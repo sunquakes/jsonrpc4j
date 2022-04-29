@@ -15,14 +15,21 @@ repositories {
     mavenCentral()
 }
 
+test {
+    useJUnit()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+
+}
+
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     implementation group: 'org.springframework', name: 'spring-core', version: "${springVersion}"
     implementation group: 'org.springframework', name: 'spring-context', version: "${springVersion}"
     implementation group: 'org.springframework', name: 'spring-web', version: "${springVersion}"
-}
 
-test {
-    useJUnitPlatform()
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
 }
