@@ -7,12 +7,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:serverApplicationContext.xml")
-public class JsonRpcServerTest {
+public class JsonRpcServiceTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -20,5 +19,11 @@ public class JsonRpcServerTest {
     @Test
     public void testContext() {
         assertNotNull(applicationContext);
+    }
+
+    @Test
+    public void testGetBean() {
+        Object bean = applicationContext.getBean("JsonRpcService");
+        assertSame(JsonRpcServer.class, bean.getClass());
     }
 }
