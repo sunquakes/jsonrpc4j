@@ -1,5 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
+import com.sunquakes.jsonrpc4j.JsonRpcHttpServer;
 import com.sunquakes.jsonrpc4j.spring.server.JsonRpcServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;

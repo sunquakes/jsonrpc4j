@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j.spring;
+package com.sunquakes.jsonrpc4j;
 
 import org.springframework.web.HttpRequestHandler;
 
@@ -11,6 +11,9 @@ public class JsonRpcHttpServer extends JsonRpcServer implements HttpRequestHandl
 
     @Override
     public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
+        if (!request.getMethod().equals("POST")) {
+            response.setStatus(400);
+        }
+        response.getOutputStream().flush();
     }
 }
