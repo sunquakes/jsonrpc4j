@@ -1,40 +1,35 @@
 package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.JsonRpcHttpServer;
-import org.easymock.EasyMockRunner;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockHttpServletResponse;
-
-import javax.servlet.ServletException;
-import java.io.IOException;
-
 import static org.junit.Assert.*;
 
-@RunWith(EasyMockRunner.class)
+import java.io.IOException;
+
 public class JsonRpcHttpServerTest {
 
     private JsonRpcHttpServer jsonRpcHttpServer;
 
     @Before
-    public void setup() {
-        jsonRpcHttpServer = new JsonRpcHttpServer();
+    public void setup() throws IOException {
     }
 
     @Test
-    public void testMethod() throws ServletException, IOException {
-        MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
-        MockHttpServletResponse response = new MockHttpServletResponse();
+    public void testMethod() throws IOException {
+        jsonRpcHttpServer = new JsonRpcHttpServer();
+        jsonRpcHttpServer.start();
 
-        jsonRpcHttpServer.handleRequest(request, response);
-        assertEquals(response.getStatus(), 400);
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPost httpget = new HttpPost("http://localhost:3200");
+        HttpResponse response = httpclient.execute(httpget);
 
-        request = new MockHttpServletRequest("POST", "");
-        response = new MockHttpServletResponse();
-
-        jsonRpcHttpServer.handleRequest(request, response);
-        assertEquals(response.getStatus(), 200);
+        assertEquals(EntityUtils.toString(response.getEntity()), "test");
     }
 }

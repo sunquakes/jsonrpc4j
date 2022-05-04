@@ -1,19 +1,17 @@
 package com.sunquakes.jsonrpc4j;
 
-import org.springframework.web.HttpRequestHandler;
+import com.sun.net.httpserver.HttpServer;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.concurrent.Executors;
 
-public class JsonRpcHttpServer extends JsonRpcServer implements HttpRequestHandler {
+public class JsonRpcHttpServer extends JsonRpcServer {
 
-    @Override
-    public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        if (!request.getMethod().equals("POST")) {
-            response.setStatus(400);
-        }
-        response.getOutputStream().flush();
+    public void start() throws IOException {
+        HttpServer httpServer = HttpServer.create(new InetSocketAddress(3200), 0);
+        httpServer.createContext("/", new JsonRpcHttpHandler());
+        httpServer.setExecutor(Executors.newFixedThreadPool(10));
+        httpServer.start();
     }
 }

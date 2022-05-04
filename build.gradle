@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        set("servletApiVersion", "4.0.1")
         set("springVersion", "5.3.19")
         set("easymockVersion", "4.3")
+        set("httpclientVersion", "4.5.13")
     }
 }
 
@@ -26,7 +26,6 @@ test {
 }
 
 dependencies {
-    implementation group: 'javax.servlet', name: 'javax.servlet-api', version: "${servletApiVersion}"
     implementation group: 'org.springframework', name: 'spring-core', version: "${springVersion}"
     implementation group: 'org.springframework', name: 'spring-context', version: "${springVersion}"
     implementation group: 'org.springframework', name: 'spring-web', version: "${springVersion}"
@@ -37,5 +36,5 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
     testImplementation group: 'org.easymock', name: 'easymock', version: "${easymockVersion}"
-
+    testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: "${httpclientVersion}"
 }
