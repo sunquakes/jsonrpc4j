@@ -2,6 +2,7 @@ package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.JsonRpcHttpServer;
 import com.sunquakes.jsonrpc4j.JsonRpcService;
+import com.sunquakes.jsonrpc4j.JsonRpcServiceBean;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -11,13 +12,14 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.springframework.util.ClassUtils.forName;
 import static org.springframework.util.ClassUtils.getAllInterfacesForClass;
 
-public class JsonRpcServerBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
     private static Map<String, String> findServiceBeanDefinitions(ConfigurableListableBeanFactory beanFactory) {
         final Map<String, String> serviceBeanNames = new HashMap<>();
@@ -32,13 +34,20 @@ public class JsonRpcServerBeanFactoryPostProcessor implements BeanFactoryPostPro
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) beanFactory;
         Map<String, String> servicePathToBeanName = findServiceBeanDefinitions(defaultListableBeanFactory);
         for (Map.Entry<String, String> entry : servicePathToBeanName.entrySet()) {
-            registerServerProxy(defaultListableBeanFactory, entry.getValue());
+            registerServiceProxy(defaultListableBeanFactory, entry.getValue());
         }
     }
 
-    private void registerServerProxy(DefaultListableBeanFactory defaultListableBeanFactory, String beanName) {
-        System.out.println(beanName);
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
+    private void registerServiceProxy(DefaultListableBeanFactory defaultListableBeanFactory, String serviceBeanName) {
+        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcServiceBean.class);
+        BeanDefinition serviceBeanDefinition = findBeanDefinition(defaultListableBeanFactory, serviceBeanName);
+        for (Class<?> currentInterface : getBeanInterfaces(serviceBeanDefinition, defaultListableBeanFactory.getBeanClassLoader())) {
+            if (currentInterface.isAnnotationPresent(JsonRpcService.class)) {
+                String serviceInterface = currentInterface.getName();
+                builder.addPropertyValue("serviceInterface", serviceInterface);
+                break;
+            }
+        }
         defaultListableBeanFactory.registerBeanDefinition("JsonRpcService", builder.getBeanDefinition());
     }
 
