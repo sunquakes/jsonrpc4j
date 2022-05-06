@@ -37,9 +37,8 @@ public class JsonRpcServerBeanFactoryPostProcessor implements BeanFactoryPostPro
     }
 
     private void registerServerProxy(DefaultListableBeanFactory defaultListableBeanFactory, String beanName) {
-        System.out.println(beanName);
         BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
-        defaultListableBeanFactory.registerBeanDefinition("JsonRpcService", builder.getBeanDefinition());
+        defaultListableBeanFactory.registerBeanDefinition("JsonRpcServer", builder.getBeanDefinition());
     }
 
     private BeanDefinition findBeanDefinition(ConfigurableListableBeanFactory beanFactory, String serviceBeanName) {

@@ -1,8 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.JsonRpcHttpServer;
 import com.sunquakes.jsonrpc4j.JsonRpcService;
-import com.sunquakes.jsonrpc4j.JsonRpcServiceBean;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -20,6 +18,8 @@ import static org.springframework.util.ClassUtils.forName;
 import static org.springframework.util.ClassUtils.getAllInterfacesForClass;
 
 public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+
+    private final String SUFFIX = "Service";
 
     private static Map<String, String> findServiceBeanDefinitions(ConfigurableListableBeanFactory beanFactory) {
         final Map<String, String> serviceBeanNames = new HashMap<>();
@@ -39,16 +39,14 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
     }
 
     private void registerServiceProxy(DefaultListableBeanFactory defaultListableBeanFactory, String serviceBeanName) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcServiceBean.class);
         BeanDefinition serviceBeanDefinition = findBeanDefinition(defaultListableBeanFactory, serviceBeanName);
         for (Class<?> currentInterface : getBeanInterfaces(serviceBeanDefinition, defaultListableBeanFactory.getBeanClassLoader())) {
             if (currentInterface.isAnnotationPresent(JsonRpcService.class)) {
-                String serviceInterface = currentInterface.getName();
-                builder.addPropertyValue("serviceInterface", serviceInterface);
-                break;
+                BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(serviceBeanName));
+                String key = getPathByBeanName(serviceBeanName);
+                defaultListableBeanFactory.registerBeanDefinition(key, builder.getBeanDefinition());
             }
         }
-        defaultListableBeanFactory.registerBeanDefinition("JsonRpcService", builder.getBeanDefinition());
     }
 
     private BeanDefinition findBeanDefinition(ConfigurableListableBeanFactory beanFactory, String serviceBeanName) {
@@ -70,5 +68,17 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
         } catch (ClassNotFoundException | LinkageError e) {
             throw new IllegalStateException(format("Cannot find bean class '%s'.", beanClassName), e);
         }
+    }
+
+    private String getPathByBeanName(String beanName) {
+        String[] arr = beanName.split("\\.");
+        String name = arr[arr.length - 1];
+        arr = name.split(SUFFIX);
+        return arr[0];
+    }
+
+    private String getBeanName(String beanName) {
+        String[] arr = beanName.split("\\#");
+        return arr[0];
     }
 }

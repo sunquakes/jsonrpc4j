@@ -12,4 +12,8 @@ public abstract class JsonRpcServer implements ApplicationContextAware {
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
+    public Object getHandler(String path) {
+        return applicationContext.getBean(path);
+    }
 }
