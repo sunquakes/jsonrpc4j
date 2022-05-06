@@ -15,7 +15,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:serverApplicationContext.xml")
+@ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcHttpServerTest {
 
     @Test
@@ -24,6 +24,6 @@ public class JsonRpcHttpServerTest {
         HttpPost httpget = new HttpPost("http://localhost:3200");
         HttpResponse response = httpclient.execute(httpget);
 
-        assertEquals(EntityUtils.toString(response.getEntity()), "test");
+        assertEquals(EntityUtils.toString(response.getEntity()), "{\"res\":\"7\"}");
     }
 }

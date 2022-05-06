@@ -44,6 +44,7 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
             if (currentInterface.isAnnotationPresent(JsonRpcService.class)) {
                 BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(serviceBeanName));
                 String key = getPathByBeanName(serviceBeanName);
+                System.out.println(key);
                 defaultListableBeanFactory.registerBeanDefinition(key, builder.getBeanDefinition());
             }
         }

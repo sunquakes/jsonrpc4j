@@ -3,6 +3,7 @@ buildscript {
         set("springVersion", "5.3.19")
         set("easymockVersion", "4.3")
         set("httpclientVersion", "4.5.13")
+        set("fastjsonVersion", "2.0.2")
     }
 }
 
@@ -29,7 +30,7 @@ dependencies {
     implementation group: 'org.springframework', name: 'spring-core', version: "${springVersion}"
     implementation group: 'org.springframework', name: 'spring-context', version: "${springVersion}"
     implementation group: 'org.springframework', name: 'spring-web', version: "${springVersion}"
-
+    implementation group: 'com.alibaba', name: 'fastjson', version: "${fastjsonVersion}"
 
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

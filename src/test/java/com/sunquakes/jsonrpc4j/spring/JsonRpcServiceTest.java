@@ -16,7 +16,7 @@ import java.util.Set;
 import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration("classpath:serviceApplicationContext.xml")
+@ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcServiceTest {
 
     @Autowired

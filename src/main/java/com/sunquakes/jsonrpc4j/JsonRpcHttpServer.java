@@ -16,7 +16,7 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
 
     public void start() throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(3200), 0);
-        httpServer.createContext("/", new JsonRpcHttpHandler());
+        httpServer.createContext("/", new JsonRpcHttpHandler(applicationContext));
         httpServer.setExecutor(Executors.newFixedThreadPool(10));
         httpServer.start();
     }
