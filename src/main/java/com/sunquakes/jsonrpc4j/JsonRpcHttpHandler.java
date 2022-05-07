@@ -7,6 +7,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,6 +22,8 @@ public class JsonRpcHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        InputStream is = httpExchange.getRequestBody();
+        OutputStream out = httpExchange.getResponseBody();
         try {
             httpExchange.sendResponseHeaders(200, 0);
             Object clazz = applicationContext.getBean("JsonRpc");
@@ -31,10 +34,7 @@ public class JsonRpcHttpHandler implements HttpHandler {
             jsonObject.put("res", result);
 
             byte[] res = jsonObject.toString().getBytes();
-            OutputStream out = httpExchange.getResponseBody();
             out.write(res);
-            out.flush();
-            out.close();
         } catch (BeansException e) {
             e.printStackTrace();
         } catch (NoSuchMethodException e) {
@@ -43,6 +43,9 @@ public class JsonRpcHttpHandler implements HttpHandler {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
+        } finally {
+            out.flush();
+            out.close();
         }
     }
 }
