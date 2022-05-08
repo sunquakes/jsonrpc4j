@@ -7,12 +7,12 @@ public class MethodNotFoundException extends Exception {
     private int code;
 
     public MethodNotFoundException() {
-        super(ErrorEnum.InvalidRequest.getText());
+        super(ErrorEnum.MethodNotFound.getText());
     }
 
     public MethodNotFoundException(String message) {
         super(message);
-        this.code = ErrorEnum.InvalidRequest.getCode();
+        this.code = ErrorEnum.MethodNotFound.getCode();
     }
 
     @Override

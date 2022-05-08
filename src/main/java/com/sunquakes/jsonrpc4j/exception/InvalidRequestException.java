@@ -7,12 +7,12 @@ public class InvalidRequestException extends Exception {
     private int code;
 
     public InvalidRequestException() {
-        super(ErrorEnum.MethodNotFound.getText());
+        super(ErrorEnum.InvalidRequest.getText());
     }
 
     public InvalidRequestException(String message) {
         super(message);
-        this.code = ErrorEnum.MethodNotFound.getCode();
+        this.code = ErrorEnum.InvalidRequest.getCode();
     }
 
     @Override

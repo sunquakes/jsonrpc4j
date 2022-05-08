@@ -1,8 +1,8 @@
 package com.sunquakes.jsonrpc4j.utils;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.NotifyRequestDto;
 import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
@@ -17,14 +17,16 @@ public class RequestUtils {
 
     public String[] parseRequestMethod(String method) throws MethodNotFoundException {
         char first = method.charAt(0);
-        if (first == '.' || first == '/') {
+        if (first == '.' || first == '/' ) {
             method = method.substring(0, method.length() - 1);
         }
-        if (method.indexOf(".") != 1 && method.indexOf("/") != 1) {
+        int m = method.length() - method.replaceAll("\\.", "").length();
+        int n = method.length() - method.replaceAll("/", "").length();
+        if (m != 1 && n != 1) {
             throw new MethodNotFoundException(String.format("rpc: method request ill-formed: %s; need x.y or x/y", method));
         }
         String[] methodArr;
-        if (method.indexOf(".") == 1) {
+        if (m == 1) {
             methodArr = method.split(".");
         } else {
             methodArr = method.split("/");
@@ -34,6 +36,7 @@ public class RequestUtils {
 
     public Object parseRequestBody(String json) throws InvalidRequestException {
         Object typeObject = JSON.parse(json);
+        System.out.println(typeObject.getClass());
         if (typeObject instanceof JSONArray) {
             List<Object> list = new ArrayList<>();
             JSONArray jsonArray = (JSONArray) typeObject;

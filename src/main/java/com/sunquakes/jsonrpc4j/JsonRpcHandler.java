@@ -20,7 +20,7 @@ public class JsonRpcHandler implements ApplicationContextAware {
         this.applicationContext = applicationContext;
     }
 
-    public byte[] handler(String json) {
+    public byte[] handle(String json) {
         try {
             Object typeObject = JSON.parse(json);
             if (typeObject instanceof JSONArray) {
