@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.NotifyRequestDto;
 import com.sunquakes.jsonrpc4j.dto.RequestDto;
+import com.sunquakes.jsonrpc4j.exception.InvalidParamsException;
 import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
 import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import lombok.experimental.UtilityClass;
@@ -17,7 +18,7 @@ public class RequestUtils {
 
     public String[] parseRequestMethod(String method) throws MethodNotFoundException {
         char first = method.charAt(0);
-        if (first == '.' || first == '/' ) {
+        if (first == '.' || first == '/') {
             method = method.substring(0, method.length() - 1);
         }
         int m = method.length() - method.replaceAll("\\.", "").length();
@@ -57,6 +58,23 @@ public class RequestUtils {
             return jsonObject.toJavaObject(RequestDto.class);
         } else {
             return jsonObject.toJavaObject(NotifyRequestDto.class);
+        }
+    }
+
+    public Object[] parseParams(Object params, String[] names) throws InvalidParamsException {
+        if (params instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) params;
+            return jsonArray.toArray();
+        } else if (params instanceof JSONObject) {
+            JSONObject jsonObject = (JSONObject) params;
+            int l = names.length;
+            Object[] res = new Object[l];
+            for (int i = 0; i < l; i++) {
+                res[i] = jsonObject.get(names[i]);
+            }
+            return res;
+        } else {
+            throw new InvalidParamsException();
         }
     }
 }

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class JsonRpcHttpHandler implements HttpHandler {
 
@@ -27,8 +28,20 @@ public class JsonRpcHttpHandler implements HttpHandler {
         try {
             httpExchange.sendResponseHeaders(200, 0);
             Object clazz = applicationContext.getBean("JsonRpc");
-            Method m = clazz.getClass().getDeclaredMethod("add");
-            Object result = m.invoke(clazz);
+            Method[] methods = clazz.getClass().getMethods();
+            Method m = null;
+            for (Method m2 : methods) {
+                if (m2.getName().equals("add")) {
+                    m = m2;
+                }
+            }
+            Parameter[] ps = m.getParameters();
+            if (ps != null) {
+                for (int i = 0; i < ps.length; i++) {
+                    System.out.println("java 8 ,paramter name = " + ps[i].getName());
+                }
+            }
+            Object result = m.invoke(clazz, new Object[]{3, 4});
 
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("res", result);
@@ -36,8 +49,6 @@ public class JsonRpcHttpHandler implements HttpHandler {
             byte[] res = jsonObject.toString().getBytes();
             out.write(res);
         } catch (BeansException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();

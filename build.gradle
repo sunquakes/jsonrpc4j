@@ -15,6 +15,12 @@ plugins {
 group 'com.sunquakes'
 version '1.0-SNAPSHOT'
 
+gradle.projectsEvaluated {
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-parameters"
+    }
+}
+
 repositories {
     mavenCentral()
 }

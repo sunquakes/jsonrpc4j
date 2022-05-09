@@ -5,5 +5,5 @@ import com.sunquakes.jsonrpc4j.JsonRpcService;
 @JsonRpcService
 public interface IJsonRpcService {
 
-    String add();
+    String add(int a, int b);
 }

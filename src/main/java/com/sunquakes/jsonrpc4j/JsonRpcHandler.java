@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 
 public class JsonRpcHandler implements ApplicationContextAware {
 
@@ -39,9 +40,14 @@ public class JsonRpcHandler implements ApplicationContextAware {
     public JSONObject handlerObject(JSONObject jsonObject) {
         try {
             Object clazz = applicationContext.getBean("JsonRpc");
-            Method m = clazz.getClass().getDeclaredMethod("add");
-            Object result = m.invoke(clazz);
-
+            Method m = clazz.getClass().getDeclaredMethod("add", Object.class, Object.class);
+            Parameter[] ps = m.getParameters();
+            if (ps != null) {
+                for (int i = 0; i < ps.length; i++) {
+                    System.out.println("java 8 ,paramter name = " + ps[i].getName());
+                }
+            }
+            Object result = m.invoke(clazz, new int[]{1, 2});
             byte[] res = jsonObject.toString().getBytes();
         } catch (BeansException e) {
             e.printStackTrace();
