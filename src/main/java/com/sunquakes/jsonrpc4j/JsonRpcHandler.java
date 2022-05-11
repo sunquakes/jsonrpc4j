@@ -37,14 +37,15 @@ public class JsonRpcHandler implements ApplicationContextAware {
         return null;
     }
 
-    public JSONObject handlerObject(JSONObject jsonObject) {
+    public JSONObject handleObject(JSONObject jsonObject) {
         try {
             Object clazz = applicationContext.getBean("JsonRpc");
             Method m = clazz.getClass().getDeclaredMethod("add", Object.class, Object.class);
-            Parameter[] ps = m.getParameters();
-            if (ps != null) {
-                for (int i = 0; i < ps.length; i++) {
-                    System.out.println("java 8 ,paramter name = " + ps[i].getName());
+            Parameter[] params = m.getParameters();
+            String[] paramNames = new String[params.length];
+            if (params != null) {
+                for (int i = 0; i < params.length; i++) {
+                    paramNames[i] = params[i].getName();
                 }
             }
             Object result = m.invoke(clazz, new int[]{1, 2});
@@ -62,7 +63,7 @@ public class JsonRpcHandler implements ApplicationContextAware {
         return jsonObject;
     }
 
-    public JSONArray handlerArray(JSONArray jsonArray) {
+    public JSONArray handleArray(JSONArray jsonArray) {
         return jsonArray;
     }
 }

@@ -16,25 +16,6 @@ import java.util.List;
 @UtilityClass
 public class RequestUtils {
 
-    public String[] parseRequestMethod(String method) throws MethodNotFoundException {
-        char first = method.charAt(0);
-        if (first == '.' || first == '/') {
-            method = method.substring(0, method.length() - 1);
-        }
-        int m = method.length() - method.replaceAll("\\.", "").length();
-        int n = method.length() - method.replaceAll("/", "").length();
-        if (m != 1 && n != 1) {
-            throw new MethodNotFoundException(String.format("rpc: method request ill-formed: %s; need x.y or x/y", method));
-        }
-        String[] methodArr;
-        if (m == 1) {
-            methodArr = method.split(".");
-        } else {
-            methodArr = method.split("/");
-        }
-        return methodArr;
-    }
-
     public Object parseRequestBody(String json) throws InvalidRequestException {
         Object typeObject = JSON.parse(json);
         System.out.println(typeObject.getClass());
@@ -59,6 +40,25 @@ public class RequestUtils {
         } else {
             return jsonObject.toJavaObject(NotifyRequestDto.class);
         }
+    }
+
+    public String[] parseMethod(String method) throws MethodNotFoundException {
+        char first = method.charAt(0);
+        if (first == '.' || first == '/') {
+            method = method.substring(0, method.length() - 1);
+        }
+        int m = method.length() - method.replaceAll("\\.", "").length();
+        int n = method.length() - method.replaceAll("/", "").length();
+        if (m != 1 && n != 1) {
+            throw new MethodNotFoundException(String.format("rpc: method request ill-formed: %s; need x.y or x/y", method));
+        }
+        String[] methodArr;
+        if (m == 1) {
+            methodArr = method.split(".");
+        } else {
+            methodArr = method.split("/");
+        }
+        return methodArr;
     }
 
     public Object[] parseParams(Object params, String[] names) throws InvalidParamsException {
