@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -23,6 +24,7 @@ public class JsonRpcHandler implements ApplicationContextAware {
 
     public byte[] handle(String json) {
         try {
+//            Object request = RequestUtils.parseRequestBody(json);
             Object typeObject = JSON.parse(json);
             if (typeObject instanceof JSONArray) {
                 System.out.print("JSONArray");

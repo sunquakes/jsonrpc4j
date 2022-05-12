@@ -25,4 +25,13 @@ public enum ErrorEnum {
     public String getText() {
         return text;
     }
+
+    public static String getTextByCode(int code) {
+        for (ErrorEnum errorEnum : ErrorEnum.values()) {
+            if (errorEnum.getCode() == code) {
+                return errorEnum.getText();
+            }
+        }
+        return null;
+    }
 }
