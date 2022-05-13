@@ -26,7 +26,7 @@ public class RequestUtilsTest {
 
     @Test
     public void testParseRequestBody() throws InvalidRequestException, InvalidParamsException {
-//        test RequestDto||NotifyRequestDto
+        // test RequestDto||NotifyRequestDto
         {
             String json = "{" +
                     "\"id\":\"1234567890\"" +
@@ -39,13 +39,13 @@ public class RequestUtilsTest {
             assertEquals(requestDto.getId(), "1234567890");
             assertEquals(requestDto.getJsonrpc(), "2.0");
 
-//            test parse params
+            // test parse params
             Object[] params = RequestUtils.parseParams(requestDto.getParams(), new String[]{"a", "b"});
             assertEquals(params[0], 1);
             assertEquals(params[1], 2);
         }
 
-//        test RequestDto||NotifyRequestDto Array
+        // test RequestDto||NotifyRequestDto Array
         {
             String json = "[{" +
                     "\"id\":\"1234567890\"" +
@@ -64,7 +64,7 @@ public class RequestUtilsTest {
             NotifyRequestDto notifyRequestDto = (NotifyRequestDto) requestDtoList.get(1);
             assertEquals(notifyRequestDto.getJsonrpc(), "2.0");
 
-//            test parse params
+            // test parse params
             Object[] params = RequestUtils.parseParams(requestDto.getParams(), new String[]{"a", "b"});
             assertEquals(params[0], 1);
             assertEquals(params[1], 2);

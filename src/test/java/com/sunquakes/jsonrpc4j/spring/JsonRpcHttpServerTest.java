@@ -24,6 +24,6 @@ public class JsonRpcHttpServerTest {
         HttpPost httpget = new HttpPost("http://localhost:3200");
         HttpResponse response = httpclient.execute(httpget);
 
-        assertEquals(EntityUtils.toString(response.getEntity()), "{\"res\":\"7\"}");
+        assertEquals(EntityUtils.toString(response.getEntity()), "{\"res\":7}");
     }
 }

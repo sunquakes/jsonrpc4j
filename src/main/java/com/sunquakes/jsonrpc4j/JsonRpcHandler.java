@@ -1,9 +1,5 @@
 package com.sunquakes.jsonrpc4j;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.NotifyRequestDto;
 import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.exception.InvalidParamsException;
@@ -39,19 +35,14 @@ public class JsonRpcHandler implements ApplicationContextAware {
             } else if (request instanceof NotifyRequestDto || request instanceof RequestDto) {
                 return handleObject(request);
             } else {
-
+                throw new InvalidRequestException();
             }
-        } catch (JSONException e) {
-
         } catch (InvalidRequestException e) {
-            e.printStackTrace();
-        } catch (MethodNotFoundException e) {
-            e.printStackTrace();
+            return ResponseUtils.error(null, e.getCode(), e.getMessage());
         }
-        return null;
     }
 
-    public Object handleObject(Object request) throws MethodNotFoundException {
+    public Object handleObject(Object request) {
         String method, id = null;
         Object params;
         if (request instanceof NotifyRequestDto) {
@@ -64,8 +55,8 @@ public class JsonRpcHandler implements ApplicationContextAware {
             params = requestDto.getParams();
             id = requestDto.getId();
         }
-        String[] methodArr = RequestUtils.parseMethod(method);
         try {
+            String[] methodArr = RequestUtils.parseMethod(method);
             Object clazz = applicationContext.getBean(methodArr[0]);
             Method[] methods = clazz.getClass().getMethods();
             Method m = null;
@@ -84,34 +75,18 @@ public class JsonRpcHandler implements ApplicationContextAware {
             }
             Object[] paramArr = RequestUtils.parseParams(params, paramNames);
             Object result = m.invoke(clazz, paramArr);
-            if (request instanceof NotifyRequestDto) {
-                return ResponseUtils.successNotify(result);
-            } else {
-                return ResponseUtils.success(id, result);
-            }
-        } catch (BeansException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            return ResponseUtils.success(id, result);
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            return ResponseUtils.error(id, ErrorEnum.MethodNotFound.getCode());
         } catch (InvalidParamsException e) {
-            e.printStackTrace();
+            return ResponseUtils.error(id, e.getCode(), e.getMessage());
+        } catch (MethodNotFoundException e) {
+            return ResponseUtils.error(id, e.getCode(), e.getMessage());
         }
-        return null;
     }
 
     public List<Object> handleArray(Object request) {
-        List<Object> response = new ArrayList<>();
         List<Object> requestList = (List<Object>) request;
-        requestList.stream().map(item -> {
-            Object res = null;
-            try {
-                res = handleObject(item);
-            } catch (MethodNotFoundException e) {
-            }
-            return res;
-        }).collect(Collectors.toList());
-        return response;
+        return requestList.stream().map(item -> handleObject(item)).collect(Collectors.toList());
     }
 }
