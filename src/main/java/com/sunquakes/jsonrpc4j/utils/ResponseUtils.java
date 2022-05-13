@@ -2,10 +2,7 @@ package com.sunquakes.jsonrpc4j.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
-import com.sunquakes.jsonrpc4j.dto.ErrorDto;
-import com.sunquakes.jsonrpc4j.dto.ErrorNotifyResponseDto;
-import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
-import com.sunquakes.jsonrpc4j.dto.ResponseDto;
+import com.sunquakes.jsonrpc4j.dto.*;
 import lombok.experimental.UtilityClass;
 
 @UtilityClass
@@ -31,5 +28,13 @@ public class ResponseUtils {
     public ErrorNotifyResponseDto errorNotify(String id, int code, String message) {
         ErrorDto errorDto = new ErrorDto(code, message, null);
         return new ErrorNotifyResponseDto(JSONRPC, errorDto);
+    }
+
+    public ResponseDto success(String id, Object data) {
+        return new ResponseDto(id, JSONRPC, data);
+    }
+
+    public NotifyResponseDto successNotify(Object data) {
+        return new NotifyResponseDto(JSONRPC, data);
     }
 }

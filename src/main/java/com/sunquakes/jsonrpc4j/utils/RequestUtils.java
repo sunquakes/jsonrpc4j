@@ -18,7 +18,6 @@ public class RequestUtils {
 
     public Object parseRequestBody(String json) throws InvalidRequestException {
         Object typeObject = JSON.parse(json);
-        System.out.println(typeObject.getClass());
         if (typeObject instanceof JSONArray) {
             List<Object> list = new ArrayList<>();
             JSONArray jsonArray = (JSONArray) typeObject;
