@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.spring;
 import com.sunquakes.jsonrpc4j.JsonRpcHandler;
 import com.sunquakes.jsonrpc4j.dto.NotifyResponseDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
+import com.sunquakes.jsonrpc4j.spring.server.JsonRpcServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:applicationContext.xml")
@@ -47,6 +51,27 @@ public class JsonRpcHandlerTest {
             NotifyResponseDto notifyResponseDto = (NotifyResponseDto) jsonRpcHandler.handle(json);
             assertEquals(notifyResponseDto.getJsonrpc(), "2.0");
             assertEquals(notifyResponseDto.getResult(), 3);
+        }
+
+        // test RequestDto||NotifyRequestDto Array
+        {
+            String json = "[{" +
+                    "\"id\":\"1234567890\"" +
+                    "\"method\":\"JsonRpc/add\"" +
+                    "\"jsonrpc\":2.0" +
+                    "\"params\":{\"a\":1,\"b\":2}" +
+                    "},{" +
+                    "\"method\":\"JsonRpc/sub\"" +
+                    "\"jsonrpc\":2.0" +
+                    "\"params\":[2, 1]" +
+                    "}]";
+            JsonRpcHandler jsonRpcHandler = applicationContext.getBean(JsonRpcHandler.class);
+            Object res = jsonRpcHandler.handle(json);
+            assertTrue(res instanceof ArrayList);
+
+            List<Object> list = (List<Object>) res;
+            assertTrue(list.get(0) instanceof ResponseDto);
+            assertTrue(list.get(1) instanceof NotifyResponseDto);
         }
     }
 }

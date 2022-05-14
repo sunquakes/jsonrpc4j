@@ -1,17 +1,14 @@
 package com.sunquakes.jsonrpc4j;
 
+import com.alibaba.fastjson.JSON;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import org.json.JSONObject;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
+
 
 public class JsonRpcHttpHandler implements HttpHandler {
 
@@ -23,40 +20,23 @@ public class JsonRpcHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
-        InputStream is = httpExchange.getRequestBody();
-        OutputStream out = httpExchange.getResponseBody();
-        try {
-            httpExchange.sendResponseHeaders(200, 0);
-            Object clazz = applicationContext.getBean("JsonRpc");
-            Method[] methods = clazz.getClass().getMethods();
-            Method m = null;
-            for (Method m2 : methods) {
-                if (m2.getName().equals("add")) {
-                    m = m2;
-                }
-            }
-            Parameter[] ps = m.getParameters();
-            if (ps != null) {
-                for (int i = 0; i < ps.length; i++) {
-                    System.out.println("java 8 ,paramter name = " + ps[i].getName());
-                }
-            }
-            Object result = m.invoke(clazz, new Object[]{3, 4});
+        if (!httpExchange.getRequestMethod().equals("POST")) {
 
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("res", result);
-
-            byte[] res = jsonObject.toString().getBytes();
-            out.write(res);
-        } catch (BeansException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } finally {
-            out.flush();
-            out.close();
         }
+        httpExchange.sendResponseHeaders(200, 0);
+        InputStream is = httpExchange.getRequestBody();
+        StringBuilder sb = new StringBuilder();
+        for (int ch; (ch = is.read()) != -1; ) {
+            sb.append((char) ch);
+        }
+        String request = sb.toString();
+        OutputStream out = httpExchange.getResponseBody();
+        JsonRpcHandler jsonRpcHandler = new JsonRpcHandler(applicationContext);
+        Object res = jsonRpcHandler.handle(request);
+        System.out.println(res);
+        byte[] a = JSON.toJSONBytes(res);
+        out.write(a);
+        out.flush();
+        out.close();
     }
 }

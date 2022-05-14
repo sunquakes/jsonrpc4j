@@ -7,6 +7,7 @@ import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
 import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import com.sunquakes.jsonrpc4j.utils.ResponseUtils;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -18,14 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class JsonRpcHandler implements ApplicationContextAware {
+
+@AllArgsConstructor
+public class JsonRpcHandler {
 
     private ApplicationContext applicationContext;
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 
     public Object handle(String json) {
         try {

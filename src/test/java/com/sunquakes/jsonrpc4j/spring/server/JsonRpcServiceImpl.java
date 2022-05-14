@@ -6,4 +6,9 @@ public class JsonRpcServiceImpl implements IJsonRpcService {
     public Integer add(int a, int b) {
         return a + b;
     }
+
+    @Override
+    public Integer sub(int a, int b) {
+        return a - b;
+    }
 }
