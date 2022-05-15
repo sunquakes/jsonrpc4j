@@ -1,5 +1,6 @@
-package com.sunquakes.jsonrpc4j;
+package com.sunquakes.jsonrpc4j.server;
 
+import com.sunquakes.jsonrpc4j.ErrorEnum;
 import com.sunquakes.jsonrpc4j.dto.NotifyRequestDto;
 import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.exception.InvalidParamsException;

@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j;
+package com.sunquakes.jsonrpc4j.server;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

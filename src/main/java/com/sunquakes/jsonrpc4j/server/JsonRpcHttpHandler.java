@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j;
+package com.sunquakes.jsonrpc4j.server;
 
 import com.alibaba.fastjson.JSON;
 import com.sun.net.httpserver.HttpExchange;
@@ -20,22 +20,24 @@ public class JsonRpcHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpExchange httpExchange) throws IOException {
+        OutputStream out = httpExchange.getResponseBody();
+        httpExchange.getResponseHeaders().add("Content-Type", "application/json; charset=utf-8");
         if (!httpExchange.getRequestMethod().equals("POST")) {
-
+            httpExchange.sendResponseHeaders(405, 0);
+            out.flush();
+            out.close();
         }
-        httpExchange.sendResponseHeaders(200, 0);
         InputStream is = httpExchange.getRequestBody();
         StringBuilder sb = new StringBuilder();
         for (int ch; (ch = is.read()) != -1; ) {
             sb.append((char) ch);
         }
         String request = sb.toString();
-        OutputStream out = httpExchange.getResponseBody();
         JsonRpcHandler jsonRpcHandler = new JsonRpcHandler(applicationContext);
         Object res = jsonRpcHandler.handle(request);
-        System.out.println(res);
-        byte[] a = JSON.toJSONBytes(res);
-        out.write(a);
+        byte[] output = JSON.toJSONBytes(res);
+        httpExchange.sendResponseHeaders(200, output.length);
+        out.write(output);
         out.flush();
         out.close();
     }

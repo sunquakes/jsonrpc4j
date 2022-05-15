@@ -1,7 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.JsonRpcHttpServer;
-import com.sunquakes.jsonrpc4j.JsonRpcService;
+import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;

@@ -1,9 +1,8 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.JsonRpcHandler;
+import com.sunquakes.jsonrpc4j.server.JsonRpcHandler;
 import com.sunquakes.jsonrpc4j.dto.NotifyResponseDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
-import com.sunquakes.jsonrpc4j.spring.server.JsonRpcServiceImpl;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
