@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j.spring.server;
+package com.sunquakes.jsonrpc4j.service;
 
 import com.sunquakes.jsonrpc4j.JsonRpcService;
 

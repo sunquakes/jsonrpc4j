@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j.spring;
+package com.sunquakes.jsonrpc4j.server;
 
 import com.alibaba.fastjson2.JSONObject;
 import org.apache.http.HttpResponse;

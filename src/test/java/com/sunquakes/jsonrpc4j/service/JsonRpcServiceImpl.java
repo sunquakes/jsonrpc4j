@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j.spring.server;
+package com.sunquakes.jsonrpc4j.service;
 
 public class JsonRpcServiceImpl implements IJsonRpcService {
 

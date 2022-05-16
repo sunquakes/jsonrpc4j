@@ -1,6 +1,7 @@
 package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
+import com.sunquakes.jsonrpc4j.server.JsonRpcTcpServer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -36,8 +37,10 @@ public class JsonRpcServerBeanFactoryPostProcessor implements BeanFactoryPostPro
     }
 
     private void registerServerProxy(DefaultListableBeanFactory defaultListableBeanFactory, String beanName) {
-        BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
-        defaultListableBeanFactory.registerBeanDefinition("JsonRpcServer", builder.getBeanDefinition());
+        BeanDefinitionBuilder builder1 = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
+        defaultListableBeanFactory.registerBeanDefinition("JsonRpcHttpServer", builder1.getBeanDefinition());
+        BeanDefinitionBuilder builder2 = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
+        defaultListableBeanFactory.registerBeanDefinition("JsonRpcTcpServer", builder2.getBeanDefinition());
     }
 
     private BeanDefinition findBeanDefinition(ConfigurableListableBeanFactory beanFactory, String serviceBeanName) {

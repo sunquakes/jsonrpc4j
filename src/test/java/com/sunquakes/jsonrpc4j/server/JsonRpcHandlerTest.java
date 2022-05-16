@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j.spring;
+package com.sunquakes.jsonrpc4j.server;
 
 import com.sunquakes.jsonrpc4j.server.JsonRpcHandler;
 import com.sunquakes.jsonrpc4j.dto.NotifyResponseDto;
