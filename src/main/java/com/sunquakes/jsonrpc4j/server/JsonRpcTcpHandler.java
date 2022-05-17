@@ -1,11 +1,13 @@
 package com.sunquakes.jsonrpc4j.server;
 
 import com.alibaba.fastjson.JSON;
-import com.sun.net.httpserver.HttpExchange;
+import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.context.ApplicationContext;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 
@@ -19,13 +21,14 @@ public class JsonRpcTcpHandler implements Runnable {
     @Override
     public void run() {
         try {
-            while (true) {
+            String init = "";
+            while (!socket.isClosed()) {
                 InputStream is = socket.getInputStream();
                 byte[] buffer = new byte[10];
                 int bufferLength = buffer.length;
                 int len;
-                StringBuffer sb = new StringBuffer();
 
+                StringBuffer sb = new StringBuffer(init);
                 String packageEof = "\r\n";
                 int packageEofLength = packageEof.length();
 
@@ -36,7 +39,12 @@ public class JsonRpcTcpHandler implements Runnable {
                         byte[] end = Arrays.copyOfRange(buffer, 0, len);
                         sb.append(new String(end));
                     }
-                    if (sb.substring(sb.length() - packageEofLength, sb.length() - 1).equals(packageEof)) {
+                    int i = sb.indexOf(packageEof);
+                    if (i != -1) {
+                        sb.substring(0, i);
+                        if (i + packageEofLength < sb.length()) {
+                            init = sb.substring(i + packageEofLength + 1);
+                        }
                         break;
                     }
                 }
@@ -45,14 +53,15 @@ public class JsonRpcTcpHandler implements Runnable {
                 System.out.println(sb.substring(0, sb.length() - packageEofLength));
                 Object res = jsonRpcHandler.handle(sb.substring(0, sb.length() - packageEofLength));
                 System.out.println(res);
-                byte[] output = JSON.toJSONBytes(res);
+                byte[] output = ByteArrayUtils.merge(JSON.toJSONBytes(res), packageEof.getBytes());
 
                 OutputStream os = socket.getOutputStream();
                 os.write(output);
                 os.flush();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(888);
+            // e.printStackTrace();
         }
     }
 }
