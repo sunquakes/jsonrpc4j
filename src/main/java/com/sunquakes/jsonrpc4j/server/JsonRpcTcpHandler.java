@@ -24,32 +24,41 @@ public class JsonRpcTcpHandler implements Runnable {
             String init = "";
             InputStream is = socket.getInputStream();
             OutputStream os = socket.getOutputStream();
+            String packageEof = "\r\n";
+            int packageEofLength = packageEof.length();
             while (!socket.isClosed()) {
                 byte[] buffer = new byte[10];
                 int bufferLength = buffer.length;
                 int len;
 
                 StringBuffer sb = new StringBuffer(init);
-                String packageEof = "\r\n";
-                int packageEofLength = packageEof.length();
-
-                while ((len = is.read(buffer)) != -1) {
-                    System.out.println(len);
-                    if (bufferLength == len) {
-                        sb.append(new String(buffer));
+                // If more than one delimiter is received at a time
+                int i = sb.indexOf(packageEof);
+                if (i != -1) {
+                    sb.substring(0, i);
+                    if (i + packageEofLength < sb.length()) {
+                        init = sb.substring(i + packageEofLength);
                     } else {
-                        byte[] end = Arrays.copyOfRange(buffer, 0, len);
-                        sb.append(new String(end));
+                        init = "";
                     }
-                    int i = sb.indexOf(packageEof);
-                    if (i != -1) {
-                        sb.substring(0, i);
-                        if (i + packageEofLength < sb.length()) {
-                            init = sb.substring(i + packageEofLength);
+                } else {
+                    while ((len = is.read(buffer)) != -1) {
+                        if (bufferLength == len) {
+                            sb.append(new String(buffer));
                         } else {
-                            init = "";
+                            byte[] end = Arrays.copyOfRange(buffer, 0, len);
+                            sb.append(new String(end));
                         }
-                        break;
+                        i = sb.indexOf(packageEof);
+                        if (i != -1) {
+                            sb.substring(0, i);
+                            if (i + packageEofLength < sb.length()) {
+                                init = sb.substring(i + packageEofLength);
+                            } else {
+                                init = "";
+                            }
+                            break;
+                        }
                     }
                 }
                 if (sb.length() > 0) {

@@ -59,44 +59,73 @@ public class JsonRpcTcpServerTest {
             String packageEof = "\r\n";
             int packageEofLength = packageEof.length();
 
-            while ((len = is.read(buffer)) != -1) {
-                if (bufferLength == len) {
-                    sb.append(new String(buffer));
+            int i = sb.indexOf(packageEof);
+            if (i != -1) {
+                sb.substring(0, i);
+                if (i + packageEofLength < sb.length()) {
+                    init = sb.substring(i + packageEofLength);
                 } else {
-                    byte[] end = Arrays.copyOfRange(buffer, 0, len);
-                    sb.append(new String(end));
+                    init = "";
                 }
-                int i = sb.indexOf(packageEof);
-                if (i != -1) {
-                    sb.substring(0, i);
-                    if (i + packageEofLength < sb.length()) {
-                        init = sb.substring(i + packageEofLength);
+            } else {
+                while ((len = is.read(buffer)) != -1) {
+                    if (bufferLength == len) {
+                        sb.append(new String(buffer));
+                    } else {
+                        byte[] end = Arrays.copyOfRange(buffer, 0, len);
+                        sb.append(new String(end));
                     }
-                    break;
+                    i = sb.indexOf(packageEof);
+                    if (i != -1) {
+                        sb.substring(0, i);
+                        if (i + packageEofLength < sb.length()) {
+                            init = sb.substring(i + packageEofLength);
+                        } else {
+                            init = "";
+                        }
+                        break;
+                    }
                 }
             }
             ResponseDto responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
             assertEquals(responseDto.getResult(), 3);
+            System.out.println(111111);
 
-            while ((len = is.read(buffer)) != -1) {
-                if (bufferLength == len) {
-                    sb.append(new String(buffer));
+            sb = new StringBuffer(init);
+
+            i = sb.indexOf(packageEof);
+            if (i != -1) {
+                sb.substring(0, i);
+                if (i + packageEofLength < sb.length()) {
+                    init = sb.substring(i + packageEofLength);
                 } else {
-                    byte[] end = Arrays.copyOfRange(buffer, 0, len);
-                    sb.append(new String(end));
+                    init = "";
                 }
-                int i = sb.indexOf(packageEof);
-                if (i != -1) {
-                    sb.substring(0, i);
-                    if (i + packageEofLength < sb.length()) {
-                        init = sb.substring(i + packageEofLength);
+            } else {
+                while ((len = is.read(buffer)) != -1) {
+                    if (bufferLength == len) {
+                        sb.append(new String(buffer));
+                    } else {
+                        byte[] end = Arrays.copyOfRange(buffer, 0, len);
+                        sb.append(new String(end));
                     }
-                    break;
+                    i = sb.indexOf(packageEof);
+                    if (i != -1) {
+                        sb.substring(0, i);
+                        if (i + packageEofLength < sb.length()) {
+                            init = sb.substring(i + packageEofLength);
+                        } else {
+                            init = "";
+                        }
+                        break;
+                    }
                 }
             }
+
             responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
             assertEquals(responseDto.getResult(), 3);
             System.out.println(sb);
+            System.out.println(222222);
             // is.read(buffer);
             // while ((len = is.read(buffer)) != -1) {
             //     System.out.println(len);
