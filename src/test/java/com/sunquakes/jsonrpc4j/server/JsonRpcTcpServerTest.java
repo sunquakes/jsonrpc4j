@@ -70,12 +70,31 @@ public class JsonRpcTcpServerTest {
                 if (i != -1) {
                     sb.substring(0, i);
                     if (i + packageEofLength < sb.length()) {
-                        init = sb.substring(i + packageEofLength + 1);
+                        init = sb.substring(i + packageEofLength);
                     }
                     break;
                 }
             }
             ResponseDto responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
+            assertEquals(responseDto.getResult(), 3);
+
+            while ((len = is.read(buffer)) != -1) {
+                if (bufferLength == len) {
+                    sb.append(new String(buffer));
+                } else {
+                    byte[] end = Arrays.copyOfRange(buffer, 0, len);
+                    sb.append(new String(end));
+                }
+                int i = sb.indexOf(packageEof);
+                if (i != -1) {
+                    sb.substring(0, i);
+                    if (i + packageEofLength < sb.length()) {
+                        init = sb.substring(i + packageEofLength);
+                    }
+                    break;
+                }
+            }
+            responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
             assertEquals(responseDto.getResult(), 3);
             System.out.println(sb);
             // is.read(buffer);

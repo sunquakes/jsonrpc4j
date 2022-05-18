@@ -22,8 +22,9 @@ public class JsonRpcTcpHandler implements Runnable {
     public void run() {
         try {
             String init = "";
+            InputStream is = socket.getInputStream();
+            OutputStream os = socket.getOutputStream();
             while (!socket.isClosed()) {
-                InputStream is = socket.getInputStream();
                 byte[] buffer = new byte[10];
                 int bufferLength = buffer.length;
                 int len;
@@ -33,6 +34,7 @@ public class JsonRpcTcpHandler implements Runnable {
                 int packageEofLength = packageEof.length();
 
                 while ((len = is.read(buffer)) != -1) {
+                    System.out.println(len);
                     if (bufferLength == len) {
                         sb.append(new String(buffer));
                     } else {
@@ -43,21 +45,23 @@ public class JsonRpcTcpHandler implements Runnable {
                     if (i != -1) {
                         sb.substring(0, i);
                         if (i + packageEofLength < sb.length()) {
-                            init = sb.substring(i + packageEofLength + 1);
+                            init = sb.substring(i + packageEofLength);
+                        } else {
+                            init = "";
                         }
                         break;
                     }
                 }
-
-                JsonRpcHandler jsonRpcHandler = new JsonRpcHandler(applicationContext);
-                System.out.println(sb.substring(0, sb.length() - packageEofLength));
-                Object res = jsonRpcHandler.handle(sb.substring(0, sb.length() - packageEofLength));
-                System.out.println(res);
-                byte[] output = ByteArrayUtils.merge(JSON.toJSONBytes(res), packageEof.getBytes());
-
-                OutputStream os = socket.getOutputStream();
-                os.write(output);
-                os.flush();
+                if (sb.length() > 0) {
+                    JsonRpcHandler jsonRpcHandler = new JsonRpcHandler(applicationContext);
+                    System.out.println("sb");
+                    System.out.println(sb);
+                    Object res = jsonRpcHandler.handle(sb.substring(0, sb.length() - packageEofLength));
+                    System.out.println(res);
+                    byte[] output = ByteArrayUtils.merge(JSON.toJSONBytes(res), packageEof.getBytes());
+                    os.write(output);
+                    os.flush();
+                }
             }
         } catch (IOException e) {
             System.out.println(888);
