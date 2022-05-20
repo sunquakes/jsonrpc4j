@@ -1,21 +1,18 @@
-package com.sunquakes.jsonrpc4j;
+package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.client.IJsonRpcClient;
-import com.sunquakes.jsonrpc4j.dto.ResponseDto;
-import com.sunquakes.jsonrpc4j.service.JsonRpcServiceImpl;
+import com.sunquakes.jsonrpc4j.spring.JsonRpcClientImportBeanDefinitionRegistrar;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.*;
-import java.net.Socket;
-import java.util.Arrays;
+import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -28,8 +25,8 @@ public class JsonRpcClientTest {
     @Test
     public void testGetBean() throws IOException {
         {
-            Object bean = applicationContext.getBean("client");
-            assertSame(IJsonRpcClient.class, bean.getClass());
+            IJsonRpcClient bean = (IJsonRpcClient) applicationContext.getBean("client");
+            // System.out.println(bean.add(1, 2));
         }
     }
 }

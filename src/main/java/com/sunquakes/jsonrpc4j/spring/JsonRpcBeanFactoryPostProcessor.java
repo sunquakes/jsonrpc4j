@@ -50,9 +50,9 @@ public class JsonRpcBeanFactoryPostProcessor implements BeanFactoryPostProcessor
                 defaultListableBeanFactory.registerBeanDefinition(key, builder.getBeanDefinition());
             } else if (currentInterface.isAnnotationPresent(JsonRpcClient.class)) {
                 System.out.println(1234567890);
-                Class proxy = (Class) Proxy.newProxyInstance(defaultListableBeanFactory.getBeanClassLoader(), currentInterface.getInterfaces(), new JsonRpcClientInvocationHandler());
-                BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(proxy);
-                defaultListableBeanFactory.registerBeanDefinition("client", builder.getBeanDefinition());
+                // Class proxy = (Class) Proxy.newProxyInstance(defaultListableBeanFactory.getBeanClassLoader(), currentInterface.getInterfaces(), new JsonRpcClientInvocationHandler());
+                // BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(proxy);
+                // defaultListableBeanFactory.registerBeanDefinition("client", builder.getBeanDefinition());
             }
         }
     }
