@@ -1,6 +1,7 @@
 package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.client.JsonRpcClientInvocationHandler;
+import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClientHandler;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -18,13 +19,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.spring
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-
-        System.out.println(666666666);
-
         Boolean enable = importingClassMetadata
                 .getAnnotations()
                 .stream()
@@ -68,6 +72,7 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
             for (Class<?> type : interfaceTypes) {
                 BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
                 builder.addConstructorArgValue(type);
+                builder.addConstructorArgValue(new JsonRpcHttpClientHandler());
                 registry.registerBeanDefinition("client", builder.getBeanDefinition());
             }
 

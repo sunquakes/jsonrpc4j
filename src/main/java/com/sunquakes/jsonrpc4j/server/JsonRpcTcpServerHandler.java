@@ -11,8 +11,14 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.server
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 @AllArgsConstructor
-public class JsonRpcTcpHandler implements Runnable {
+public class JsonRpcTcpServerHandler implements Runnable {
 
     private ApplicationContext applicationContext;
 
@@ -62,18 +68,14 @@ public class JsonRpcTcpHandler implements Runnable {
                     }
                 }
                 if (sb.length() > 0) {
-                    JsonRpcHandler jsonRpcHandler = new JsonRpcHandler(applicationContext);
-                    System.out.println("sb");
-                    System.out.println(sb);
-                    Object res = jsonRpcHandler.handle(sb.substring(0, sb.length() - packageEofLength));
-                    System.out.println(res);
+                    JsonRpcServerHandler jsonRpcServerHandler = new JsonRpcServerHandler(applicationContext);
+                    Object res = jsonRpcServerHandler.handle(sb.substring(0, sb.length() - packageEofLength));
                     byte[] output = ByteArrayUtils.merge(JSON.toJSONBytes(res), packageEof.getBytes());
                     os.write(output);
                     os.flush();
                 }
             }
         } catch (IOException e) {
-            System.out.println(888);
             // e.printStackTrace();
         }
     }

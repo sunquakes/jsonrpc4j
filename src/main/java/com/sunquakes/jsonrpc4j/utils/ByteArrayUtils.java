@@ -2,6 +2,12 @@ package com.sunquakes.jsonrpc4j.utils;
 
 import lombok.experimental.UtilityClass;
 
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.utils
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 @UtilityClass
 public class ByteArrayUtils {
 

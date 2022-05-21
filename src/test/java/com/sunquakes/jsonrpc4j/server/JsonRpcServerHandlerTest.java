@@ -1,6 +1,5 @@
 package com.sunquakes.jsonrpc4j.server;
 
-import com.sunquakes.jsonrpc4j.server.JsonRpcHandler;
 import com.sunquakes.jsonrpc4j.dto.NotifyResponseDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import org.junit.Test;
@@ -17,7 +16,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcHandlerTest {
+public class JsonRpcServerHandlerTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -32,8 +31,8 @@ public class JsonRpcHandlerTest {
                     "\"method\":\"JsonRpc/add\"" +
                     "\"params\":{\"a\":1,\"b\":2}" +
                     "}";
-            JsonRpcHandler jsonRpcHandler = applicationContext.getBean(JsonRpcHandler.class);
-            ResponseDto responseDto = (ResponseDto) jsonRpcHandler.handle(json);
+            JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(JsonRpcServerHandler.class);
+            ResponseDto responseDto = (ResponseDto) jsonRpcServerHandler.handle(json);
             assertEquals(responseDto.getId(), "1234567890");
             assertEquals(responseDto.getJsonrpc(), "2.0");
             assertEquals(responseDto.getResult(), 3);
@@ -46,8 +45,8 @@ public class JsonRpcHandlerTest {
                     "\"method\":\"JsonRpc/add\"" +
                     "\"params\":{\"a\":1,\"b\":2}" +
                     "}";
-            JsonRpcHandler jsonRpcHandler = applicationContext.getBean(JsonRpcHandler.class);
-            NotifyResponseDto notifyResponseDto = (NotifyResponseDto) jsonRpcHandler.handle(json);
+            JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(JsonRpcServerHandler.class);
+            NotifyResponseDto notifyResponseDto = (NotifyResponseDto) jsonRpcServerHandler.handle(json);
             assertEquals(notifyResponseDto.getJsonrpc(), "2.0");
             assertEquals(notifyResponseDto.getResult(), 3);
         }
@@ -64,8 +63,8 @@ public class JsonRpcHandlerTest {
                     "\"jsonrpc\":2.0" +
                     "\"params\":[2, 1]" +
                     "}]";
-            JsonRpcHandler jsonRpcHandler = applicationContext.getBean(JsonRpcHandler.class);
-            Object res = jsonRpcHandler.handle(json);
+            JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(JsonRpcServerHandler.class);
+            Object res = jsonRpcServerHandler.handle(json);
             assertTrue(res instanceof ArrayList);
 
             List<Object> list = (List<Object>) res;

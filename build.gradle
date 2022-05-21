@@ -40,11 +40,11 @@ dependencies {
     implementation group: 'com.alibaba', name: 'fastjson', version: "${fastjsonVersion}"
     compileOnly group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
+    implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: "${httpclientVersion}"
 
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
     testImplementation group: 'org.easymock', name: 'easymock', version: "${easymockVersion}"
-    testImplementation group: 'org.apache.httpcomponents', name: 'httpclient', version: "${httpclientVersion}"
 }

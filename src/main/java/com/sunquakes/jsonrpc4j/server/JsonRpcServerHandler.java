@@ -9,9 +9,7 @@ import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import com.sunquakes.jsonrpc4j.utils.ResponseUtils;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,9 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.server
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 @AllArgsConstructor
-public class JsonRpcHandler {
+public class JsonRpcServerHandler {
 
     private ApplicationContext applicationContext;
 

@@ -20,6 +20,12 @@ import static java.lang.String.format;
 import static org.springframework.util.ClassUtils.forName;
 import static org.springframework.util.ClassUtils.getAllInterfacesForClass;
 
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.spring
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 public class JsonRpcBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
     private final String SERVICE_SUFFIX = "Service";
@@ -48,11 +54,6 @@ public class JsonRpcBeanFactoryPostProcessor implements BeanFactoryPostProcessor
                 BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(beanName));
                 String key = getPathByBeanName(beanName, SERVICE_SUFFIX);
                 defaultListableBeanFactory.registerBeanDefinition(key, builder.getBeanDefinition());
-            } else if (currentInterface.isAnnotationPresent(JsonRpcClient.class)) {
-                System.out.println(1234567890);
-                // Class proxy = (Class) Proxy.newProxyInstance(defaultListableBeanFactory.getBeanClassLoader(), currentInterface.getInterfaces(), new JsonRpcClientInvocationHandler());
-                // BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(proxy);
-                // defaultListableBeanFactory.registerBeanDefinition("client", builder.getBeanDefinition());
             }
         }
     }

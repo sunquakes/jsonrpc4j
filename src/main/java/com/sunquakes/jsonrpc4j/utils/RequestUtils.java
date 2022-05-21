@@ -13,6 +13,12 @@ import lombok.experimental.UtilityClass;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.utils
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 @UtilityClass
 public class RequestUtils {
 

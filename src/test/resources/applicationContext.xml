@@ -3,7 +3,7 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
     <bean class="com.sunquakes.jsonrpc4j.client.JsonRpcConfig"/>
-    <bean class="com.sunquakes.jsonrpc4j.server.JsonRpcHandler"/>
+    <bean class="com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler"/>
     <bean class="com.sunquakes.jsonrpc4j.service.JsonRpcServiceImpl"/>
     <bean class="com.sunquakes.jsonrpc4j.spring.JsonRpcServerBeanFactoryPostProcessor"/>
     <bean class="com.sunquakes.jsonrpc4j.spring.JsonRpcBeanFactoryPostProcessor"/>

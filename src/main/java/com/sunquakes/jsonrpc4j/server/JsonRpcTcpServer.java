@@ -9,6 +9,12 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.client
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean {
 
     @Override
@@ -38,7 +44,7 @@ class ServerThread extends Thread {
             ServerSocket server = new ServerSocket(3201);
             while (true) {
                 Socket socket = server.accept();
-                pool.execute(new JsonRpcTcpHandler(applicationContext, socket));
+                pool.execute(new JsonRpcTcpServerHandler(applicationContext, socket));
             }
         } catch (IOException e) {
             e.printStackTrace();

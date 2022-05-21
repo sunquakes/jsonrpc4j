@@ -17,6 +17,12 @@ import static java.lang.String.format;
 import static org.springframework.util.ClassUtils.forName;
 import static org.springframework.util.ClassUtils.getAllInterfacesForClass;
 
+/**
+ * @Project: jsonrpc4j
+ * @Package: com.sunquakes.jsonrpc4j.spring
+ * @Author: Robert
+ * @CreateTime: 2022/5/21 1:32 PM
+ **/
 public class JsonRpcServerBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
 
     private static Map<String, String> findServiceBeanDefinitions(ConfigurableListableBeanFactory beanFactory) {
