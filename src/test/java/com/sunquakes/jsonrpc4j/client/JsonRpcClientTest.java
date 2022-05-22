@@ -19,10 +19,10 @@ public class JsonRpcClientTest {
     private ApplicationContext applicationContext;
 
     @Test
-    public void testGetBean() throws IOException {
-        // test
+    public void testHandler() throws IOException {
+        // test http handler
         {
-            IJsonRpcClient jsonRpcClient = (IJsonRpcClient) applicationContext.getBean("client");
+            IJsonRpcClient jsonRpcClient = applicationContext.getBean(IJsonRpcClient.class);
             assertEquals(jsonRpcClient.add(3, 4), 7);
         }
     }

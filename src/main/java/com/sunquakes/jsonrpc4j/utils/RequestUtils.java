@@ -12,6 +12,7 @@ import lombok.experimental.UtilityClass;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @Project: jsonrpc4j
@@ -21,6 +22,8 @@ import java.util.List;
  **/
 @UtilityClass
 public class RequestUtils {
+
+    public String JSONRPC = "2.0";
 
     public Object parseRequestBody(String json) throws InvalidRequestException {
         Object typeObject = JSON.parse(json);
@@ -81,5 +84,9 @@ public class RequestUtils {
         } else {
             throw new InvalidParamsException();
         }
+    }
+
+    public String getId() {
+        return UUID.randomUUID().toString();
     }
 }

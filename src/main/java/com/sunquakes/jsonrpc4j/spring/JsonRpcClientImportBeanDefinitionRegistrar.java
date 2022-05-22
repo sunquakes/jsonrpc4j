@@ -2,6 +2,7 @@ package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.client.JsonRpcClientInvocationHandler;
 import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClientHandler;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -25,11 +26,12 @@ import java.util.Map;
  * @Author: Robert
  * @CreateTime: 2022/5/21 1:32 PM
  **/
+@Slf4j
 public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
 
     @Override
-    public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        Boolean enable = importingClassMetadata
+    public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
+        Boolean enable = annotationMetadata
                 .getAnnotations()
                 .stream()
                 .filter(x -> x.getType().equals(JsonRpcScan.class))
@@ -38,47 +40,41 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
         // if (!enable)
         //     return;
 
+        String appClassName = annotationMetadata.getClassName();
+        Class<?> appClass = null;
         try {
-            String appClassName = importingClassMetadata.getClassName();
-            Class<?> appClass = Class.forName(appClassName);
-            String packageName = appClass.getPackage().getName();
-
-            List<Class<?>> interfaceTypes = new LinkedList<Class<?>>();
-            ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
-            scanner.addIncludeFilter(new TypeFilter() {
-                @Override
-                public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
-
-                    Map<String, Object> annotationAttributes = metadataReader
-                            .getAnnotationMetadata()
-                            .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcClient");
-
-                    if (annotationAttributes == null)
-                        return false;
-
-                    Class<?> interfaceType = null;
-                    try {
-                        interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-
-                    interfaceTypes.add(interfaceType);
-                    return true;
-                }
-            });
-            scanner.findCandidateComponents(packageName);
-
-            for (Class<?> type : interfaceTypes) {
-                BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
-                builder.addConstructorArgValue(type);
-                builder.addConstructorArgValue(new JsonRpcHttpClientHandler());
-                registry.registerBeanDefinition("client", builder.getBeanDefinition());
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            // error code here
+            appClass = Class.forName(appClassName);
+        } catch (ClassNotFoundException e) {
+            log.error("The import class of JsonRpcClient not exists");
         }
+        String packageName = appClass.getPackage().getName();
+
+        ClassPathScanningCandidateComponentProvider classPathScanningCandidateComponentProvider = new ClassPathScanningCandidateComponentProvider(false);
+        classPathScanningCandidateComponentProvider.addIncludeFilter(new TypeFilter() {
+            @Override
+            public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
+
+                Map<String, Object> annotationAttributes = metadataReader
+                        .getAnnotationMetadata()
+                        .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcClient");
+
+                if (annotationAttributes == null)
+                    return false;
+
+                Class<?> interfaceType = null;
+                try {
+                    interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+
+                BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
+                builder.addConstructorArgValue(interfaceType);
+                builder.addConstructorArgValue(new JsonRpcHttpClientHandler());
+                beanDefinitionRegistry.registerBeanDefinition(interfaceType.getName(), builder.getBeanDefinition());
+                return true;
+            }
+        });
+        classPathScanningCandidateComponentProvider.findCandidateComponents(packageName);
     }
 }

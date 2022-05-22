@@ -13,7 +13,7 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class ResponseUtils {
 
-    private String JSONRPC = "2.0";
+    private String JSONRPC = RequestUtils.JSONRPC;
 
     public Object error(String id, int code) {
         return error(id, code, null);

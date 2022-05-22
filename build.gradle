@@ -5,6 +5,7 @@ buildscript {
         set("httpclientVersion", "4.5.13")
         set("fastjsonVersion", "2.0.2")
         set("lombokVersion", "1.18.24")
+        set("slf4jVersion", "1.7.36")
     }
 }
 
@@ -41,6 +42,7 @@ dependencies {
     compileOnly group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: "${httpclientVersion}"
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
 
     testImplementation 'junit:junit:4.13.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
