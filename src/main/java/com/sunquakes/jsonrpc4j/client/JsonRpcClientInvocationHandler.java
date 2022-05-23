@@ -1,6 +1,7 @@
 package com.sunquakes.jsonrpc4j.client;
 
 import com.alibaba.fastjson2.JSON;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -14,18 +15,21 @@ import java.lang.reflect.Method;
  * @Author: Robert
  * @CreateTime: 2022/5/21 1:32 PM
  **/
+@Slf4j
 public class JsonRpcClientInvocationHandler<T> implements InvocationHandler {
-
-    private Class<T> interfaceType;
 
     private JsonRpcClientHandlerInterface jsonRpcClientHandler;
 
-    public JsonRpcClientInvocationHandler(Class<T> intefaceType, JsonRpcClientHandlerInterface jsonRpcClientHandler) {
-        this.interfaceType = interfaceType;
+    private String service;
+
+    public JsonRpcClientInvocationHandler(JsonRpcClientHandlerInterface jsonRpcClientHandler, String service) {
         this.jsonRpcClientHandler = jsonRpcClientHandler;
+        this.service = service;
     }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return jsonRpcClientHandler.handle("test", args);
+        String methodPath = String.format("/%s/%s", service, method.getName());
+        System.out.println(methodPath);
+        return jsonRpcClientHandler.handle(methodPath, args);
     }
 }

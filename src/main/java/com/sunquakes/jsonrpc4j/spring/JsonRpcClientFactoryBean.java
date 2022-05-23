@@ -18,14 +18,15 @@ public class JsonRpcClientFactoryBean<T> implements FactoryBean<T> {
 
     private JsonRpcClientHandlerInterface jsonRpcClientHandler;
 
-    public JsonRpcClientFactoryBean(Class<T> interfaceType, JsonRpcClientHandlerInterface jsonRpcClientHandler) {
+    private String service;
+
+    public JsonRpcClientFactoryBean(Class<T> interfaceType) {
         this.interfaceType = interfaceType;
-        this.jsonRpcClientHandler = jsonRpcClientHandler;
     }
 
     @Override
     public T getObject() {
-        return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new JsonRpcClientInvocationHandler(interfaceType, jsonRpcClientHandler));
+        return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new JsonRpcClientInvocationHandler(jsonRpcClientHandler, service));
     }
 
     @Override
@@ -36,5 +37,13 @@ public class JsonRpcClientFactoryBean<T> implements FactoryBean<T> {
     @Override
     public boolean isSingleton() {
         return true;
+    }
+
+    public void setJsonRpcClientHandler(JsonRpcClientHandlerInterface jsonRpcClientHandler) {
+        this.jsonRpcClientHandler = jsonRpcClientHandler;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 }

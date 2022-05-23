@@ -49,4 +49,5 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
     testImplementation group: 'org.easymock', name: 'easymock', version: "${easymockVersion}"
+    testImplementation group: 'org.slf4j', name: 'slf4j-nop', version: "${slf4jVersion}"
 }

@@ -53,7 +53,7 @@ public class RequestUtils {
     public String[] parseMethod(String method) throws MethodNotFoundException {
         char first = method.charAt(0);
         if (first == '.' || first == '/') {
-            method = method.substring(0, method.length() - 1);
+            method = method.substring(1);
         }
         int m = method.length() - method.replaceAll("\\.", "").length();
         int n = method.length() - method.replaceAll("/", "").length();

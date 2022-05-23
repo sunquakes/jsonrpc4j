@@ -61,6 +61,8 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
                 if (annotationAttributes == null)
                     return false;
 
+                System.out.println(annotationAttributes);
+
                 Class<?> interfaceType = null;
                 try {
                     interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
@@ -70,7 +72,8 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
 
                 BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
                 builder.addConstructorArgValue(interfaceType);
-                builder.addConstructorArgValue(new JsonRpcHttpClientHandler());
+                builder.addPropertyValue("jsonRpcClientHandler", new JsonRpcHttpClientHandler(annotationAttributes.get("url").toString()));
+                builder.addPropertyValue("service", annotationAttributes.get("value"));
                 beanDefinitionRegistry.registerBeanDefinition(interfaceType.getName(), builder.getBeanDefinition());
                 return true;
             }

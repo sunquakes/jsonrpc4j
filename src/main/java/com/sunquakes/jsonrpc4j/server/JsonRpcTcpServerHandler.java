@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.server;
 import com.alibaba.fastjson.JSON;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -17,6 +18,7 @@ import java.util.Arrays;
  * @Author: Robert
  * @CreateTime: 2022/5/21 1:32 PM
  **/
+@Slf4j
 @AllArgsConstructor
 public class JsonRpcTcpServerHandler implements Runnable {
 
@@ -76,7 +78,7 @@ public class JsonRpcTcpServerHandler implements Runnable {
                 }
             }
         } catch (IOException e) {
-            // e.printStackTrace();
+            log.error("The socket is closed.");
         }
     }
 }
