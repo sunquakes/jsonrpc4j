@@ -28,6 +28,6 @@ public @interface JsonRpcClient {
      * The format of url is 127.0.0.1:3200 or www.sunquakes.com
      * @return
      */
-    String url() default "";
+    String url();
 
 }

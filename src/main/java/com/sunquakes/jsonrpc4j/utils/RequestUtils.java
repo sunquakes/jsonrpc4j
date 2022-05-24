@@ -23,6 +23,9 @@ import java.util.UUID;
 @UtilityClass
 public class RequestUtils {
 
+    public String PROTOCOL_TCP = "tcp";
+    public String PROTOCOL_HTTP = "http";
+
     public String JSONRPC = "2.0";
 
     public Object parseRequestBody(String json) throws InvalidRequestException {

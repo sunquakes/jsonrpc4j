@@ -1,7 +1,10 @@
 package com.sunquakes.jsonrpc4j.spring;
 
+import com.sunquakes.jsonrpc4j.client.JsonRpcClientHandlerInterface;
 import com.sunquakes.jsonrpc4j.client.JsonRpcClientInvocationHandler;
 import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClientHandler;
+import com.sunquakes.jsonrpc4j.client.JsonRpcTcpClientHandler;
+import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
@@ -13,6 +16,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Proxy;
@@ -31,21 +35,12 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
-        Boolean enable = annotationMetadata
-                .getAnnotations()
-                .stream()
-                .filter(x -> x.getType().equals(JsonRpcScan.class))
-                .count() > 0;
-
-        // if (!enable)
-        //     return;
-
         String appClassName = annotationMetadata.getClassName();
         Class<?> appClass = null;
         try {
             appClass = Class.forName(appClassName);
         } catch (ClassNotFoundException e) {
-            log.error("The import class of JsonRpcClient not exists");
+            log.error("The import class of JsonRpcClient is not exists.");
         }
         String packageName = appClass.getPackage().getName();
 
@@ -61,23 +56,39 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
                 if (annotationAttributes == null)
                     return false;
 
-                System.out.println(annotationAttributes);
-
                 Class<?> interfaceType = null;
                 try {
                     interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
 
-                BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
-                builder.addConstructorArgValue(interfaceType);
-                builder.addPropertyValue("jsonRpcClientHandler", new JsonRpcHttpClientHandler(annotationAttributes.get("url").toString()));
-                builder.addPropertyValue("service", annotationAttributes.get("value"));
-                beanDefinitionRegistry.registerBeanDefinition(interfaceType.getName(), builder.getBeanDefinition());
-                return true;
+                    // Select handler according to different protocol
+                    String protocol = annotationAttributes.get("protocol").toString();
+                    String url = annotationAttributes.get("url").toString();
+                    if (!StringUtils.hasLength(url)) {
+                        log.error("The url of JsonRpcClient is required.");
+                        return false;
+                    }
+                    JsonRpcClientHandlerInterface jsonRpcClientHandler = getJsonRpcClientHandler(protocol, url);
+
+                    BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
+                    builder.addConstructorArgValue(interfaceType);
+                    builder.addPropertyValue("jsonRpcClientHandler", jsonRpcClientHandler);
+                    builder.addPropertyValue("service", annotationAttributes.get("value"));
+                    beanDefinitionRegistry.registerBeanDefinition(interfaceType.getName(), builder.getBeanDefinition());
+                    return true;
+                } catch (ClassNotFoundException e) {
+                    log.error("The interface of JsonRpcClient is not exists.");
+                    return false;
+                }
             }
         });
         classPathScanningCandidateComponentProvider.findCandidateComponents(packageName);
+    }
+
+    private JsonRpcClientHandlerInterface getJsonRpcClientHandler(String protocol, String url) throws IllegalArgumentException {
+        if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
+            return new JsonRpcTcpClientHandler();
+        } else {
+            return new JsonRpcHttpClientHandler(url);
+        }
     }
 }
