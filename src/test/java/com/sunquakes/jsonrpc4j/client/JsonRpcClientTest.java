@@ -22,8 +22,11 @@ public class JsonRpcClientTest {
     public void testHandler() throws IOException {
         // test http handler
         {
-            IJsonRpcClient jsonRpcClient = applicationContext.getBean(IJsonRpcClient.class);
-            assertEquals(jsonRpcClient.add(3, 4), 7);
+            IJsonRpcHttpClient jsonRpcHttpClient = applicationContext.getBean(IJsonRpcHttpClient.class);
+            assertEquals(jsonRpcHttpClient.add(3, 4), 7);
+
+            IJsonRpcTcpClient jsonRpcTcpHttpClient = applicationContext.getBean(IJsonRpcTcpClient.class);
+            assertEquals(jsonRpcTcpHttpClient.add(3, 4), 7);
         }
     }
 }

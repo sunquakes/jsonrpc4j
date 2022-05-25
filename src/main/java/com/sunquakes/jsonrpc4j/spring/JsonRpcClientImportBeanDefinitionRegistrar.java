@@ -86,7 +86,7 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
 
     private JsonRpcClientHandlerInterface getJsonRpcClientHandler(String protocol, String url) throws IllegalArgumentException {
         if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
-            return new JsonRpcTcpClientHandler();
+            return new JsonRpcTcpClientHandler(url);
         } else {
             return new JsonRpcHttpClientHandler(url);
         }
