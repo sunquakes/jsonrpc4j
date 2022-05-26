@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.client;
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
+import lombok.Synchronized;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;

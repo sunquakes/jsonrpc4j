@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.client;
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
+import lombok.Synchronized;
 
 import java.io.*;
 import java.net.Socket;
@@ -52,14 +53,9 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
         bw.write((request + packageEof));
         bw.flush();
 
-        os = s.getOutputStream();
-        bw = new BufferedWriter(new OutputStreamWriter(os));
-        bw.write(request + packageEof);
-        bw.flush();
-
         StringBuffer sb = new StringBuffer(init);
 
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[10];
         int bufferLength = buffer.length;
         int len;
         InputStream is = s.getInputStream();

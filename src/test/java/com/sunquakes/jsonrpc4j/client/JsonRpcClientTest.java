@@ -19,14 +19,16 @@ public class JsonRpcClientTest {
     private ApplicationContext applicationContext;
 
     @Test
-    public void testHandler() throws IOException {
+    public void testHandler() throws IOException, InterruptedException {
         // test http handler
         {
             IJsonRpcHttpClient jsonRpcHttpClient = applicationContext.getBean(IJsonRpcHttpClient.class);
             assertEquals(jsonRpcHttpClient.add(3, 4), 7);
 
             IJsonRpcTcpClient jsonRpcTcpHttpClient = applicationContext.getBean(IJsonRpcTcpClient.class);
+            assertEquals(jsonRpcTcpHttpClient.add(1, 2), 3);
             assertEquals(jsonRpcTcpHttpClient.add(3, 4), 7);
+            assertEquals(jsonRpcTcpHttpClient.add(5, 6), 11);
         }
     }
 }
