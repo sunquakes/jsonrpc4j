@@ -37,16 +37,8 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
         request.put("method", method);
         request.put("params", args);
 
-        String[] ipPort = url.split(":");
-        String ip = ipPort[0];
-        Integer port;
-        if (ipPort.length < 2) {
-            port = defaultPort;
-        } else {
-            port = Integer.valueOf(ipPort[1]);
-        }
-
-        Socket s = new Socket(ip, port);
+        JsonRpcTcpClientSource.initPool(url, 10);
+        Socket s = JsonRpcTcpClientSource.getSocket(url);
 
         OutputStream os = s.getOutputStream();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));
