@@ -4,5 +4,5 @@ import java.io.IOException;
 
 public interface JsonRpcClientHandlerInterface {
 
-    Object handle(String method, Object[] args) throws IOException;
+    Object handle(String method, Object[] args) throws Exception;
 }

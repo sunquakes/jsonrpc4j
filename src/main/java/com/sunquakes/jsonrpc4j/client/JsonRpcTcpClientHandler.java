@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import lombok.Synchronized;
+import org.apache.commons.pool2.ObjectPool;
 
 import java.io.*;
 import java.net.Socket;
@@ -19,8 +20,6 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 
     private String packageEof = "\r\n";
 
-    private Integer defaultPort = 80;
-
     private String url;
 
     private String init = "";
@@ -30,15 +29,15 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
     }
 
     @Override
-    public Object handle(String method, Object[] args) throws IOException {
+    public Object handle(String method, Object[] args) throws Exception {
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
         request.put("method", method);
         request.put("params", args);
 
-        JsonRpcTcpClientSource.initPool(url, 10);
-        Socket s = JsonRpcTcpClientSource.getSocket(url);
+        ObjectPool<Socket> socketPool = SocketPoolFactory.getPool(url);
+        Socket s = socketPool.borrowObject();
 
         OutputStream os = s.getOutputStream();
         BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));
