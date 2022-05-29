@@ -11,6 +11,7 @@ import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@TestPropertySource("classpath:application-http.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcHttpServerTest {
 

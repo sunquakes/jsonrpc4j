@@ -2,6 +2,7 @@ package com.sunquakes.jsonrpc4j.server;
 
 import com.sun.net.httpserver.HttpServer;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,13 +16,16 @@ import java.util.concurrent.Executors;
  **/
 public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean {
 
+    @Value("${jsonrpc.server.port}")
+    private int port;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         start();
     }
 
     public void start() throws IOException {
-        HttpServer httpServer = HttpServer.create(new InetSocketAddress(3200), 0);
+        HttpServer httpServer = HttpServer.create(new InetSocketAddress(port), 0);
         httpServer.createContext("/", new JsonRpcHttpServerHandler(applicationContext));
         httpServer.setExecutor(Executors.newFixedThreadPool(10));
         httpServer.start();

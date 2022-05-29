@@ -1,18 +1,21 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.JsonRpcClient;
 import com.sunquakes.jsonrpc4j.JsonRpcService;
-import com.sunquakes.jsonrpc4j.client.JsonRpcClientInvocationHandler;
+import com.sunquakes.jsonrpc4j.ProtocolEnum;
+import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
+import com.sunquakes.jsonrpc4j.server.JsonRpcTcpServer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
 
-import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,9 +29,16 @@ import static org.springframework.util.ClassUtils.getAllInterfacesForClass;
  * @Author: Robert
  * @CreateTime: 2022/5/21 1:32 PM
  **/
-public class JsonRpcBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostProcessor, EnvironmentAware {
 
     private final String SERVICE_SUFFIX = "Service";
+
+    private Environment environment;
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
     private static Map<String, String> findBeanDefinitions(ConfigurableListableBeanFactory beanFactory) {
         final Map<String, String> beanNames = new HashMap<>();
@@ -55,6 +65,19 @@ public class JsonRpcBeanFactoryPostProcessor implements BeanFactoryPostProcessor
                 String key = getPathByBeanName(beanName, SERVICE_SUFFIX);
                 defaultListableBeanFactory.registerBeanDefinition(key, builder.getBeanDefinition());
             }
+        }
+        String protocol = environment.getProperty("jsonrpc.server.protocol");
+        String serverBeanName = String.format("%s_%s", "JsonRpcServer", protocol);
+        if (protocol != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
+            BeanDefinitionBuilder builder;
+            if (protocol.equals(ProtocolEnum.Tcp.getName())) {
+                builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
+            } else if (protocol.equals(ProtocolEnum.Http.getName())) {
+                builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
+            } else {
+                throw new IllegalArgumentException("Invalid protocol.");
+            }
+            defaultListableBeanFactory.registerBeanDefinition(serverBeanName, builder.getBeanDefinition());
         }
     }
 

@@ -1,6 +1,7 @@
 package com.sunquakes.jsonrpc4j.server;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 
 import java.io.IOException;
@@ -17,13 +18,16 @@ import java.util.concurrent.Executors;
  **/
 public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean {
 
+    @Value("${jsonrpc.server.port}")
+    private int port;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         start();
     }
 
     public void start() throws IOException {
-        Thread t = new ServerThread(applicationContext);
+        Thread t = new ServerThread(applicationContext, port);
         t.start();
     }
 }
@@ -32,16 +36,19 @@ class ServerThread extends Thread {
 
     ExecutorService pool = Executors.newFixedThreadPool(10);
 
+    private int port;
+
     private ApplicationContext applicationContext;
 
-    ServerThread(ApplicationContext applicationContext) {
+    ServerThread(ApplicationContext applicationContext, int port) {
         this.applicationContext = applicationContext;
+        this.port = port;
     }
 
     @Override
     public void run() {
         try {
-            ServerSocket server = new ServerSocket(3201);
+            ServerSocket server = new ServerSocket(port);
             while (true) {
                 Socket socket = server.accept();
                 pool.execute(new JsonRpcTcpServerHandler(applicationContext, socket));
