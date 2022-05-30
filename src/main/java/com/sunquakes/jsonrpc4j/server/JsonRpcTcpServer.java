@@ -1,5 +1,6 @@
 package com.sunquakes.jsonrpc4j.server;
 
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -21,28 +22,32 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
     @Value("${jsonrpc.server.port}")
     private int port;
 
+    @Value("${jsonrpc.server.pool.max-active:168}")
+    private int poolMaxActive;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         start();
     }
 
     public void start() throws IOException {
-        Thread t = new ServerThread(applicationContext, port);
+        Thread t = new ServerThread(applicationContext, port, poolMaxActive);
         t.start();
     }
 }
 
 class ServerThread extends Thread {
 
-    ExecutorService pool = Executors.newFixedThreadPool(10);
+    private ApplicationContext applicationContext;
 
     private int port;
 
-    private ApplicationContext applicationContext;
+    ExecutorService pool;
 
-    ServerThread(ApplicationContext applicationContext, int port) {
+    ServerThread(ApplicationContext applicationContext, int port, int poolMaxActive) {
         this.applicationContext = applicationContext;
         this.port = port;
+        this.pool = Executors.newFixedThreadPool(poolMaxActive);
     }
 
     @Override

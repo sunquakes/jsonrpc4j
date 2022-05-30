@@ -19,6 +19,9 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
     @Value("${jsonrpc.server.port}")
     private int port;
 
+    @Value("${jsonrpc.server.pool.max-active:168}")
+    private int poolMaxActive;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         start();
@@ -27,7 +30,7 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
     public void start() throws IOException {
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(port), 0);
         httpServer.createContext("/", new JsonRpcHttpServerHandler(applicationContext));
-        httpServer.setExecutor(Executors.newFixedThreadPool(10));
+        httpServer.setExecutor(Executors.newFixedThreadPool(poolMaxActive));
         httpServer.start();
     }
 }

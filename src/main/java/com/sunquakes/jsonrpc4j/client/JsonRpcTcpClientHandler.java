@@ -18,7 +18,9 @@ import java.util.Arrays;
  **/
 public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 
-    private String packageEof = "\r\n";
+    private String packageEof = RequestUtils.TCP_PACKAGE_EOF;
+
+    private int packageMaxLength = RequestUtils.TCP_PACKAG_MAX_LENGHT;
 
     private String url;
 
@@ -46,7 +48,7 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 
         StringBuffer sb = new StringBuffer(init);
 
-        byte[] buffer = new byte[10];
+        byte[] buffer = new byte[packageMaxLength];
         int bufferLength = buffer.length;
         int len;
         InputStream is = s.getInputStream();
@@ -84,5 +86,15 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
         }
         ResponseDto responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
         return responseDto.getResult();
+    }
+
+    public JsonRpcTcpClientHandler setPackageEof(String packageEof) {
+        this.packageEof = packageEof;
+        return this;
+    }
+
+    public JsonRpcTcpClientHandler setPackageMaxLength(int packageMaxLength) {
+        this.packageMaxLength = packageMaxLength;
+        return this;
     }
 }

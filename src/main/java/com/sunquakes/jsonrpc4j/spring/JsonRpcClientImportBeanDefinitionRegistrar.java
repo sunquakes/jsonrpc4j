@@ -1,17 +1,16 @@
 package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.client.JsonRpcClientHandlerInterface;
-import com.sunquakes.jsonrpc4j.client.JsonRpcClientInvocationHandler;
 import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClientHandler;
 import com.sunquakes.jsonrpc4j.client.JsonRpcTcpClientHandler;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -19,9 +18,6 @@ import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.lang.reflect.Proxy;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,7 +27,14 @@ import java.util.Map;
  * @CreateTime: 2022/5/21 1:32 PM
  **/
 @Slf4j
-public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar {
+public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {
+
+    private Environment environment;
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
+    }
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
@@ -86,7 +89,9 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
 
     private JsonRpcClientHandlerInterface getJsonRpcClientHandler(String protocol, String url) throws IllegalArgumentException {
         if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
-            return new JsonRpcTcpClientHandler(url);
+            String packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
+            int packageEofLength = Integer.valueOf(environment.getProperty("jsonrpc.client.package-max-length", String.valueOf(RequestUtils.TCP_PACKAG_MAX_LENGHT)));
+            return new JsonRpcTcpClientHandler(url).setPackageEof(packageEof).setPackageMaxLength(packageEofLength);
         } else {
             return new JsonRpcHttpClientHandler(url);
         }
