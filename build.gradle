@@ -7,6 +7,7 @@ buildscript {
         set("lombokVersion", "1.18.24")
         set("slf4jVersion", "1.7.36")
         set("commonsPool2Version", "2.11.1")
+        set("springbootVersion", "2.7.0")
     }
 }
 
@@ -50,6 +51,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
+    testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
     testImplementation group: 'org.easymock', name: 'easymock', version: "${easymockVersion}"
-    testImplementation group: 'org.slf4j', name: 'slf4j-nop', version: "${slf4jVersion}"
+    testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springbootVersion}"
 }
