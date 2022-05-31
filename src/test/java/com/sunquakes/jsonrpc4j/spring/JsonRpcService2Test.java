@@ -1,10 +1,14 @@
-package com.sunquakes.jsonrpc4j.spring.boot;
+package com.sunquakes.jsonrpc4j.spring;
 
+import com.sunquakes.jsonrpc4j.spring.boot.IJsonRpcClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -19,10 +23,25 @@ import static org.junit.Assert.assertEquals;
 public class JsonRpcService2Test {
 
     @Value("${jsonrpc.server.protocol}")
-    private final String protocol = null;
+    private String protocol;
+
+    @Value("${jsonrpc.server.port}")
+    private int port;
+
+    @Autowired
+    private IJsonRpcClient jsonRpcClient;
 
     @Test
     public void testGetConfiguration() {
         assertEquals(protocol, "tcp");
+        assertEquals(port, 3202);
+    }
+
+    @Test
+    public void testRequest() throws IOException, InterruptedException {
+        // test request
+        {
+            // assertEquals(jsonRpcClient.add(3, 4), 7);
+        }
     }
 }

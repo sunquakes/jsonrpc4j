@@ -1,9 +1,7 @@
-package com.sunquakes.jsonrpc4j.spring.boot;
+package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.spring.JsonRpcScan;
 import org.springframework.boot.SpringApplication;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
  * @Project: jsonrpc4j
@@ -11,8 +9,7 @@ import org.springframework.context.annotation.Configuration;
  * @Author: Robert
  * @CreateTime: 2022/5/30 12:45 PM
  **/
-@Configuration
-@ComponentScan
+@SpringBootApplication
 @JsonRpcScan
 public class JsonRpcApplication {
 
