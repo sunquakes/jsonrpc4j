@@ -1,5 +1,6 @@
-package com.sunquakes.jsonrpc4j.spring;
+package com.sunquakes.jsonrpc4j.spring.boot;
 
+import com.sunquakes.jsonrpc4j.spring.JsonRpcScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

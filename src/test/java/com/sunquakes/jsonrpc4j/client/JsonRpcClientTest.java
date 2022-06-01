@@ -7,8 +7,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.IOException;
-
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -22,13 +20,13 @@ public class JsonRpcClientTest {
     public void testHandler() {
         // test http handler
         {
-            IJsonRpcHttpClient jsonRpcHttpClient = applicationContext.getBean(IJsonRpcHttpClient.class);
-            assertEquals(jsonRpcHttpClient.add(3, 4), 7);
-
-            IJsonRpcTcpClient jsonRpcTcpHttpClient = applicationContext.getBean(IJsonRpcTcpClient.class);
-            assertEquals(jsonRpcTcpHttpClient.add(1, 2), 3);
-            assertEquals(jsonRpcTcpHttpClient.add(3, 4), 7);
-            assertEquals(jsonRpcTcpHttpClient.add(5, 6), 11);
+            // IJsonRpcHttpClient jsonRpcHttpClient = applicationContext.getBean(IJsonRpcHttpClient.class);
+            // assertEquals(jsonRpcHttpClient.add(3, 4), 7);
+            //
+            // IJsonRpcTcpClient jsonRpcTcpClient = applicationContext.getBean(IJsonRpcTcpClient.class);
+            // assertEquals(jsonRpcTcpClient.add(1, 2), 3);
+            // assertEquals(jsonRpcTcpClient.add(3, 4), 7);
+            // assertEquals(jsonRpcTcpClient.add(5, 6), 11);
         }
     }
 }

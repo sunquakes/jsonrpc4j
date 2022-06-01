@@ -15,6 +15,7 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,31 +54,41 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) beanFactory;
         Map<String, String> servicePathToBeanName = findBeanDefinitions(defaultListableBeanFactory);
         for (Map.Entry<String, String> entry : servicePathToBeanName.entrySet()) {
+            if (defaultListableBeanFactory == null) continue;
             registerServiceProxy(defaultListableBeanFactory, entry.getValue());
         }
     }
 
     private void registerServiceProxy(DefaultListableBeanFactory defaultListableBeanFactory, String beanName) {
-        BeanDefinition serviceBeanDefinition = findBeanDefinition(defaultListableBeanFactory, beanName);
-        for (Class<?> currentInterface : getBeanInterfaces(serviceBeanDefinition, defaultListableBeanFactory.getBeanClassLoader())) {
-            if (currentInterface.isAnnotationPresent(JsonRpcService.class)) {
-                BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(beanName));
-                String key = getPathByBeanName(beanName, SERVICE_SUFFIX);
-                defaultListableBeanFactory.registerBeanDefinition(key, builder.getBeanDefinition());
-            }
+        if (defaultListableBeanFactory == null) {
+            return;
         }
-        String protocol = environment.getProperty("jsonrpc.server.protocol");
-        String serverBeanName = String.format("%s_%s", "JsonRpcServer", protocol);
-        if (protocol != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
-            BeanDefinitionBuilder builder;
-            if (protocol.equals(ProtocolEnum.Tcp.getName())) {
-                builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
-            } else if (protocol.equals(ProtocolEnum.Http.getName())) {
-                builder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
-            } else {
-                throw new IllegalArgumentException("Invalid protocol.");
+        BeanDefinition serviceBeanDefinition = findBeanDefinition(defaultListableBeanFactory, beanName);
+        try {
+            for (Class<?> currentInterface : getBeanInterfaces(serviceBeanDefinition, defaultListableBeanFactory.getBeanClassLoader())) {
+                if (currentInterface.isAnnotationPresent(JsonRpcService.class)) {
+                    BeanDefinitionBuilder serviceBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(beanName));
+                    String key = getPathByBeanName(beanName, SERVICE_SUFFIX);
+                    defaultListableBeanFactory.registerBeanDefinition(key, serviceBuilder.getBeanDefinition());
+
+                    String protocol = environment.getProperty("jsonrpc.server.protocol");
+                    String serverBeanName = String.format("%s_%s", "JsonRpcServer", protocol);
+                    if (protocol != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
+                        BeanDefinitionBuilder serverBuilder;
+                        if (protocol.equals(ProtocolEnum.Tcp.getName())) {
+                            serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
+                        } else if (protocol.equals(ProtocolEnum.Http.getName())) {
+                            serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
+                        } else {
+                            throw new IllegalArgumentException("Invalid protocol.");
+                        }
+                        defaultListableBeanFactory.registerBeanDefinition(serverBeanName, serverBuilder.getBeanDefinition());
+                    }
+                }
             }
-            defaultListableBeanFactory.registerBeanDefinition(serverBeanName, builder.getBeanDefinition());
+        } catch (Exception e) {
+            System.out.println(beanName);
+            // e.printStackTrace();
         }
     }
 
@@ -94,6 +105,9 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
 
     private Class<?>[] getBeanInterfaces(BeanDefinition serviceBeanDefinition, ClassLoader beanClassLoader) {
         String beanClassName = serviceBeanDefinition.getBeanClassName();
+        if (beanClassName == null || beanClassLoader == null) {
+            return null;
+        }
         try {
             Class<?> beanClass = forName(beanClassName, beanClassLoader);
             return getAllInterfacesForClass(beanClass, beanClassLoader);
