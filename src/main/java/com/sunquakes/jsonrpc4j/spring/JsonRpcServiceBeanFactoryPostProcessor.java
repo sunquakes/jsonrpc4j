@@ -70,13 +70,15 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanDefinitionReg
         try {
             for (Class<?> currentInterface : getBeanInterfaces(serviceBeanDefinition, defaultListableBeanFactory.getBeanClassLoader())) {
                 System.out.println("77777777777");
+                System.out.println(beanName);
                 System.out.println(currentInterface.getName());
                 System.out.println(currentInterface.isAnnotationPresent(JsonRpcService.class));
                 if (currentInterface.isAnnotationPresent(JsonRpcService.class)) {
-                    BeanDefinitionBuilder serviceBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(beanName));
-                    String key = getPathByBeanName(beanName, SERVICE_SUFFIX);
-                    System.out.println(key);
-                    defaultListableBeanFactory.registerBeanDefinition(key, serviceBuilder.getBeanDefinition());
+                    // BeanDefinitionBuilder serviceBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(beanName));
+                    // String key = getPathByBeanName(beanName, SERVICE_SUFFIX);
+                    // System.out.println(key);
+                    // System.out.println(getBeanName(beanName));
+                    // defaultListableBeanFactory.registerBeanDefinition(key, serviceBuilder.getBeanDefinition());
 
                     String protocol = environment.getProperty("jsonrpc.server.protocol");
                     String serverBeanName = String.format("%s_%s", "JsonRpcServer", protocol);

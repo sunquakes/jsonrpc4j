@@ -1,18 +1,20 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.JsonRpcService;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
+import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
-import org.springframework.context.annotation.ScannedGenericBeanDefinition;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
+import org.springframework.util.Assert;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,14 +35,17 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                 //     return false;
                 System.out.println("9999999999999");
                 Map<String, Object> annotationAttributes;
-                String [] t = metadataReader.getClassMetadata().getInterfaceNames();
+                System.out.println(metadataReader.getClassMetadata().getClassName());
+                String[] t = metadataReader.getClassMetadata().getInterfaceNames();
                 for (int i = 0; i < t.length; i++) {
-                    System.out.println(t[i]);
                     annotationAttributes = metadataReaderFactory.getMetadataReader(t[i])
                             .getAnnotationMetadata()
                             .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");
-                    if (annotationAttributes != null)
+                    if (annotationAttributes != null) {
+                        System.out.println("0000000000000000000");
+                        System.out.println(t[i]);
                         return true;
+                    }
                 }
                 return false;
             }
@@ -49,17 +54,38 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
 
     @Override
     protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
-        Set<BeanDefinitionHolder> beanDefinitions = super.doScan(basePackages);
-        ScannedGenericBeanDefinition definition;
-        for (BeanDefinitionHolder holder : beanDefinitions) {
-            definition = (ScannedGenericBeanDefinition) holder.getBeanDefinition();
-            String beanName = holder.getBeanName();
-            System.out.println("88888888888888888");
-            System.out.println(beanName);
-            if (definition.getMetadata().isInterface()) {
+        try {
+
+            JsonRpcServiceBeanNameGenerator beanNameGenerator = new JsonRpcServiceBeanNameGenerator();
+            BeanDefinitionRegistry registry = getRegistry();
+            Assert.notEmpty(basePackages, "At least one base package must be specified");
+            Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
+            Map<String, Object> annotationAttributes;
+            for (String basePackage : basePackages) {
+                Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
+                for (BeanDefinition candidate : candidates) {
+                    String[] t = getMetadataReaderFactory().getMetadataReader(candidate.getBeanClassName()).getAnnotationMetadata().getInterfaceNames();
+                    for (int i = 0; i < t.length; i++) {
+                        System.out.println("------------------");
+                        annotationAttributes = getMetadataReaderFactory().getMetadataReader(t[i])
+                                .getAnnotationMetadata()
+                                .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");
+                        if (annotationAttributes != null) {
+                            String beanName = beanNameGenerator.generateBeanName(candidate, registry);
+                            if (checkCandidate(beanName, candidate)) {
+                                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+                                beanDefinitions.add(definitionHolder);
+                                registerBeanDefinition(definitionHolder, registry);
+                            }
+                        }
+                    }
+                }
             }
+            return beanDefinitions;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return beanDefinitions;
+        return null;
     }
 
     @Override

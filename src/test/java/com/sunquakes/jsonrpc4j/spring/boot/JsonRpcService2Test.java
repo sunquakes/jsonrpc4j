@@ -40,7 +40,7 @@ public class JsonRpcService2Test {
     public void testRequest() throws IOException, InterruptedException {
         // test request
         {
-            assertEquals(jsonRpcClient.add(1, 2), 7);
+            assertEquals(jsonRpcClient.add(1, 2), 3);
             assertEquals(jsonRpcClient.add(3, 4), 7);
             assertEquals(jsonRpcClient.add(5, 2), 7);
         }
