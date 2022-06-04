@@ -33,17 +33,13 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
             public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
                 // if (annotationAttributes == null)
                 //     return false;
-                System.out.println("9999999999999");
                 Map<String, Object> annotationAttributes;
-                System.out.println(metadataReader.getClassMetadata().getClassName());
                 String[] t = metadataReader.getClassMetadata().getInterfaceNames();
                 for (int i = 0; i < t.length; i++) {
                     annotationAttributes = metadataReaderFactory.getMetadataReader(t[i])
                             .getAnnotationMetadata()
                             .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");
                     if (annotationAttributes != null) {
-                        System.out.println("0000000000000000000");
-                        System.out.println(t[i]);
                         return true;
                     }
                 }
@@ -66,7 +62,6 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                 for (BeanDefinition candidate : candidates) {
                     String[] t = getMetadataReaderFactory().getMetadataReader(candidate.getBeanClassName()).getAnnotationMetadata().getInterfaceNames();
                     for (int i = 0; i < t.length; i++) {
-                        System.out.println("------------------");
                         annotationAttributes = getMetadataReaderFactory().getMetadataReader(t[i])
                                 .getAnnotationMetadata()
                                 .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");

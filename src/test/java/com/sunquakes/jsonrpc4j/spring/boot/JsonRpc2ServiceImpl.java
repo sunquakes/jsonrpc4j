@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.spring.boot;
 import com.sunquakes.jsonrpc4j.JsonRpcService;
 import org.springframework.stereotype.Service;
 
+@Service
 public class JsonRpc2ServiceImpl implements IJsonRpc2Service {
 
     @Override

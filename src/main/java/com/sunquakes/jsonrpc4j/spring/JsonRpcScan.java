@@ -13,6 +13,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import(JsonRpcClientImportBeanDefinitionRegistrar.class)
+@Import({JsonRpcClientImportBeanDefinitionRegistrar.class})
 public @interface JsonRpcScan {
 }

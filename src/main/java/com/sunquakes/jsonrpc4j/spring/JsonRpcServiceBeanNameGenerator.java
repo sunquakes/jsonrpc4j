@@ -14,8 +14,6 @@ public class JsonRpcServiceBeanNameGenerator implements BeanNameGenerator {
 
     @Override
     public String generateBeanName(BeanDefinition definition, BeanDefinitionRegistry registry) {
-        System.out.println("9191919191919919191919911");
-        System.out.println(getPathByBeanName(definition.getBeanClassName(), "Service"));
         return getPathByBeanName(definition.getBeanClassName(), "Service");
     }
 

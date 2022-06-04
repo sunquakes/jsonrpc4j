@@ -15,6 +15,8 @@ import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.env.Environment;
@@ -33,11 +35,13 @@ import static org.springframework.util.ClassUtils.getAllInterfacesForClass;
  * @Author: Robert
  * @CreateTime: 2022/5/21 1:32 PM
  **/
-public class JsonRpcServiceBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor, EnvironmentAware {
+public class JsonRpcServiceBeanFactoryPostProcessor implements BeanDefinitionRegistryPostProcessor, EnvironmentAware, ApplicationContextAware {
 
     private final String SERVICE_SUFFIX = "Service";
 
     private Environment environment;
+
+    private ApplicationContext applicationContext;
 
     @Override
     public void setEnvironment(Environment environment) {
@@ -69,15 +73,9 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanDefinitionReg
         BeanDefinition serviceBeanDefinition = findBeanDefinition(defaultListableBeanFactory, beanName);
         try {
             for (Class<?> currentInterface : getBeanInterfaces(serviceBeanDefinition, defaultListableBeanFactory.getBeanClassLoader())) {
-                System.out.println("77777777777");
-                System.out.println(beanName);
-                System.out.println(currentInterface.getName());
-                System.out.println(currentInterface.isAnnotationPresent(JsonRpcService.class));
                 if (currentInterface.isAnnotationPresent(JsonRpcService.class)) {
                     // BeanDefinitionBuilder serviceBuilder = BeanDefinitionBuilder.rootBeanDefinition(getBeanName(beanName));
                     // String key = getPathByBeanName(beanName, SERVICE_SUFFIX);
-                    // System.out.println(key);
-                    // System.out.println(getBeanName(beanName));
                     // defaultListableBeanFactory.registerBeanDefinition(key, serviceBuilder.getBeanDefinition());
 
                     String protocol = environment.getProperty("jsonrpc.server.protocol");
@@ -140,6 +138,11 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanDefinitionReg
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
         ClassPathBeanDefinitionScanner scanner = new JsonRpcServiceClassPathBeanDefinitionScanner(registry);
-        scanner.scan("com.sunquakes.jsonrpc4j");
+        scanner.scan("com.sunquakes");
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

@@ -5,6 +5,7 @@ import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClientHandler;
 import com.sunquakes.jsonrpc4j.client.JsonRpcTcpClientHandler;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.EnvironmentAware;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @Project: jsonrpc4j
@@ -39,19 +41,11 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
         String appClassName = annotationMetadata.getClassName();
-        Class<?> appClass = null;
-        try {
-            appClass = Class.forName(appClassName);
-        } catch (ClassNotFoundException e) {
-            log.error("The import class of JsonRpcClient is not exists.");
-        }
-        String packageName = appClass.getPackage().getName();
 
         ClassPathScanningCandidateComponentProvider classPathScanningCandidateComponentProvider = new ClassPathScanningCandidateComponentProvider(false);
         classPathScanningCandidateComponentProvider.addIncludeFilter(new TypeFilter() {
             @Override
             public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
-
                 Map<String, Object> annotationAttributes = metadataReader
                         .getAnnotationMetadata()
                         .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcClient");
@@ -84,7 +78,25 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
                 }
             }
         });
-        classPathScanningCandidateComponentProvider.findCandidateComponents(packageName);
+        String packageName = appClassName;
+            int end = packageName.lastIndexOf(".");
+        packageName = packageName.substring(0, end);
+        Set<BeanDefinition> beanDefinitionSet = classPathScanningCandidateComponentProvider.findCandidateComponents(packageName);
+        System.out.println("================");
+        System.out.println(beanDefinitionSet);
+        // while (true) {
+        //     int end = packageName.lastIndexOf(".");
+        //     if (end == -1) {
+        //         break;
+        //     }
+        //     packageName = packageName.substring(0, end);
+        //     Set<BeanDefinition> beanDefinitionSet = classPathScanningCandidateComponentProvider.findCandidateComponents(packageName);
+        //     System.out.println("================");
+        //     System.out.println(packageName);
+        //     if (beanDefinitionSet.size() > 0) {
+        //         break;
+        //     }
+        // }
     }
 
     private JsonRpcClientHandlerInterface getJsonRpcClientHandler(String protocol, String url) throws IllegalArgumentException {
