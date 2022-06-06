@@ -5,14 +5,10 @@ import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClientHandler;
 import com.sunquakes.jsonrpc4j.client.JsonRpcTcpClientHandler;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
-import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
@@ -20,30 +16,25 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @Project: jsonrpc4j
  * @Package: com.sunquakes.jsonrpc4j.spring
  * @Author: Robert
- * @CreateTime: 2022/5/21 1:32 PM
+ * @CreateTime: 2022/6/6 9:17 PM
  **/
 @Slf4j
-public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {
+public class JsonRpcClientClassPathScanningCandidateComponentProvider extends ClassPathScanningCandidateComponentProvider {
 
     private Environment environment;
 
-    @Override
-    public void setEnvironment(Environment environment) {
+    private BeanDefinitionRegistry beanDefinitionRegistry;
+
+    public JsonRpcClientClassPathScanningCandidateComponentProvider(boolean useDefaultFilters, Environment environment, BeanDefinitionRegistry beanDefinitionRegistry) {
+        super(useDefaultFilters);
         this.environment = environment;
-    }
-
-    @Override
-    public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
-        String appClassName = annotationMetadata.getClassName();
-
-        ClassPathScanningCandidateComponentProvider classPathScanningCandidateComponentProvider = new ClassPathScanningCandidateComponentProvider(false);
-        classPathScanningCandidateComponentProvider.addIncludeFilter(new TypeFilter() {
+        this.beanDefinitionRegistry = beanDefinitionRegistry;
+        super.addIncludeFilter(new TypeFilter() {
             @Override
             public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
                 Map<String, Object> annotationAttributes = metadataReader
@@ -78,25 +69,6 @@ public class JsonRpcClientImportBeanDefinitionRegistrar implements ImportBeanDef
                 }
             }
         });
-        String packageName = appClassName;
-            int end = packageName.lastIndexOf(".");
-        packageName = packageName.substring(0, end);
-        Set<BeanDefinition> beanDefinitionSet = classPathScanningCandidateComponentProvider.findCandidateComponents(packageName);
-        System.out.println("================");
-        System.out.println(beanDefinitionSet);
-        // while (true) {
-        //     int end = packageName.lastIndexOf(".");
-        //     if (end == -1) {
-        //         break;
-        //     }
-        //     packageName = packageName.substring(0, end);
-        //     Set<BeanDefinition> beanDefinitionSet = classPathScanningCandidateComponentProvider.findCandidateComponents(packageName);
-        //     System.out.println("================");
-        //     System.out.println(packageName);
-        //     if (beanDefinitionSet.size() > 0) {
-        //         break;
-        //     }
-        // }
     }
 
     private JsonRpcClientHandlerInterface getJsonRpcClientHandler(String protocol, String url) throws IllegalArgumentException {

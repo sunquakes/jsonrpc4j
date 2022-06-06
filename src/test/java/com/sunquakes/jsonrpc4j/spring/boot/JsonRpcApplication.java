@@ -11,7 +11,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @CreateTime: 2022/5/30 12:45 PM
  **/
 @SpringBootApplication
-@JsonRpcScan
+@JsonRpcScan({"com.sunquakes"})
 public class JsonRpcApplication {
 
     public static void main(String[] args) {
