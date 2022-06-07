@@ -26,7 +26,6 @@ public class JsonRpcClientInvocationHandler<T> implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodPath = String.format("/%s/%s", service, method.getName());
-        System.out.println(methodPath);
         return jsonRpcClientHandler.handle(methodPath, args);
     }
 }

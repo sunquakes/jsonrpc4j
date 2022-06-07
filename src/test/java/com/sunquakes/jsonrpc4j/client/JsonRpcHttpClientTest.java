@@ -5,13 +5,15 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
+@TestPropertySource("classpath:application-http.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcClientTest {
+public class JsonRpcHttpClientTest {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -20,13 +22,10 @@ public class JsonRpcClientTest {
     public void testHandler() {
         // test http handler
         {
-            // IJsonRpcHttpClient jsonRpcHttpClient = applicationContext.getBean(IJsonRpcHttpClient.class);
-            // assertEquals(jsonRpcHttpClient.add(3, 4), 7);
-            //
-            // IJsonRpcTcpClient jsonRpcTcpClient = applicationContext.getBean(IJsonRpcTcpClient.class);
-            // assertEquals(jsonRpcTcpClient.add(1, 2), 3);
-            // assertEquals(jsonRpcTcpClient.add(3, 4), 7);
-            // assertEquals(jsonRpcTcpClient.add(5, 6), 11);
+            IJsonRpcHttpClient jsonRpcHttpClient = applicationContext.getBean(IJsonRpcHttpClient.class);
+            assertEquals(jsonRpcHttpClient.add(1, 2), 3);
+            assertEquals(jsonRpcHttpClient.add(3, 4), 7);
+            assertEquals(jsonRpcHttpClient.add(5, 6), 11);
         }
     }
 }
