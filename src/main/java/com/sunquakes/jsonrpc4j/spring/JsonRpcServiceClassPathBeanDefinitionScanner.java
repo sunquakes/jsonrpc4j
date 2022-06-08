@@ -31,8 +31,6 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
         addIncludeFilter(new TypeFilter() {
             @Override
             public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
-                // if (annotationAttributes == null)
-                //     return false;
                 Map<String, Object> annotationAttributes;
                 String[] t = metadataReader.getClassMetadata().getInterfaceNames();
                 for (int i = 0; i < t.length; i++) {
@@ -51,7 +49,6 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
     @Override
     protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
         try {
-
             JsonRpcServiceBeanNameGenerator beanNameGenerator = new JsonRpcServiceBeanNameGenerator();
             BeanDefinitionRegistry registry = getRegistry();
             Assert.notEmpty(basePackages, "At least one base package must be specified");

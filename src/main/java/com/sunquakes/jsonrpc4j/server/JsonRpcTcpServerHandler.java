@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,49 +30,55 @@ public class JsonRpcTcpServerHandler implements Runnable {
     @Override
     public void run() {
         try {
-            String init = "";
+            byte[] initBytes = new byte[0];
             InputStream is = socket.getInputStream();
             OutputStream os = socket.getOutputStream();
             String packageEof = "\r\n";
-            int packageEofLength = packageEof.length();
+            byte[] packageEofBytes = packageEof.getBytes();
+            int packageEofBytesLength = packageEofBytes.length;
             while (!socket.isClosed()) {
                 byte[] buffer = new byte[10];
                 int bufferLength = buffer.length;
                 int len;
 
-                StringBuffer sb = new StringBuffer(init);
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                byteArrayOutputStream.write(initBytes);
+                byte[] bytes = byteArrayOutputStream.toByteArray();
+
                 // If more than one delimiter is received at a time
-                int i = sb.indexOf(packageEof);
+                int i = ByteArrayUtils.strstr(bytes, packageEofBytes);
                 if (i != -1) {
-                    sb.substring(0, i);
-                    if (i + packageEofLength < sb.length()) {
-                        init = sb.substring(i + packageEofLength);
+                    if (i + packageEofBytesLength < bytes.length) {
+                        initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
                     } else {
-                        init = "";
+                        initBytes = new byte[0];
                     }
+                    bytes = Arrays.copyOfRange(bytes, 0, i);
                 } else {
                     while ((len = is.read(buffer)) != -1) {
                         if (bufferLength == len) {
-                            sb.append(new String(buffer));
+                            byteArrayOutputStream.write(buffer);
                         } else {
                             byte[] end = Arrays.copyOfRange(buffer, 0, len);
-                            sb.append(new String(end));
+                            byteArrayOutputStream.write(end);
                         }
-                        i = sb.indexOf(packageEof);
+                        bytes = byteArrayOutputStream.toByteArray();
+                        i = ByteArrayUtils.strstr(bytes, packageEofBytes);
                         if (i != -1) {
-                            sb.substring(0, i);
-                            if (i + packageEofLength < sb.length()) {
-                                init = sb.substring(i + packageEofLength);
+                            if (i + packageEofBytesLength < bytes.length) {
+                                initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
                             } else {
-                                init = "";
+                                initBytes = new byte[0];
                             }
+                            bytes = Arrays.copyOfRange(bytes, 0, i);
                             break;
                         }
                     }
                 }
-                if (sb.length() > 0) {
+                if (bytes.length > 0) {
                     JsonRpcServerHandler jsonRpcServerHandler = new JsonRpcServerHandler(applicationContext);
-                    Object res = jsonRpcServerHandler.handle(sb.substring(0, sb.length() - packageEofLength));
+                    System.out.println(new String(bytes));
+                    Object res = jsonRpcServerHandler.handle(new String(bytes));
                     byte[] output = ByteArrayUtils.merge(JSON.toJSONBytes(res), packageEof.getBytes());
                     os.write(output);
                     os.flush();

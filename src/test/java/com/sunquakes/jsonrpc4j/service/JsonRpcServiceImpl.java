@@ -11,4 +11,9 @@ public class JsonRpcServiceImpl implements IJsonRpcService {
     public Integer sub(int a, int b) {
         return a - b;
     }
+
+    @Override
+    public String splice(String a, String b) {
+        return a + b;
+    }
 }
