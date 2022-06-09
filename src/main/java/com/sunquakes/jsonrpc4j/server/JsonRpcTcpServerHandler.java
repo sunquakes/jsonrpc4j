@@ -77,7 +77,6 @@ public class JsonRpcTcpServerHandler implements Runnable {
                 }
                 if (bytes.length > 0) {
                     JsonRpcServerHandler jsonRpcServerHandler = new JsonRpcServerHandler(applicationContext);
-                    System.out.println(new String(bytes));
                     Object res = jsonRpcServerHandler.handle(new String(bytes));
                     byte[] output = ByteArrayUtils.merge(JSON.toJSONBytes(res), packageEof.getBytes());
                     os.write(output);

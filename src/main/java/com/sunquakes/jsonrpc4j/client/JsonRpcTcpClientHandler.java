@@ -2,8 +2,8 @@ package com.sunquakes.jsonrpc4j.client;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
+import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
-import lombok.Synchronized;
 import org.apache.commons.pool2.ObjectPool;
 
 import java.io.*;
@@ -24,7 +24,7 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 
     private String url;
 
-    private String init = "";
+    private byte[] initBytes = new byte[0];
 
     public JsonRpcTcpClientHandler(String url) {
         this.url = url;
@@ -46,7 +46,9 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
         bw.write((request + packageEof));
         bw.flush();
 
-        StringBuffer sb = new StringBuffer(init);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byteArrayOutputStream.write(initBytes);
+        byte[] bytes = byteArrayOutputStream.toByteArray();
 
         byte[] buffer = new byte[packageMaxLength];
         int bufferLength = buffer.length;
@@ -56,35 +58,39 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
         String packageEof = "\r\n";
         int packageEofLength = packageEof.length();
 
-        int i = sb.indexOf(packageEof);
+        byte[] packageEofBytes = packageEof.getBytes();
+        int packageEofBytesLength = packageEofBytes.length;
+
+        int i = ByteArrayUtils.strstr(bytes, packageEofBytes);
         if (i != -1) {
-            sb.substring(0, i);
-            if (i + packageEofLength < sb.length()) {
-                init = sb.substring(i + packageEofLength);
+            if (i + packageEofBytesLength < bytes.length) {
+                initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
             } else {
-                init = "";
+                initBytes = new byte[0];
             }
+            bytes = Arrays.copyOfRange(bytes, 0, i);
         } else {
             while ((len = is.read(buffer)) != -1) {
                 if (bufferLength == len) {
-                    sb.append(new String(buffer));
+                    byteArrayOutputStream.write(buffer);
                 } else {
                     byte[] end = Arrays.copyOfRange(buffer, 0, len);
-                    sb.append(new String(end));
+                    byteArrayOutputStream.write(end);
                 }
-                i = sb.indexOf(packageEof);
+                bytes = byteArrayOutputStream.toByteArray();
+                i = ByteArrayUtils.strstr(bytes, packageEofBytes);
                 if (i != -1) {
-                    sb.substring(0, i);
-                    if (i + packageEofLength < sb.length()) {
-                        init = sb.substring(i + packageEofLength);
+                    if (i + packageEofBytesLength < bytes.length) {
+                        initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
                     } else {
-                        init = "";
+                        initBytes = new byte[0];
                     }
+                    bytes = Arrays.copyOfRange(bytes, 0, i);
                     break;
                 }
             }
         }
-        ResponseDto responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
+        ResponseDto responseDto = JSONObject.parseObject(new String(bytes), ResponseDto.class);
         return responseDto.getResult();
     }
 
