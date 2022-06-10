@@ -8,6 +8,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
+
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -16,16 +21,22 @@ import static org.junit.Assert.assertEquals;
 public class JsonRpcHttpClientTest {
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private IJsonRpcHttpClient jsonRpcHttpClient;
 
     @Test
     public void testHandler() {
         // test http handler
-        {
-            IJsonRpcHttpClient jsonRpcHttpClient = applicationContext.getBean(IJsonRpcHttpClient.class);
-            assertEquals(jsonRpcHttpClient.add(1, 2), 3);
-            assertEquals(jsonRpcHttpClient.add(3, 4), 7);
-            assertEquals(jsonRpcHttpClient.add(5, 6), 11);
-        }
+        assertEquals(jsonRpcHttpClient.add(1, 2), 3);
+        assertEquals(jsonRpcHttpClient.add(3, 4), 7);
+        assertEquals(jsonRpcHttpClient.add(5, 6), 11);
+    }
+
+    @Test
+    public void testLongParams() {
+        InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
+        String text1 = new BufferedReader(new InputStreamReader(text1IS)).lines().collect(Collectors.joining(System.lineSeparator()));
+        InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
+        String text2 = new BufferedReader(new InputStreamReader(text2IS)).lines().collect(Collectors.joining(System.lineSeparator()));
+        assertEquals(text1 + text2, jsonRpcHttpClient.splice(text1, text2));
     }
 }

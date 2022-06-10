@@ -5,6 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import org.springframework.context.ApplicationContext;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,11 +34,12 @@ public class JsonRpcHttpServerHandler implements HttpHandler {
             out.close();
         }
         InputStream is = httpExchange.getRequestBody();
-        StringBuilder sb = new StringBuilder();
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         for (int ch; (ch = is.read()) != -1; ) {
-            sb.append((char) ch);
+            byteArrayOutputStream.write(ch);
         }
-        String request = sb.toString();
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        String request = new String(bytes);
         JsonRpcServerHandler jsonRpcServerHandler = new JsonRpcServerHandler(applicationContext);
         Object res = jsonRpcServerHandler.handle(request);
         byte[] output = JSON.toJSONBytes(res);

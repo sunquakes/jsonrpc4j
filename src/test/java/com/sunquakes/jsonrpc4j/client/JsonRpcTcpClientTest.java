@@ -24,24 +24,23 @@ public class JsonRpcTcpClientTest {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private IJsonRpcTcpClient jsonRpcTcpClient;
+
     @Test
     public void testHandler() {
         // test tcp handler
-        {
-            IJsonRpcTcpClient jsonRpcTcpClient = applicationContext.getBean(IJsonRpcTcpClient.class);
-            assertEquals(jsonRpcTcpClient.add(1, 2), 3);
-            assertEquals(jsonRpcTcpClient.add(3, 4), 7);
-            assertEquals(jsonRpcTcpClient.add(5, 6), 11);
-        }
+        assertEquals(jsonRpcTcpClient.add(1, 2), 3);
+        assertEquals(jsonRpcTcpClient.add(3, 4), 7);
+        assertEquals(jsonRpcTcpClient.add(5, 6), 11);
     }
 
     @Test
     public void testLongParams() {
-        IJsonRpcTcpClient jsonRpcTcpClient = applicationContext.getBean(IJsonRpcTcpClient.class);
         InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
         String text1 = new BufferedReader(new InputStreamReader(text1IS)).lines().collect(Collectors.joining(System.lineSeparator()));
         InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
         String text2 = new BufferedReader(new InputStreamReader(text2IS)).lines().collect(Collectors.joining(System.lineSeparator()));
-        assertEquals("你我", jsonRpcTcpClient.splice("你", "我"));
+        assertEquals(text1 + text2, jsonRpcTcpClient.splice(text1, text2));
     }
 }
