@@ -27,17 +27,20 @@ public class JsonRpcTcpServerHandler implements Runnable {
 
     private Socket socket;
 
+    private TcpServerOption tcpServerOption;
+
     @Override
     public void run() {
         try {
             byte[] initBytes = new byte[0];
             InputStream is = socket.getInputStream();
             OutputStream os = socket.getOutputStream();
-            String packageEof = "\r\n";
+            String packageEof = tcpServerOption.getPackageEof();
+            int bufferSize = tcpServerOption.getPackageMaxLength();
             byte[] packageEofBytes = packageEof.getBytes();
             int packageEofBytesLength = packageEofBytes.length;
             while (!socket.isClosed()) {
-                byte[] buffer = new byte[10];
+                byte[] buffer = new byte[bufferSize];
                 int bufferLength = buffer.length;
                 int len;
 

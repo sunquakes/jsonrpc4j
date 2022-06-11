@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -18,6 +19,12 @@ import static org.junit.Assert.assertEquals;
 @TestPropertySource("classpath:application-tcp.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcTcpServerTest {
+
+    @Value("${jsonrpc.server.package-eof}")
+    private String packageEof;
+
+    @Value("${jsonrpc.server.package-max-length}")
+    private int packageMaxLength;
 
     @Test
     public void testHandle() throws IOException {
@@ -35,20 +42,19 @@ public class JsonRpcTcpServerTest {
             // 包装输入输出流
             OutputStream os = s.getOutputStream();
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os));
-            bw.write((request + "\r\n"));
+            bw.write((request + packageEof));
             bw.flush();
             os = s.getOutputStream();
             bw = new BufferedWriter(new OutputStreamWriter(os));
-            bw.write((request + "\r\n"));
+            bw.write((request + packageEof));
             bw.flush();
             StringBuffer sb = new StringBuffer();
-            byte[] buffer = new byte[4096];
+            byte[] buffer = new byte[packageMaxLength];
             int bufferLength = buffer.length;
             int len;
             InputStream is = s.getInputStream();
 
             String init = "";
-            String packageEof = "\r\n";
             int packageEofLength = packageEof.length();
 
             int i = sb.indexOf(packageEof);

@@ -18,9 +18,7 @@ import java.util.Arrays;
  **/
 public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 
-    private String packageEof = RequestUtils.TCP_PACKAGE_EOF;
-
-    private int packageMaxLength = RequestUtils.TCP_PACKAG_MAX_LENGHT;
+    private TcpClientOption option;
 
     private String url;
 
@@ -32,6 +30,9 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 
     @Override
     public Object handle(String method, Object[] args) throws Exception {
+        String packageEof = option.getPackageEof();
+        int packageMaxLength = option.getPackageMaxLength();
+
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
@@ -54,9 +55,6 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
         int bufferLength = buffer.length;
         int len;
         InputStream is = s.getInputStream();
-
-        String packageEof = "\r\n";
-        int packageEofLength = packageEof.length();
 
         byte[] packageEofBytes = packageEof.getBytes();
         int packageEofBytesLength = packageEofBytes.length;
@@ -94,13 +92,8 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
         return responseDto.getResult();
     }
 
-    public JsonRpcTcpClientHandler setPackageEof(String packageEof) {
-        this.packageEof = packageEof;
-        return this;
-    }
-
-    public JsonRpcTcpClientHandler setPackageMaxLength(int packageMaxLength) {
-        this.packageMaxLength = packageMaxLength;
+    public JsonRpcTcpClientHandler setOption(TcpClientOption option) {
+        this.option = option;
         return this;
     }
 }

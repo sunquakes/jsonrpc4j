@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.spring;
 import com.sunquakes.jsonrpc4j.client.JsonRpcClientHandlerInterface;
 import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClientHandler;
 import com.sunquakes.jsonrpc4j.client.JsonRpcTcpClientHandler;
+import com.sunquakes.jsonrpc4j.client.TcpClientOption;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -74,8 +75,8 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
     private JsonRpcClientHandlerInterface getJsonRpcClientHandler(String protocol, String url) throws IllegalArgumentException {
         if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
             String packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
-            int packageEofLength = Integer.valueOf(environment.getProperty("jsonrpc.client.package-max-length", String.valueOf(RequestUtils.TCP_PACKAG_MAX_LENGHT)));
-            return new JsonRpcTcpClientHandler(url).setPackageEof(packageEof).setPackageMaxLength(packageEofLength);
+            int packageMaxLength = Integer.valueOf(environment.getProperty("jsonrpc.client.package-max-length", String.valueOf(RequestUtils.TCP_PACKAG_MAX_LENGHT)));
+            return new JsonRpcTcpClientHandler(url).setOption(new TcpClientOption(packageEof, packageMaxLength));
         } else {
             return new JsonRpcHttpClientHandler(url);
         }
