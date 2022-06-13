@@ -1,6 +1,9 @@
 package com.sunquakes.jsonrpc4j.client;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.sunquakes.jsonrpc4j.ErrorEnum;
+import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
@@ -88,7 +91,16 @@ public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
                 }
             }
         }
-        ResponseDto responseDto = JSONObject.parseObject(new String(bytes), ResponseDto.class);
+        String body = new String(bytes);
+        ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
+        // Throw exception if there is error in response.
+        if (responseDto.getResult() == null) {
+            JSONObject bodyJSON = JSON.parseObject(body);
+            if (bodyJSON.containsKey("error")) {
+                ErrorDto errorDto = JSONObject.parseObject(bodyJSON.getString("error"), ErrorDto.class);
+                throw ErrorEnum.getException(errorDto.getCode(), errorDto.getMessage());
+            }
+        }
         return responseDto.getResult();
     }
 

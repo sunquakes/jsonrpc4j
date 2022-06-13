@@ -2,12 +2,12 @@ package com.sunquakes.jsonrpc4j.exception;
 
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 
-public class InvalidParamsException extends Exception {
+public class InvalidParamsException extends RuntimeException {
 
     private int code;
 
     public InvalidParamsException() {
-        super(ErrorEnum.InvalidParams.getText());
+        this(ErrorEnum.InvalidParams.getText());
     }
 
     public InvalidParamsException(String message) {

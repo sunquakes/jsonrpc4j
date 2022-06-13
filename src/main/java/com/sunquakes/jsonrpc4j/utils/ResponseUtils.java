@@ -22,10 +22,10 @@ public class ResponseUtils {
     public Object error(String id, int code, String message) {
         if (id == null) {
             ErrorDto errorDto = new ErrorDto(code, ErrorEnum.getTextByCode(code), message);
-            return new ErrorResponseDto(id, JSONRPC, errorDto);
+            return new ErrorNotifyResponseDto(JSONRPC, errorDto);
         } else {
             ErrorDto errorDto = new ErrorDto(code, ErrorEnum.getTextByCode(code), message);
-            return new ErrorNotifyResponseDto(JSONRPC, errorDto);
+            return new ErrorResponseDto(id, JSONRPC, errorDto);
         }
     }
 

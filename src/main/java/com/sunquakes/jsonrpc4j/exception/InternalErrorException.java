@@ -2,12 +2,12 @@ package com.sunquakes.jsonrpc4j.exception;
 
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 
-public class InternalErrorException extends Exception {
+public class InternalErrorException extends RuntimeException {
 
     private int code;
 
     public InternalErrorException() {
-        super(ErrorEnum.InternalError.getText());
+        this(ErrorEnum.InternalError.getText());
     }
 
     public InternalErrorException(String message) {

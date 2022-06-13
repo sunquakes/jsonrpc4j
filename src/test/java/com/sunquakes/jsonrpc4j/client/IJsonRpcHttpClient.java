@@ -8,4 +8,6 @@ public interface IJsonRpcHttpClient {
     int add(int a, int b);
 
     String splice(String a, String b);
+
+    int methodNotFount();
 }

@@ -9,6 +9,7 @@ import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import com.sunquakes.jsonrpc4j.utils.ResponseUtils;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.InvocationTargetException;
@@ -68,6 +69,9 @@ public class JsonRpcServerHandler {
                     break;
                 }
             }
+            if (m == null) {
+                throw new MethodNotFoundException();
+            }
             Parameter[] paramsReflect = m.getParameters();
             String[] paramNames = new String[paramsReflect.length];
             if (params != null) {
@@ -78,7 +82,7 @@ public class JsonRpcServerHandler {
             Object[] paramArr = RequestUtils.parseParams(params, paramNames);
             Object result = m.invoke(clazz, paramArr);
             return ResponseUtils.success(id, result);
-        } catch (InvocationTargetException | IllegalAccessException e) {
+        } catch (InvocationTargetException | IllegalAccessException | BeansException e) {
             return ResponseUtils.error(id, ErrorEnum.MethodNotFound.getCode());
         } catch (InvalidParamsException e) {
             return ResponseUtils.error(id, e.getCode(), e.getMessage());

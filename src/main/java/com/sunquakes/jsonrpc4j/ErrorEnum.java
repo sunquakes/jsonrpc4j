@@ -1,5 +1,7 @@
 package com.sunquakes.jsonrpc4j;
 
+import com.sunquakes.jsonrpc4j.exception.*;
+
 public enum ErrorEnum {
 
     ParseError(-32700, "Parse error"),
@@ -33,5 +35,32 @@ public enum ErrorEnum {
             }
         }
         return null;
+    }
+
+    public static Exception getException(int code, String message) {
+        Exception e;
+        switch (code) {
+            case -32700:
+                e = new ParseErrorException(message);
+                break;
+            case -32600:
+                e = new InvalidRequestException(message);
+                break;
+            case -32601:
+                e = new MethodNotFoundException(message);
+                break;
+            case -32602:
+                e = new InvalidParamsException(message);
+                break;
+            case -32603:
+                e = new InternalErrorException(message);
+                break;
+            case -32000:
+                e = new CustomErrorException(message);
+                break;
+            default:
+                e = new Exception(message);
+        }
+        return e;
     }
 }
