@@ -39,4 +39,21 @@ public class JsonRpcHttpServerTest {
         HttpResponse response = httpClient.execute(httpPost);
         assertEquals(EntityUtils.toString(response.getEntity()), "{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}");
     }
+
+    @Test
+    public void testMethod() throws IOException {
+        JSONObject params = new JSONObject();
+        params.put("a", 3);
+        params.put("b", 4);
+        JSONObject request = new JSONObject();
+        request.put("id", "1234567890");
+        request.put("jsonrpc", "2.0");
+        request.put("method", "json_rpc/add");
+        request.put("params", params);
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        HttpPost httpPost = new HttpPost("http://localhost:3200");
+        httpPost.setEntity(new StringEntity(request.toString(), ContentType.APPLICATION_JSON));
+        HttpResponse response = httpClient.execute(httpPost);
+        assertEquals(EntityUtils.toString(response.getEntity()), "{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":7}");
+    }
 }
