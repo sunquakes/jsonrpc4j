@@ -5,5 +5,6 @@
     <bean class="com.sunquakes.jsonrpc4j.client.JsonRpcConfig"/>
     <bean class="com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler"/>
     <bean class="com.sunquakes.jsonrpc4j.service.JsonRpcServiceImpl"/>
+    <bean class="com.sunquakes.jsonrpc4j.service.JsonRpc3ServiceImpl"/>
     <bean class="com.sunquakes.jsonrpc4j.spring.JsonRpcServiceBeanFactoryPostProcessor"/>
 </beans>

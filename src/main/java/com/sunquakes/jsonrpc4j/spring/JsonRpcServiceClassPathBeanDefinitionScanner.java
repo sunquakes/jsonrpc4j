@@ -12,6 +12,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
@@ -49,7 +50,6 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
     @Override
     protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
         try {
-            JsonRpcServiceBeanNameGenerator beanNameGenerator = new JsonRpcServiceBeanNameGenerator();
             BeanDefinitionRegistry registry = getRegistry();
             Assert.notEmpty(basePackages, "At least one base package must be specified");
             Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
@@ -63,9 +63,9 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                 .getAnnotationMetadata()
                                 .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");
                         if (annotationAttributes != null) {
-                            String beanName = beanNameGenerator.generateBeanName(candidate, registry);
-                            if (checkCandidate(beanName, candidate)) {
-                                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+                            String customBeanName = annotationAttributes.get("value").toString();
+                            if (StringUtils.hasLength(customBeanName) && checkCandidate(customBeanName, candidate)) {
+                                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, customBeanName);
                                 beanDefinitions.add(definitionHolder);
                                 registerBeanDefinition(definitionHolder, registry);
                             }

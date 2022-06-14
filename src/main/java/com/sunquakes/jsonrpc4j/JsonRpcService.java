@@ -13,5 +13,5 @@ public @interface JsonRpcService {
      * The name of the server;
      * @return
      */
-    String value() default "";
+    String value();
 }

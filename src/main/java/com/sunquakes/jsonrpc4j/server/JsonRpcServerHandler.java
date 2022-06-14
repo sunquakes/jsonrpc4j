@@ -8,7 +8,6 @@ import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
 import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import com.sunquakes.jsonrpc4j.utils.ResponseUtils;
-import com.sunquakes.jsonrpc4j.utils.StringUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -61,7 +60,7 @@ public class JsonRpcServerHandler {
         }
         try {
             String[] methodArr = RequestUtils.parseMethod(method);
-            String className = StringUtils.formatClassName(methodArr[0]);
+            String className = methodArr[0];
             Object clazz = applicationContext.getBean(className);
             Method[] methods = clazz.getClass().getMethods();
             Method m = null;
