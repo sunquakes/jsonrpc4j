@@ -14,13 +14,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
-
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.client
- * @Author: Robert
- * @CreateTime: 2022/5/21 1:32 PM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since : 2022/5/21 1:32 PM
  **/
 public class JsonRpcHttpClientHandler implements JsonRpcClientHandlerInterface {
 

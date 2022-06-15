@@ -11,7 +11,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 public @interface JsonRpcService {
     /**
      * The name of the server;
-     * @return
+     * @return the server name
      */
     String value();
 }

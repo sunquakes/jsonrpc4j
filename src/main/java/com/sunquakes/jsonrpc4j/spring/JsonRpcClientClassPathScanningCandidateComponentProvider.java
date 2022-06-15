@@ -19,10 +19,9 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.spring
- * @Author: Robert
- * @CreateTime: 2022/6/6 9:17 PM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since: 2022/6/6 9:17 PM
  **/
 @Slf4j
 public class JsonRpcClientClassPathScanningCandidateComponentProvider extends ClassPathScanningCandidateComponentProvider {

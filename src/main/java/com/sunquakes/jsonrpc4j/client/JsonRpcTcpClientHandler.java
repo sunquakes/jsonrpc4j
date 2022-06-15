@@ -14,10 +14,9 @@ import java.net.Socket;
 import java.util.Arrays;
 
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.client
- * @Author: Robert
- * @CreateTime: 2022/5/24 12:43 PM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since : 2022/5/24 12:43 PM
  **/
 public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 

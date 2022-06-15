@@ -10,10 +10,9 @@ import org.springframework.core.env.Environment;
 import java.lang.annotation.Annotation;
 
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.spring
- * @Author: Robert
- * @CreateTime: 2022/6/1 1:04 PM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since : 2022/6/1 1:04 PM
  **/
 public class JsonRpcServerInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 

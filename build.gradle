@@ -58,3 +58,5 @@ dependencies {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"
     }
 }
+
+apply from: 'publishing.gradle'

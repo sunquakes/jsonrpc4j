@@ -7,10 +7,9 @@ import org.springframework.beans.factory.FactoryBean;
 import java.lang.reflect.Proxy;
 
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.spring
- * @Author: Robert
- * @CreateTime: 2022/5/21 1:32 PM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since : 2022/5/21 1:32 PM
  **/
 public class JsonRpcClientFactoryBean<T> implements FactoryBean<T> {
 

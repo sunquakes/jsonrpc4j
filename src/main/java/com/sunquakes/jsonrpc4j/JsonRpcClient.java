@@ -12,13 +12,13 @@ public @interface JsonRpcClient {
 
     /**
      * The name of the client;
-     * @return
+     * @return the client name
      */
     String value() default "";
 
     /**
      * The protocol of the client request to server;
-     * @return
+     * @return the client protocol
      */
     String protocol() default "http";
 
@@ -26,7 +26,7 @@ public @interface JsonRpcClient {
      * The server url of the client request to server;
      * Include IP and port;
      * The format of url is 127.0.0.1:3200 or www.sunquakes.com
-     * @return
+     * @return the server url
      */
     String url();
 

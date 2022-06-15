@@ -4,10 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.server
- * @Author: Robert
- * @CreateTime: 2022/6/11 9:00 AM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since : 2022/6/11 9:00 AM
  **/
 @Data
 @AllArgsConstructor

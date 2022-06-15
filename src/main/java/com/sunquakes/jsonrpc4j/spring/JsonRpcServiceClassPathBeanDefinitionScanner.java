@@ -20,10 +20,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.spring
- * @Author: Robert
- * @CreateTime: 2022/6/2 1:19 PM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since : 2022/6/2 1:19 PM
  **/
 public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 

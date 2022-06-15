@@ -1,0 +1,62 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+    classifier = 'sources'
+}
+
+task javadocJar(type: Jar) {
+    from javadoc
+    classifier = 'javadoc'
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact sourcesJar
+            artifact javadocJar
+            pom {
+                name = 'jsonrpc4j'
+                description = 'Package java-jsonrpc provides a client and server implementation of JSON-RPC 2.0🚀'
+                url = 'https://github.com/sunquakes/jsonrpc4j'
+                licenses {
+                    license {
+                        name = 'The MIT License (MIT)'
+                        url = 'https://mit-license.org/'
+                    }
+                }
+                developers {
+                    developer {
+                        name = 'Robert'
+                        email = 'sunquakes@outlook.com'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/sunquakes/jsonrpc4j'
+                    connection = 'scm:git:git://github.com:sunquakes/jsonrpc4j.git'
+                    developerConnection = 'scm:git:ssh://git@github.com:sunquakes/jsonrpc4j.git'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+javadoc {
+    // <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    options.addStringOption("charset", "UTF-8")
+}

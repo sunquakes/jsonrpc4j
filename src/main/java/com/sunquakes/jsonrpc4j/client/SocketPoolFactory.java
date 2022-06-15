@@ -8,10 +8,9 @@ import java.net.Socket;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.utils
- * @Author: Robert
- * @CreateTime: 2022/5/28 7:24 PM
+ * @author : Robert, sunquakes@outlook.com
+ * @version : 1.0.0
+ * @since : 2022/5/28 7:24 PM
  **/
 @UtilityClass
 public class SocketPoolFactory {
