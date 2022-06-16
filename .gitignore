@@ -4,3 +4,4 @@ build/*
 .idea/*
 gradle.properties
 secret.gpg
+.DS_Store
