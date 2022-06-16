@@ -86,7 +86,9 @@ public class JsonRpcTest {
     @Autowired
     private IJsonRpcClient jsonRpcClient;
 
-    public int add() { 
+    public int add() {
+        // data sent: {"id":"691bbf41-e992-4f45-9c0d-1eeb0b088698","jsonrpc":"2.0","method":"json_rpc/add","params":{"a":3,"b":4}}
+        // data received: {"id":"691bbf41-e992-4f45-9c0d-1eeb0b088698","jsonrpc":"2.0","result":7}
         return jsonRpcClient.add(1, 2); // the result is 3
     }
 }
