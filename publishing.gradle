@@ -20,7 +20,11 @@ publishing {
             pom {
                 name = 'jsonrpc4j'
                 description = 'Package java-jsonrpc provides a client and server implementation of JSON-RPC 2.0🚀'
-                url = 'https://github.com/sunquakes/jsonrpc4j'
+                url = 'https://www.sunquakes.com'
+                organization {
+                    name = 'sunquakes'
+                    url = 'https://www.sunquakes.com'
+                }
                 licenses {
                     license {
                         name = 'The MIT License (MIT)'

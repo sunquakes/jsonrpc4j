@@ -77,7 +77,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
             int packageMaxLength = Integer.valueOf(environment.getProperty("jsonrpc.client.package-max-length", String.valueOf(RequestUtils.TCP_PACKAG_MAX_LENGHT)));
             return new JsonRpcTcpClientHandler(url).setOption(new TcpClientOption(packageEof, packageMaxLength));
         } else {
-            return new JsonRpcHttpClientHandler(url);
+            return new JsonRpcHttpClientHandler(protocol, url);
         }
     }
 }

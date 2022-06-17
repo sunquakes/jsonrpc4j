@@ -67,12 +67,13 @@ public class JsonRpcServiceImpl implements IJsonRpcService {
 }
 ```
 ### step4. Configuring client
+- Add configuration items to application.properties
 ```properties
 # Symbol for the end of data request once.
 jsonrpc.client.package-eof=\r\n
 ```
 ### step5. Create client interface
-- Create a new interface file named IJsonRpcClient with @JsonRpcClient, if the protocol is http, the url should be "http://localhost:3200"
+- Create a new interface file named IJsonRpcClient with @JsonRpcClient, protocol value can be tcp or http or https.
 ```java
 @JsonRpcClient(value = "JsonRpc", protocol = "tcp", url = "localhost:3200")
 public interface IJsonRpcClient {

@@ -24,6 +24,7 @@ public class RequestUtils {
 
     public String PROTOCOL_TCP = "tcp";
     public String PROTOCOL_HTTP = "http";
+    public String PROTOCOL_HTTPS = "https";
 
     public String TCP_PACKAGE_EOF = "\r\n";
     public int TCP_PACKAG_MAX_LENGHT = 2 * 1024 * 1024;

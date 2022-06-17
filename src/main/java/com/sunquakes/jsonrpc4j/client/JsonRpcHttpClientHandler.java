@@ -23,8 +23,12 @@ public class JsonRpcHttpClientHandler implements JsonRpcClientHandlerInterface {
 
     private String url;
 
-    public JsonRpcHttpClientHandler(String url) {
-        this.url = url;
+    public JsonRpcHttpClientHandler(String protocol, String url) {
+        if (url.substring(0, 4).equals(RequestUtils.PROTOCOL_HTTP)) {
+            this.url = url;
+        } else {
+            this.url = String.format("%s://%s", protocol, url);
+        }
     }
 
     @Override
