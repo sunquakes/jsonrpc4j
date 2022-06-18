@@ -16,7 +16,7 @@ plugins {
 }
 
 group 'com.sunquakes'
-version '1.0.0'
+version '1.0.1'
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
@@ -33,7 +33,6 @@ test {
     testLogging {
         events "passed", "skipped", "failed"
     }
-
 }
 
 dependencies {
