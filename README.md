@@ -1,3 +1,6 @@
+English | [🇨🇳中文](README_ZH.md)
+
+---
 # jsonrpc4j
 ## Installing
 - maven
@@ -50,9 +53,9 @@ jsonrpc.server.package-eof=\r\n
 jsonrpc.server.package-max-length=2097152
 ```
 ### step3. Create service interface and class
-- Create a new interface file named IJsonRpcService with @JsonRpcService
+- Create a new interface file named IJsonRpcService with @JsonRpcService, value is the name of the service
 ```java
-@JsonRpcService("JsonRpc")
+@JsonRpcService(value = "JsonRpc")
 public interface IJsonRpcService {
     int add(int a, int b);
 }
@@ -73,7 +76,7 @@ public class JsonRpcServiceImpl implements IJsonRpcService {
 jsonrpc.client.package-eof=\r\n
 ```
 ### step5. Create client interface
-- Create a new interface file named IJsonRpcClient with @JsonRpcClient, protocol value can be tcp or http or https.
+- Create a new interface file named IJsonRpcClient with @JsonRpcClient, protocol can be tcp or http or https and should be same as item(jsonrpc.server.protocol) of step2, value must be same as the value of step3.
 ```java
 @JsonRpcClient(value = "JsonRpc", protocol = "tcp", url = "localhost:3200")
 public interface IJsonRpcClient {
