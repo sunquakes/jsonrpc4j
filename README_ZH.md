@@ -1,6 +1,4 @@
 [English](README.md) | 🇨🇳中文
-
----
 # jsonrpc4j
 ## 安装
 - maven

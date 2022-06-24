@@ -1,6 +1,4 @@
 English | [🇨🇳中文](README_ZH.md)
-
----
 # jsonrpc4j
 ## Installing
 - maven
