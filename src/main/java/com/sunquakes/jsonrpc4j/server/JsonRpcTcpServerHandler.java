@@ -38,42 +38,74 @@ public class JsonRpcTcpServerHandler implements Runnable {
             int bufferSize = tcpServerOption.getPackageMaxLength();
             byte[] packageEofBytes = packageEof.getBytes();
             int packageEofBytesLength = packageEofBytes.length;
+            byte[] buffer = new byte[bufferSize];
             while (!socket.isClosed()) {
-                byte[] buffer = new byte[bufferSize];
-                int bufferLength = buffer.length;
                 int len;
 
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 byteArrayOutputStream.write(initBytes);
                 byte[] bytes = byteArrayOutputStream.toByteArray();
 
-                // If more than one delimiter is received at a time
-                int i = ByteArrayUtils.strstr(bytes, packageEofBytes);
-                if (i != -1) {
-                    if (i + packageEofBytesLength < bytes.length) {
-                        initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
-                    } else {
-                        initBytes = new byte[0];
-                    }
-                    bytes = Arrays.copyOfRange(bytes, 0, i);
-                } else {
+                // If the length of the data is smaller than package EOF's length, read stream to the OutputStream only.
+                if (bytes.length < packageEofBytesLength) {
+                    int endIndex = 0;
                     while ((len = is.read(buffer)) != -1) {
-                        if (bufferLength == len) {
+                        if (bufferSize == len) {
                             byteArrayOutputStream.write(buffer);
                         } else {
                             byte[] end = Arrays.copyOfRange(buffer, 0, len);
                             byteArrayOutputStream.write(end);
                         }
                         bytes = byteArrayOutputStream.toByteArray();
-                        i = ByteArrayUtils.strstr(bytes, packageEofBytes);
-                        if (i != -1) {
-                            if (i + packageEofBytesLength < bytes.length) {
-                                initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
-                            } else {
-                                initBytes = new byte[0];
+
+                        if (bytes.length > packageEofBytesLength) {
+                            if (endIndex == 0) {
+                                endIndex = packageEofBytesLength;
                             }
-                            bytes = Arrays.copyOfRange(bytes, 0, i);
-                            break;
+                            int i = ByteArrayUtils.strstr(bytes, packageEofBytes, endIndex - packageEofBytesLength);
+                            if (i != -1) {
+                                if (i + packageEofBytesLength < bytes.length) {
+                                    initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
+                                } else {
+                                    initBytes = new byte[0];
+                                }
+                                bytes = Arrays.copyOfRange(bytes, 0, i);
+                                break;
+                            }
+                        }
+                        endIndex += len;
+                    }
+                } else {
+                    // If more than one delimiter is received at a time
+                    int i = ByteArrayUtils.strstr(bytes, packageEofBytes);
+                    if (i != -1) {
+                        if (i + packageEofBytesLength < bytes.length) {
+                            initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
+                        } else {
+                            initBytes = new byte[0];
+                        }
+                        bytes = Arrays.copyOfRange(bytes, 0, i);
+                    } else {
+                        int endIndex = bytes.length;
+                        while ((len = is.read(buffer)) != -1) {
+                            if (bufferSize == len) {
+                                byteArrayOutputStream.write(buffer);
+                            } else {
+                                byte[] end = Arrays.copyOfRange(buffer, 0, len);
+                                byteArrayOutputStream.write(end);
+                            }
+                            bytes = byteArrayOutputStream.toByteArray();
+                            i = ByteArrayUtils.strstr(bytes, packageEofBytes, endIndex - packageEofBytesLength);
+                            if (i != -1) {
+                                if (i + packageEofBytesLength < bytes.length) {
+                                    initBytes = Arrays.copyOfRange(bytes, i + packageEofBytesLength, bytes.length);
+                                } else {
+                                    initBytes = new byte[0];
+                                }
+                                bytes = Arrays.copyOfRange(bytes, 0, i);
+                                break;
+                            }
+                            endIndex += len;
                         }
                     }
                 }
