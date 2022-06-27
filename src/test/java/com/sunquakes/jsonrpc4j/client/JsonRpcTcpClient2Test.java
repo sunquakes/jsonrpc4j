@@ -3,6 +3,8 @@ package com.sunquakes.jsonrpc4j.client;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -14,7 +16,6 @@ import java.io.InputStreamReader;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -23,6 +24,8 @@ import static org.junit.Assert.assertEquals;
 @TestPropertySource("classpath:application-tcp2.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcTcpClient2Test {
+
+    private static final Logger logger = LoggerFactory.getLogger(JsonRpcTcpClient2Test.class);
 
     @Autowired
     private IJsonRpcTcpClient2 jsonRpcTcpClient2;
@@ -62,7 +65,7 @@ public class JsonRpcTcpClient2Test {
                 @Override
                 public void run() {
                     try {
-                        assertEquals(text1 + text2, jsonRpcTcpClient2.splice(text1, text2));
+                        assertEquals(3, jsonRpcTcpClient2.add(1, 2));
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
