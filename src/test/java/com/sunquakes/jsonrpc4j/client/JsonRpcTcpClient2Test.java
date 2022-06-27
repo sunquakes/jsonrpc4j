@@ -1,9 +1,9 @@
 package com.sunquakes.jsonrpc4j.client;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -11,6 +11,10 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -23,6 +27,17 @@ public class JsonRpcTcpClient2Test {
     @Autowired
     private IJsonRpcTcpClient2 jsonRpcTcpClient2;
 
+    private String text1;
+    private String text2;
+
+    @Before
+    public void beforeTest() {
+        InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
+        text1 = new BufferedReader(new InputStreamReader(text1IS)).lines().collect(Collectors.joining(System.lineSeparator()));
+        InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
+        text2 = new BufferedReader(new InputStreamReader(text2IS)).lines().collect(Collectors.joining(System.lineSeparator()));
+    }
+
     @Test
     public void testHandler() {
         // test tcp handler
@@ -33,10 +48,30 @@ public class JsonRpcTcpClient2Test {
 
     @Test
     public void testLongParams() {
-        InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
-        String text1 = new BufferedReader(new InputStreamReader(text1IS)).lines().collect(Collectors.joining(System.lineSeparator()));
-        InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
-        String text2 = new BufferedReader(new InputStreamReader(text2IS)).lines().collect(Collectors.joining(System.lineSeparator()));
         assertEquals(text1 + text2, jsonRpcTcpClient2.splice(text1, text2));
+    }
+
+    @Test
+    public void testMultithreading() throws InterruptedException {
+        int co = 10;
+        int total = 100;
+        CountDownLatch countDownLatch = new CountDownLatch(total);
+        ExecutorService pool = Executors.newFixedThreadPool(co);
+        for (int i = 0; i < total; i++) {
+            pool.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        assertEquals(text1 + text2, jsonRpcTcpClient2.splice(text1, text2));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        countDownLatch.countDown();
+                    }
+                }
+            });
+        }
+        countDownLatch.await();
+        pool.shutdown();
     }
 }
