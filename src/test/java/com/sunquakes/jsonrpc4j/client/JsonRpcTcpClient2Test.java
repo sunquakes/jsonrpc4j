@@ -25,8 +25,6 @@ import static org.junit.Assert.assertEquals;
 @ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcTcpClient2Test {
 
-    private static final Logger logger = LoggerFactory.getLogger(JsonRpcTcpClient2Test.class);
-
     @Autowired
     private IJsonRpcTcpClient2 jsonRpcTcpClient2;
 

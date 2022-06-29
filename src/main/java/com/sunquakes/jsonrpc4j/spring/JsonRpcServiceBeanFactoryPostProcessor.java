@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.spring;
 import com.sunquakes.jsonrpc4j.JsonRpcService;
 import com.sunquakes.jsonrpc4j.ProtocolEnum;
 import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
+import com.sunquakes.jsonrpc4j.server.JsonRpcNettyServer;
 import com.sunquakes.jsonrpc4j.server.JsonRpcTcpServer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -55,7 +56,7 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
         if (protocol != null && port != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
             BeanDefinitionBuilder serverBuilder;
             if (protocol.equals(ProtocolEnum.Tcp.getName())) {
-                serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
+                serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcNettyServer.class);
             } else if (protocol.equals(ProtocolEnum.Http.getName())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
             } else {

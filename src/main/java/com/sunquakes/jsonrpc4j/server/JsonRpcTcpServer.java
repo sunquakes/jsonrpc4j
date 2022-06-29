@@ -16,6 +16,7 @@ import java.util.concurrent.Executors;
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM
  **/
+@Deprecated
 public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean {
 
     @Value("${jsonrpc.server.port}")
@@ -51,6 +52,7 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
     }
 }
 
+@Deprecated
 class ServerThread extends Thread {
 
     private ApplicationContext applicationContext;
