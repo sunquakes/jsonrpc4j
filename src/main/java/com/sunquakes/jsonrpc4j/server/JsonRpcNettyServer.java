@@ -64,6 +64,7 @@ public class JsonRpcNettyServer extends JsonRpcServer implements InitializingBea
                     sb.group(bossGroup, workerGroup)
                             .channel(NioServerSocketChannel.class)
                             .option(ChannelOption.SO_BACKLOG, poolMaxActive)
+                            .option(ChannelOption.SO_RCVBUF, packageMaxLength)
                             .childOption(ChannelOption.SO_KEEPALIVE, true)
                             .childHandler(new ChannelInitializer<SocketChannel>() {  // 绑定客户端连接时候触发操作
                                 @Override
@@ -71,7 +72,7 @@ public class JsonRpcNettyServer extends JsonRpcServer implements InitializingBea
                                     sh.pipeline()
                                             .addLast(new ByteArrayDecoder())
                                             .addLast(new ByteArrayEncoder())
-                                            .addLast(new JsonRpcNettyServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive)), new byte[0]));
+                                            .addLast(new JsonRpcNettyServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
                                 }
                             });
                     ChannelFuture future = null;
