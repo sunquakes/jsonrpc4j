@@ -58,6 +58,7 @@ public class JsonRpcNettyServerHandler extends ChannelInboundHandlerAdapter {
                 Object res = jsonRpcServerHandler.handle(new String(bytes));
                 byte[] output = ByteArrayUtils.merge(JSON.toJSONBytes(res), packageEof.getBytes());
                 ctx.writeAndFlush(output);
+                bytes = initBytes;
             }
         }
     }
