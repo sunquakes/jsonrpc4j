@@ -19,14 +19,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 /**
  * @author : Robert, sunquakes@outlook.com
  * @version : 2.0.0
  * @since : 2022/6/28 9:05 PM
  **/
 @Slf4j
-public class JsonRpcNettyServer extends JsonRpcServer implements InitializingBean {
+public class JsonRpcNettyTcpServer extends JsonRpcServer implements InitializingBean {
 
     @Value("${jsonrpc.server.port}")
     private int port;
@@ -72,7 +71,7 @@ public class JsonRpcNettyServer extends JsonRpcServer implements InitializingBea
                                     sh.pipeline()
                                             .addLast(new ByteArrayDecoder())
                                             .addLast(new ByteArrayEncoder())
-                                            .addLast(new JsonRpcNettyServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
+                                            .addLast(new JsonRpcNettyTcpServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
                                 }
                             });
                     ChannelFuture future = null;

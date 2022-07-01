@@ -1,34 +1,15 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.JsonRpcService;
 import com.sunquakes.jsonrpc4j.ProtocolEnum;
 import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
-import com.sunquakes.jsonrpc4j.server.JsonRpcNettyServer;
-import com.sunquakes.jsonrpc4j.server.JsonRpcTcpServer;
+import com.sunquakes.jsonrpc4j.server.JsonRpcNettyTcpServer;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
 import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static java.lang.String.format;
-import static org.springframework.util.ClassUtils.forName;
-import static org.springframework.util.ClassUtils.getAllInterfacesForClass;
 
 /**
  * @author : Robert, sunquakes@outlook.com
@@ -56,7 +37,7 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
         if (protocol != null && port != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
             BeanDefinitionBuilder serverBuilder;
             if (protocol.equals(ProtocolEnum.Tcp.getName())) {
-                serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcNettyServer.class);
+                serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcNettyTcpServer.class);
             } else if (protocol.equals(ProtocolEnum.Http.getName())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
             } else {

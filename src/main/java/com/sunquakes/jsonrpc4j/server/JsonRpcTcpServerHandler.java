@@ -14,10 +14,12 @@ import java.net.Socket;
 import java.util.Arrays;
 
 /**
+ * @deprecated use {@link JsonRpcNettyTcpServerHandler} instead.
  * @author : Robert, sunquakes@outlook.com
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM
  **/
+@Deprecated
 @Slf4j
 @AllArgsConstructor
 public class JsonRpcTcpServerHandler implements Runnable {

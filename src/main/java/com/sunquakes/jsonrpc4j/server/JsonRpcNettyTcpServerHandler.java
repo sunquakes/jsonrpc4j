@@ -14,7 +14,7 @@ import java.util.Arrays;
  * @version : 2.0.0
  * @since : 2022/6/28 9:30 PM
  **/
-public class JsonRpcNettyServerHandler extends ChannelInboundHandlerAdapter {
+public class JsonRpcNettyTcpServerHandler extends ChannelInboundHandlerAdapter {
 
     private ApplicationContext applicationContext;
 
@@ -22,7 +22,7 @@ public class JsonRpcNettyServerHandler extends ChannelInboundHandlerAdapter {
 
     private byte[] initBytes = new byte[0];
 
-    public JsonRpcNettyServerHandler(ApplicationContext applicationContext, TcpServerOption tcpServerOption) {
+    public JsonRpcNettyTcpServerHandler(ApplicationContext applicationContext, TcpServerOption tcpServerOption) {
         this.applicationContext = applicationContext;
         this.tcpServerOption = tcpServerOption;
     }

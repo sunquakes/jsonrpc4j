@@ -1,10 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.ProtocolEnum;
-import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
-import com.sunquakes.jsonrpc4j.server.JsonRpcTcpServer;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;

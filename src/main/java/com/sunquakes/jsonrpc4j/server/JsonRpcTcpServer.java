@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
+ * @deprecated use {@link JsonRpcNettyTcpServer} instead.
  * @author : Robert, sunquakes@outlook.com
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM

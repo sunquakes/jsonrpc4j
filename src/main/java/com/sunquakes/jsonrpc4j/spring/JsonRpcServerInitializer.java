@@ -1,13 +1,8 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-
-import java.lang.annotation.Annotation;
 
 /**
  * @author : Robert, sunquakes@outlook.com
