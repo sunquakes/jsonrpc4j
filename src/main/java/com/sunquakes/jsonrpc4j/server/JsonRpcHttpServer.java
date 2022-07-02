@@ -9,10 +9,12 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 /**
+ * @deprecated use {@link JsonRpcNettyHttpServer} instead.
  * @author : Robert, sunquakes@outlook.com
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM
  **/
+@Deprecated
 public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean {
 
     @Value("${jsonrpc.server.port}")

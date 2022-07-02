@@ -11,10 +11,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
+ * @deprecated use {@link JsonRpcNettyHttpServerHandler} instead.
  * @author : Robert, sunquakes@outlook.com
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM
  **/
+@Deprecated
 public class JsonRpcHttpServerHandler implements HttpHandler {
 
     private ApplicationContext applicationContext;
