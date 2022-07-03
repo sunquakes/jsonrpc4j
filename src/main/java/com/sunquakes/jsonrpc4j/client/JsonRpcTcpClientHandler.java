@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
+import com.sunquakes.jsonrpc4j.server.JsonRpcNettyHttpServerHandler;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import org.apache.commons.pool2.ObjectPool;
@@ -14,10 +15,12 @@ import java.net.Socket;
 import java.util.Arrays;
 
 /**
+ * @deprecated use {@link JsonRpcNettyTcpClient} instead.
  * @author : Robert, sunquakes@outlook.com
  * @version : 1.0.0
  * @since : 2022/5/24 12:43 PM
  **/
+@Deprecated
 public class JsonRpcTcpClientHandler implements JsonRpcClientHandlerInterface {
 
     private TcpClientOption option;

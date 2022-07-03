@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
  * @since : 2022/5/21 1:32 PM
  **/
 @Slf4j
-public class JsonRpcClientInvocationHandler<T> implements InvocationHandler {
+public class  JsonRpcClientInvocationHandler<T> implements InvocationHandler {
 
     private JsonRpcClientHandlerInterface jsonRpcClientHandler;
 

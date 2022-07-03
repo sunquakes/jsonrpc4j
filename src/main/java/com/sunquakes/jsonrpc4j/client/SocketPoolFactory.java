@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version : 1.0.0
  * @since : 2022/5/28 7:24 PM
  **/
+@Deprecated
 @UtilityClass
 public class SocketPoolFactory {
 

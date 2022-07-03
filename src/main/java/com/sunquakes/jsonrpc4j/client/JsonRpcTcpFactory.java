@@ -11,6 +11,7 @@ import java.net.Socket;
  * @version : 1.0.0
  * @since : 2022/5/28 10:44 AM
  **/
+@Deprecated
 public class JsonRpcTcpFactory extends BasePooledObjectFactory<Socket> {
 
     private Integer DEFAULT_PORT = 80;
