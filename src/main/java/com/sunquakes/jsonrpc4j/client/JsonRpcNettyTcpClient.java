@@ -1,6 +1,10 @@
 package com.sunquakes.jsonrpc4j.client;
 
+import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.sunquakes.jsonrpc4j.ErrorEnum;
+import com.sunquakes.jsonrpc4j.dto.ErrorDto;
+import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -27,7 +31,7 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
 
     private JsonRpcNettyTcpClientHandler jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler();
 
-    private TcpClientOption option;
+    private TcpClientOption tcpClientOption;
 
     private String url;
 
@@ -40,7 +44,9 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
 
     @Override
     public Object handle(String method, Object[] args) throws Exception {
-        String packageEof = option.getPackageEof();
+        String packageEof = tcpClientOption.getPackageEof();
+
+        jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler();
 
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
@@ -50,31 +56,37 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
         String msg = request + packageEof;
 
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        try {
-            Bootstrap bootstrap = new Bootstrap();
-            bootstrap.group(eventLoopGroup)
-                    .channel(NioSocketChannel.class)
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline()
-                                    .addLast(new ByteArrayDecoder())
-                                    .addLast(new ByteArrayEncoder())
-                                    .addLast(jsonRpcNettyTcpClientHandler);
-                        }
-                    });
-            bootstrap.connect(IP, PORT).sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.group(eventLoopGroup)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline()
+                                .addLast(new ByteArrayDecoder())
+                                .addLast(new ByteArrayEncoder())
+                                .addLast(jsonRpcNettyTcpClientHandler);
+                    }
+                });
+        bootstrap.connect(IP, PORT).sync();
         ChannelPromise channelPromise = jsonRpcNettyTcpClientHandler.send(msg);
         channelPromise.await();
-        return jsonRpcNettyTcpClientHandler.getData();
+        String body = new String(jsonRpcNettyTcpClientHandler.getData());
+        ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
+        if (responseDto.getResult() == null) {
+            JSONObject bodyJSON = JSON.parseObject(body);
+            if (bodyJSON.containsKey("error")) {
+                ErrorDto errorDto = JSONObject.parseObject(bodyJSON.getString("error"), ErrorDto.class);
+                throw ErrorEnum.getException(errorDto.getCode(), errorDto.getMessage());
+            }
+        }
+        return responseDto.getResult();
     }
 
-    public JsonRpcNettyTcpClient setOption(TcpClientOption option) {
-        this.option = option;
+    public JsonRpcNettyTcpClient setOption(TcpClientOption tcpClientOption) {
+        this.tcpClientOption = tcpClientOption;
+        this.jsonRpcNettyTcpClientHandler.setOption(tcpClientOption);
         return this;
     }
 
