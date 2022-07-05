@@ -15,6 +15,8 @@ import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.SynchronousQueue;
+
 /**
  * @author : Robert, sunquakes@outlook.com
  * @version : 2.0.0
@@ -46,8 +48,6 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
     public Object handle(String method, Object[] args) throws Exception {
         String packageEof = tcpClientOption.getPackageEof();
 
-        jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler();
-
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
@@ -69,10 +69,10 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
                                 .addLast(jsonRpcNettyTcpClientHandler);
                     }
                 });
-        bootstrap.connect(IP, PORT).sync();
-        ChannelPromise channelPromise = jsonRpcNettyTcpClientHandler.send(msg);
-        channelPromise.await();
-        String body = new String(jsonRpcNettyTcpClientHandler.getData());
+        Channel channel = bootstrap.connect(IP, PORT).sync().channel();
+
+        SynchronousQueue<Object> queue = jsonRpcNettyTcpClientHandler.send(request, channel);
+        String body = (String) queue.take();
         ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
         if (responseDto.getResult() == null) {
             JSONObject bodyJSON = JSON.parseObject(body);
@@ -86,7 +86,7 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
 
     public JsonRpcNettyTcpClient setOption(TcpClientOption tcpClientOption) {
         this.tcpClientOption = tcpClientOption;
-        this.jsonRpcNettyTcpClientHandler.setOption(tcpClientOption);
+        jsonRpcNettyTcpClientHandler.setOption(tcpClientOption);
         return this;
     }
 
