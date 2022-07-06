@@ -31,14 +31,10 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
 
     private Integer PORT;
 
-    private JsonRpcNettyTcpClientHandler jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler();
-
     private TcpClientOption tcpClientOption;
 
-    private String url;
-
-    public JsonRpcNettyTcpClient(String url) {
-        this.url = url;
+    public JsonRpcNettyTcpClient(String url, TcpClientOption tcpClientOption) {
+        this.tcpClientOption = tcpClientOption;
         Object[] ipPort = getIpPort(url);
         IP = (String) ipPort[0];
         PORT = (Integer) ipPort[1];
@@ -46,14 +42,13 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
 
     @Override
     public Object handle(String method, Object[] args) throws Exception {
-        String packageEof = tcpClientOption.getPackageEof();
+        JsonRpcNettyTcpClientHandler jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler(tcpClientOption);
 
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
         request.put("method", method);
         request.put("params", args);
-        String msg = request + packageEof;
 
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
@@ -82,12 +77,6 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
             }
         }
         return responseDto.getResult();
-    }
-
-    public JsonRpcNettyTcpClient setOption(TcpClientOption tcpClientOption) {
-        this.tcpClientOption = tcpClientOption;
-        jsonRpcNettyTcpClientHandler.setOption(tcpClientOption);
-        return this;
     }
 
     private Object[] getIpPort(String url) {

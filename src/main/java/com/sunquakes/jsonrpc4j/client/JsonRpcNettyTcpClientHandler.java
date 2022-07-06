@@ -1,9 +1,6 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.sunquakes.jsonrpc4j.ErrorEnum;
-import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import io.netty.buffer.ByteBuf;
@@ -11,14 +8,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelPromise;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author : Robert, sunquakes@outlook.com
@@ -29,37 +25,28 @@ import java.util.concurrent.TimeUnit;
 @Sharable
 public class JsonRpcNettyTcpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private byte[] data;
-
     private byte[] initBytes = new byte[0];
 
     private TcpClientOption tcpClientOption;
 
     private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
-    ChannelHandlerContext channelHandlerContext;
-
-    @Override
-    public void channelActive(ChannelHandlerContext channelHandlerContext) throws Exception {
-        super.channelActive(channelHandlerContext);
-        this.channelHandlerContext = channelHandlerContext;
+    public JsonRpcNettyTcpClientHandler(TcpClientOption tcpClientOption) {
+        this.tcpClientOption = tcpClientOption;
     }
 
     public synchronized SynchronousQueue<Object> send(JSONObject request, Channel channel) {
         String message = request.toJSONString() + tcpClientOption.getPackageEof();
-        ByteBuf byteBuf = channelHandlerContext.alloc().buffer(4 * message.length());
+        ByteBuf byteBuf = channel.alloc().buffer(tcpClientOption.getPackageMaxLength());
         byteBuf.writeBytes(message.getBytes());
         SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
         queueMap.put(request.getString("id"), synchronousQueue);
-        channelHandlerContext.writeAndFlush(byteBuf);
+        channel.writeAndFlush(byteBuf);
         return synchronousQueue;
     }
 
-    public byte[] getData() {
-        return data;
-    }
-
     @Override
+    @Synchronized
     public void channelRead(ChannelHandlerContext channelHandlerContext, Object msg) throws Exception {
         byte[] msgBytes = (byte[]) msg;
 
@@ -91,7 +78,6 @@ public class JsonRpcNettyTcpClientHandler extends ChannelInboundHandlerAdapter {
                 break;
             }
             if (bytes.length > 0) {
-                this.data = bytes;
                 String body = new String(bytes);
                 ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
                 String id = responseDto.getId();
@@ -101,10 +87,5 @@ public class JsonRpcNettyTcpClientHandler extends ChannelInboundHandlerAdapter {
                 bytes = initBytes;
             }
         }
-    }
-
-    public JsonRpcNettyTcpClientHandler setOption(TcpClientOption tcpClientOption) {
-        this.tcpClientOption = tcpClientOption;
-        return this;
     }
 }
