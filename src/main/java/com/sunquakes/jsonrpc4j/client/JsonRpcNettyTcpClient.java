@@ -14,7 +14,9 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.ObjectPool;
 
+import java.net.Socket;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -27,33 +29,26 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
 
     private Integer DEFAULT_PORT = 80;
 
-    private String IP;
-
-    private Integer PORT;
+    private String url;
 
     private TcpClientOption tcpClientOption;
 
+    private JsonRpcNettyTcpClientHandler jsonRpcNettyTcpClientHandler;
+
     public JsonRpcNettyTcpClient(String url, TcpClientOption tcpClientOption) {
+        jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler(tcpClientOption);
         this.tcpClientOption = tcpClientOption;
-        Object[] ipPort = getIpPort(url);
-        IP = (String) ipPort[0];
-        PORT = (Integer) ipPort[1];
+        this.url = url;
     }
 
     @Override
     public Object handle(String method, Object[] args) throws Exception {
-        JsonRpcNettyTcpClientHandler jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler(tcpClientOption);
-
-        JSONObject request = new JSONObject();
-        request.put("id", RequestUtils.getId());
-        request.put("jsonrpc", RequestUtils.JSONRPC);
-        request.put("method", method);
-        request.put("params", args);
 
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_RCVBUF, tcpClientOption.getPackageMaxLength())
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .handler(new ChannelInitializer<SocketChannel>() {
                     @Override
@@ -64,7 +59,15 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
                                 .addLast(jsonRpcNettyTcpClientHandler);
                     }
                 });
-        Channel channel = bootstrap.connect(IP, PORT).sync().channel();
+
+        ObjectPool<Channel> pool = JsonRpcNettyChannelPoolFactory.getPool(url, new JsonRpcNettyChannelFactory(url, bootstrap));
+        Channel channel = pool.borrowObject();
+
+        JSONObject request = new JSONObject();
+        request.put("id", RequestUtils.getId());
+        request.put("jsonrpc", RequestUtils.JSONRPC);
+        request.put("method", method);
+        request.put("params", args);
 
         SynchronousQueue<Object> queue = jsonRpcNettyTcpClientHandler.send(request, channel);
         String body = (String) queue.take();
@@ -77,17 +80,5 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
             }
         }
         return responseDto.getResult();
-    }
-
-    private Object[] getIpPort(String url) {
-        String[] ipPort = url.split(":");
-        String ip = ipPort[0];
-        Integer port;
-        if (ipPort.length < 2) {
-            port = DEFAULT_PORT;
-        } else {
-            port = Integer.valueOf(ipPort[1]);
-        }
-        return new Object[]{ip, port};
     }
 }

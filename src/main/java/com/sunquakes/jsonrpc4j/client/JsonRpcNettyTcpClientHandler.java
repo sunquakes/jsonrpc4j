@@ -35,6 +35,7 @@ public class JsonRpcNettyTcpClientHandler extends ChannelInboundHandlerAdapter {
         this.tcpClientOption = tcpClientOption;
     }
 
+    @Synchronized
     public synchronized SynchronousQueue<Object> send(JSONObject request, Channel channel) {
         String message = request.toJSONString() + tcpClientOption.getPackageEof();
         ByteBuf byteBuf = channel.alloc().buffer(tcpClientOption.getPackageMaxLength());
@@ -47,7 +48,7 @@ public class JsonRpcNettyTcpClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     @Synchronized
-    public void channelRead(ChannelHandlerContext channelHandlerContext, Object msg) throws Exception {
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         byte[] msgBytes = (byte[]) msg;
 
         String packageEof = tcpClientOption.getPackageEof();
