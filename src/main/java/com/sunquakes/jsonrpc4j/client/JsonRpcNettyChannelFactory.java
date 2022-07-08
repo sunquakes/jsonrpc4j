@@ -20,22 +20,15 @@ public class JsonRpcNettyChannelFactory extends BasePooledObjectFactory<Channel>
 
     private Integer DEFAULT_PORT = 80;
 
-    private String IP;
-
-    private Integer PORT;
-
     private Bootstrap bootstrap;
 
-    public JsonRpcNettyChannelFactory(String url, Bootstrap bootstrap) {
+    public JsonRpcNettyChannelFactory(Bootstrap bootstrap) {
         this.bootstrap = bootstrap;
-        Object[] ipPort = getIpPort(url);
-        IP = (String) ipPort[0];
-        PORT = (Integer) ipPort[1];
     }
 
     @Override
     public Channel create() throws Exception {
-        return bootstrap.connect(IP, PORT).sync().channel();
+        return bootstrap.connect().sync().channel();
     }
 
     @Override
