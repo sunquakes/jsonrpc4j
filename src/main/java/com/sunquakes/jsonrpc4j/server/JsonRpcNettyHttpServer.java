@@ -1,6 +1,5 @@
 package com.sunquakes.jsonrpc4j.server;
 
-import com.sun.net.httpserver.HttpServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -9,16 +8,13 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.bytes.ByteArrayDecoder;
-import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -28,6 +24,7 @@ import java.util.concurrent.Executors;
  * @version : 2.0.0
  * @since : 2022/7/2 12:32 PM
  **/
+@Slf4j
 public class JsonRpcNettyHttpServer extends JsonRpcServer implements InitializingBean {
 
     @Value("${jsonrpc.server.port}")
@@ -61,14 +58,14 @@ public class JsonRpcNettyHttpServer extends JsonRpcServer implements Initializin
                                             .addLast(new JsonRpcNettyHttpServerHandler(applicationContext));
                                 }
                             });
-                    ChannelFuture future = null;
+                    ChannelFuture future;
                     future = sb.bind(port).sync();
                     countDownLatch.countDown();
 
                     if (future.isSuccess()) {
-                        System.out.println("Server startup successfully.");
+                        log.info("JsonRpc http server startup successfully.");
                     } else {
-                        System.out.println("Server startup failed.");
+                        log.info("JsonRpc http server startup failed.");
                         future.cause().printStackTrace();
                         bossGroup.shutdownGracefully();
                         workerGroup.shutdownGracefully();

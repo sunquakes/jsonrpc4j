@@ -32,7 +32,7 @@ public class JsonRpcNettyHttpClientHandler extends ChannelInboundHandlerAdapter 
     private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
     @Synchronized
-    public synchronized SynchronousQueue<Object> send(JSONObject data, Channel channel) throws UnsupportedEncodingException {
+    public synchronized SynchronousQueue<Object> send(JSONObject data, Channel channel) {
         SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
         queueMap.put(data.getString("id"), synchronousQueue);
 
@@ -46,12 +46,8 @@ public class JsonRpcNettyHttpClientHandler extends ChannelInboundHandlerAdapter 
         buffer.readableBytes();
         request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
 
-        try {
-            channel.writeAndFlush(request).sync();
-            channel.closeFuture().sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        channel.writeAndFlush(request);
+        channel.closeFuture();
         return synchronousQueue;
     }
 

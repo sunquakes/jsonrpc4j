@@ -74,14 +74,14 @@ public class JsonRpcNettyTcpServer extends JsonRpcServer implements Initializing
                                             .addLast(new JsonRpcNettyTcpServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
                                 }
                             });
-                    ChannelFuture future = null;
+                    ChannelFuture future;
                     future = sb.bind(port).sync();
                     countDownLatch.countDown();
 
                     if (future.isSuccess()) {
-                        System.out.println("Server startup successfully.");
+                        log.info("JsonRpc tcp server startup successfully.");
                     } else {
-                        System.out.println("Server startup failed.");
+                        log.info("JsonRpc tcp server startup failed.");
                         future.cause().printStackTrace();
                         bossGroup.shutdownGracefully();
                         workerGroup.shutdownGracefully();

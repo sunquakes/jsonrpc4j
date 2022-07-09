@@ -16,6 +16,9 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.ObjectPool;
 
@@ -34,6 +37,8 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
 
     private Integer DEFAULT_HTTPS_PORT = 443;
 
+    private String protocol;
+
     private String url;
 
     private String IP;
@@ -44,6 +49,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
 
     public JsonRpcNettyHttpClient(String protocol, String url) {
         jsonRpcNettyHttpClientHandler = new JsonRpcNettyHttpClientHandler();
+        this.protocol = protocol;
         this.url = url;
         Object[] ipPort = getIpPort(protocol, url);
         IP = (String) ipPort[0];
@@ -67,6 +73,10 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
                                 .addLast("http-encoder", new HttpRequestEncoder())
                                 .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
                                 .addLast(jsonRpcNettyHttpClientHandler);
+                        if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+                            SslContext context = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                            ch.pipeline().addLast(context.newHandler(ch.alloc()));
+                        }
                     }
                 });
 
@@ -97,7 +107,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
         String ip = ipPort[0];
         Integer port;
         if (ipPort.length < 2) {
-            if (protocol == "https") {
+            if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
                 port = DEFAULT_HTTPS_PORT;
             } else {
                 port = DEFAULT_HTTP_PORT;
