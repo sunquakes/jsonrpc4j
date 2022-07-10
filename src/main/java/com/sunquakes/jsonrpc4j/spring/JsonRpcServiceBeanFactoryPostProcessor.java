@@ -39,7 +39,7 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
             BeanDefinitionBuilder serverBuilder;
             if (protocol.equals(ProtocolEnum.Tcp.getName())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcNettyTcpServer.class);
-            } else if (protocol.equals(ProtocolEnum.Http.getName())) {
+            } else if (protocol.equals(ProtocolEnum.Http.getName()) || protocol.equals(ProtocolEnum.Https.getName())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcNettyHttpServer.class);
             } else {
                 throw new IllegalArgumentException("Invalid protocol.");

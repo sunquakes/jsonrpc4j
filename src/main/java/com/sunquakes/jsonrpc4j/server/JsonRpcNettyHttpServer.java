@@ -1,5 +1,6 @@
 package com.sunquakes.jsonrpc4j.server;
 
+import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -11,10 +12,27 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.ResourceUtils;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLEngine;
+import javax.net.ssl.SSLException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,15 +45,40 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class JsonRpcNettyHttpServer extends JsonRpcServer implements InitializingBean {
 
+    @Value("${jsonrpc.server.ssl.key-store}")
+    private String sslKeyStore;
+
+    @Value("${jsonrpc.server.ssl.key-store-type}")
+    private String sslKeyStoreType;
+
+    @Value("${jsonrpc.server.ssl.key-store-password}")
+    private String sslKeyStorePassword;
+
+    @Value("${jsonrpc.server.protocol}")
+    private String protocol;
+
     @Value("${jsonrpc.server.port}")
     private int port;
 
     @Value("${jsonrpc.server.pool.max-active:168}")
     private int poolMaxActive;
 
-    public void start() throws InterruptedException {
+    public void start() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, CertificateException {
+        SslContext sslContext = null;
+        if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+            InputStream sslInputStream = getClass().getResourceAsStream(sslKeyStore);
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            KeyStore keyStore = KeyStore.getInstance(sslKeyStoreType);
+            keyStore.load(sslInputStream, sslKeyStorePassword.toCharArray());
+            keyManagerFactory.init(keyStore, sslKeyStorePassword.toCharArray());
+            sslContext = SslContextBuilder.forServer(keyManagerFactory).build();
+        }
+
         CountDownLatch countDownLatch = new CountDownLatch(1);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        final SslContext finalSslContext = sslContext;
+
         executorService.submit(new Runnable() {
             @Override
             public void run() {
@@ -56,6 +99,10 @@ public class JsonRpcNettyHttpServer extends JsonRpcServer implements Initializin
                                             .addLast("http-encoder", new HttpResponseEncoder())
                                             .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
                                             .addLast(new JsonRpcNettyHttpServerHandler(applicationContext));
+                                    if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+                                        SSLEngine engine = finalSslContext.newEngine(sh.alloc());
+                                        sh.pipeline().addFirst("ssl", new SslHandler(engine));
+                                    }
                                 }
                             });
                     ChannelFuture future;

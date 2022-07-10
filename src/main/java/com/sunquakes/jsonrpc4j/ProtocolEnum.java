@@ -3,7 +3,8 @@ package com.sunquakes.jsonrpc4j;
 public enum ProtocolEnum {
 
     Tcp("tcp"),
-    Http("http");
+    Http("http"),
+    Https("https");
 
     private String name;
 
