@@ -12,6 +12,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.ssl.OptionalSslHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.SslHandler;
@@ -94,15 +96,13 @@ public class JsonRpcNettyHttpServer extends JsonRpcServer implements Initializin
                             .childHandler(new ChannelInitializer<SocketChannel>() {
                                 @Override
                                 protected void initChannel(SocketChannel sh) throws Exception {
+                                    if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+                                        sh.pipeline().addLast(new OptionalSslHandler(finalSslContext));
+                                    }
                                     sh.pipeline()
-                                            .addLast("http-decoder", new HttpRequestDecoder())
-                                            .addLast("http-encoder", new HttpResponseEncoder())
+                                            .addLast("codec", new HttpServerCodec())
                                             .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
                                             .addLast(new JsonRpcNettyHttpServerHandler(applicationContext));
-                                    if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-                                        SSLEngine engine = finalSslContext.newEngine(sh.alloc());
-                                        sh.pipeline().addFirst("ssl", new SslHandler(engine));
-                                    }
                                 }
                             });
                     ChannelFuture future;

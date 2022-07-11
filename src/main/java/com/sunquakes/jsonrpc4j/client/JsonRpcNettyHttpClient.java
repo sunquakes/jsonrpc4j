@@ -16,6 +16,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder;
+import io.netty.handler.ssl.OptionalSslHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -74,8 +75,9 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
                                 .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
                                 .addLast(jsonRpcNettyHttpClientHandler);
                         if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-                            SslContext context = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-                            ch.pipeline().addLast(context.newHandler(ch.alloc()));
+                            SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                            ch.pipeline().addLast(new OptionalSslHandler(sslContext));
+                            // ch.pipeline().addLast(sslContext.newHandler(ch.alloc()));
                         }
                     }
                 });
