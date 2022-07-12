@@ -1,7 +1,6 @@
 package com.sunquakes.jsonrpc4j.client;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -20,8 +19,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.SSLContext;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,31 +40,31 @@ public class JsonRpcHttpsClientTest {
     @Autowired
     private IJsonRpcHttpsClient jsonRpcHttpsClient;
 
-    // @Test
-    // public void testRequest() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
-    //     JSONObject params = new JSONObject();
-    //     params.put("a", 1);
-    //     params.put("b", 2);
-    //     JSONObject request = new JSONObject();
-    //     request.put("id", "1234567890");
-    //     request.put("jsonrpc", "2.0");
-    //     request.put("method", "JsonRpc/add");
-    //     request.put("params", params);
-    //
-    //     SSLContextBuilder builder = new SSLContextBuilder();
-    //     builder.loadTrustMaterial(null, new TrustStrategy() {
-    //         @Override
-    //         public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-    //             return true;
-    //         }
-    //     });
-    //     SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(), new String[]{"TLSv1", "TLSv1.2"}, null, NoopHostnameVerifier.INSTANCE);
-    //     CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-    //     HttpPost httpPost = new HttpPost("https://127.0.0.1:3205");
-    //     httpPost.setEntity(new StringEntity(request.toString(), ContentType.APPLICATION_JSON));
-    //     HttpResponse response = httpClient.execute(httpPost);
-    //     assertEquals(EntityUtils.toString(response.getEntity()), "{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}");
-    // }
+    @Test
+    public void testRequest() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+        JSONObject params = new JSONObject();
+        params.put("a", 1);
+        params.put("b", 2);
+        JSONObject request = new JSONObject();
+        request.put("id", "1234567890");
+        request.put("jsonrpc", "2.0");
+        request.put("method", "JsonRpc/add");
+        request.put("params", params);
+
+        SSLContextBuilder builder = new SSLContextBuilder();
+        builder.loadTrustMaterial(null, new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                return true;
+            }
+        });
+        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        HttpPost httpPost = new HttpPost("https://localhost:3205");
+        httpPost.setEntity(new StringEntity(request.toString(), ContentType.APPLICATION_JSON));
+        HttpResponse response = httpClient.execute(httpPost);
+        assertEquals(EntityUtils.toString(response.getEntity()), "{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}");
+    }
 
     @Test
     public void testHandler() {

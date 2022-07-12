@@ -14,8 +14,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.multipart.HttpPostRequestEncoder;
+import io.netty.handler.codec.http.HttpClientCodec;
+import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.OptionalSslHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -70,14 +70,12 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
                     @Override
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ch.pipeline()
-                                .addLast("http-decoder", new HttpResponseDecoder())
-                                .addLast("http-encoder", new HttpRequestEncoder())
+                                .addLast("codec", new HttpClientCodec())
                                 .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
                                 .addLast(jsonRpcNettyHttpClientHandler);
                         if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
                             SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
                             ch.pipeline().addLast(new OptionalSslHandler(sslContext));
-                            // ch.pipeline().addLast(sslContext.newHandler(ch.alloc()));
                         }
                     }
                 });
@@ -90,7 +88,6 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
         request.put("jsonrpc", RequestUtils.JSONRPC);
         request.put("method", method);
         request.put("params", args);
-
         SynchronousQueue<Object> queue = jsonRpcNettyHttpClientHandler.send(request, channel);
         String body = (String) queue.take();
         ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);

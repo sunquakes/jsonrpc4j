@@ -10,24 +10,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.ssl.OptionalSslHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.SslHandler;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.ResourceUtils;
 
 import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLEngine;
-import javax.net.ssl.SSLException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -68,12 +59,13 @@ public class JsonRpcNettyHttpServer extends JsonRpcServer implements Initializin
     public void start() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, CertificateException {
         SslContext sslContext = null;
         if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-            InputStream sslInputStream = getClass().getResourceAsStream(sslKeyStore);
-            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance("SunX509");
+            InputStream sslInputStream = getClass().getClassLoader().getResourceAsStream(sslKeyStore);
+            KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance(sslKeyStoreType);
             keyStore.load(sslInputStream, sslKeyStorePassword.toCharArray());
             keyManagerFactory.init(keyStore, sslKeyStorePassword.toCharArray());
             sslContext = SslContextBuilder.forServer(keyManagerFactory).build();
+
         }
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -97,7 +89,7 @@ public class JsonRpcNettyHttpServer extends JsonRpcServer implements Initializin
                                 @Override
                                 protected void initChannel(SocketChannel sh) throws Exception {
                                     if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-                                        sh.pipeline().addLast(new OptionalSslHandler(finalSslContext));
+                                        sh.pipeline().addFirst(new OptionalSslHandler(finalSslContext));
                                     }
                                     sh.pipeline()
                                             .addLast("codec", new HttpServerCodec())
