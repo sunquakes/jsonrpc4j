@@ -1,5 +1,7 @@
 package com.sunquakes.jsonrpc4j.client;
 
+import io.netty.channel.Channel;
+import lombok.Synchronized;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -17,8 +19,9 @@ public class JsonRpcNettyChannelPoolFactory {
 
     ConcurrentHashMap poolMap = new ConcurrentHashMap();
 
+    @Synchronized
     public GenericObjectPool getPool(String url, JsonRpcNettyChannelFactory jsonRpcNettyChannelFactory) {
-        GenericObjectPool<Socket> objectPool = null;
+        GenericObjectPool<Channel> objectPool = null;
         if (!poolMap.contains(url)) {
             GenericObjectPoolConfig genericObjectPoolConfig = new GenericObjectPoolConfig();
 
@@ -29,7 +32,7 @@ public class JsonRpcNettyChannelPoolFactory {
             genericObjectPoolConfig.setMinIdle(5);
             // Maximum connection
             genericObjectPoolConfig.setMaxTotal(100);
-            poolMap.put(url, objectPool);
+            poolMap.putIfAbsent(url, objectPool);
         } else {
             poolMap.get(url);
         }
