@@ -17,7 +17,7 @@ plugins {
 }
 
 group 'com.sunquakes'
-version '1.0.1'
+version '2.0.0'
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {

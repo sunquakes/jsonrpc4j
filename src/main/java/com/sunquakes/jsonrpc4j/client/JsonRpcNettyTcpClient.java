@@ -7,7 +7,10 @@ import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -17,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.ObjectPool;
 
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.concurrent.SynchronousQueue;
 
 /**
