@@ -7,6 +7,7 @@ import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import java.net.Socket;
+import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,7 +23,7 @@ public class JsonRpcNettyChannelPoolFactory {
     @Synchronized
     public GenericObjectPool getPool(String url, JsonRpcNettyChannelFactory jsonRpcNettyChannelFactory) {
         GenericObjectPool<Channel> objectPool = null;
-        if (!poolMap.contains(url)) {
+        if (!poolMap.containsKey(url)) {
             GenericObjectPoolConfig genericObjectPoolConfig = new GenericObjectPoolConfig();
 
             objectPool = new GenericObjectPool<>(jsonRpcNettyChannelFactory, genericObjectPoolConfig);
@@ -32,6 +33,8 @@ public class JsonRpcNettyChannelPoolFactory {
             genericObjectPoolConfig.setMinIdle(5);
             // Maximum connection
             genericObjectPoolConfig.setMaxTotal(100);
+
+            genericObjectPoolConfig.setSoftMinEvictableIdleTime(Duration.ofSeconds(5));
             poolMap.putIfAbsent(url, objectPool);
         } else {
             poolMap.get(url);
