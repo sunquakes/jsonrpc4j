@@ -14,16 +14,20 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.bytes.ByteArrayDecoder;
+import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.ssl.OptionalSslHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.pool2.ObjectPool;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -48,6 +52,8 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
 
     private JsonRpcNettyHttpClientHandler jsonRpcNettyHttpClientHandler;
 
+    private static ConcurrentHashMap bootstrapMap = new ConcurrentHashMap();
+
     public JsonRpcNettyHttpClient(String protocol, String url) {
         jsonRpcNettyHttpClientHandler = new JsonRpcNettyHttpClientHandler();
         this.protocol = protocol;
@@ -59,30 +65,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
 
     @Override
     public Object handle(String method, Object[] args) throws Exception {
-
-        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(eventLoopGroup)
-                .remoteAddress(new InetSocketAddress(IP, PORT))
-                .channel(NioSocketChannel.class)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new ChannelInitializer<SocketChannel>() {
-                    @Override
-                    protected void initChannel(SocketChannel ch) throws Exception {
-                        ch.pipeline()
-                                .addLast("codec", new HttpClientCodec())
-                                .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
-                                .addLast(jsonRpcNettyHttpClientHandler);
-                        if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-                            SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-                            ch.pipeline().addLast(new OptionalSslHandler(sslContext));
-                        }
-                    }
-                });
-
-        ObjectPool<Channel> pool = JsonRpcNettyChannelPoolFactory.getPool(url, new JsonRpcNettyChannelFactory(bootstrap));
-        Channel channel = pool.borrowObject();
-
+        Channel channel = getChannel();
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
@@ -99,6 +82,35 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
             }
         }
         return responseDto.getResult();
+    }
+
+    @Synchronized
+    private Channel getChannel() throws Exception {
+        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(url);
+        if (bootstrap == null) {
+            EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
+            bootstrap = new Bootstrap();
+            bootstrap.group(eventLoopGroup)
+                    .remoteAddress(new InetSocketAddress(IP, PORT))
+                    .channel(NioSocketChannel.class)
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline()
+                                    .addLast("codec", new HttpClientCodec())
+                                    .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
+                                    .addLast(jsonRpcNettyHttpClientHandler);
+                            if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+                                SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                                ch.pipeline().addLast(new OptionalSslHandler(sslContext));
+                            }
+                        }
+                    });
+        }
+        ObjectPool<Channel> pool = JsonRpcNettyChannelPoolFactory.getPool(url, new JsonRpcNettyChannelFactory(bootstrap));
+        Channel channel = pool.borrowObject();
+        return channel;
     }
 
     private Object[] getIpPort(String protocol, String url) {

@@ -37,7 +37,7 @@ public class JsonRpcNettyChannelPoolFactory {
             genericObjectPoolConfig.setSoftMinEvictableIdleTime(Duration.ofSeconds(5));
             poolMap.putIfAbsent(url, objectPool);
         } else {
-            poolMap.get(url);
+            objectPool = (GenericObjectPool<Channel>) poolMap.get(url);
         }
         return objectPool;
     }
