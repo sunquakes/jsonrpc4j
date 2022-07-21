@@ -65,14 +65,16 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
 
     @Override
     public Object handle(String method, Object[] args) throws Exception {
-        Channel channel = getChannel();
+        ObjectPool<Channel> pool = getPool();
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
         request.put("method", method);
         request.put("params", args);
+        Channel channel = pool.borrowObject();
         SynchronousQueue<Object> queue = jsonRpcNettyHttpClientHandler.send(request, channel);
         String body = (String) queue.take();
+        pool.returnObject(channel);
         ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
         if (responseDto.getResult() == null) {
             JSONObject bodyJSON = JSON.parseObject(body);
@@ -85,7 +87,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
     }
 
     @Synchronized
-    private Channel getChannel() throws Exception {
+    private ObjectPool<Channel> getPool() throws Exception {
         Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(url);
         if (bootstrap == null) {
             EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
@@ -109,8 +111,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
                     });
         }
         ObjectPool<Channel> pool = JsonRpcNettyChannelPoolFactory.getPool(url, new JsonRpcNettyChannelFactory(bootstrap));
-        Channel channel = pool.borrowObject();
-        return channel;
+        return pool;
     }
 
     private Object[] getIpPort(String protocol, String url) {
