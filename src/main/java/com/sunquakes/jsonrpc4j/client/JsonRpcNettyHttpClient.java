@@ -74,7 +74,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
         Channel channel = pool.borrowObject();
         SynchronousQueue<Object> queue = jsonRpcNettyHttpClientHandler.send(request, channel);
         String body = (String) queue.take();
-        pool.returnObject(channel);
+        // pool.returnObject(channel);
         ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
         if (responseDto.getResult() == null) {
             JSONObject bodyJSON = JSON.parseObject(body);

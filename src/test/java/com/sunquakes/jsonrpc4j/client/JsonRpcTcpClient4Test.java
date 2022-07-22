@@ -1,5 +1,6 @@
 package com.sunquakes.jsonrpc4j.client;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -22,6 +24,17 @@ public class JsonRpcTcpClient4Test {
     @Autowired
     private IJsonRpcTcpClient4 jsonRpcTcpClient4;
 
+    private String text1;
+    private String text2;
+
+    @Before
+    public void beforeTest() throws UnsupportedEncodingException {
+        InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
+        text1 = new BufferedReader(new InputStreamReader(text1IS, "UTF-8")).lines().collect(Collectors.joining(System.lineSeparator()));
+        InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
+        text2 = new BufferedReader(new InputStreamReader(text2IS, "UTF-8")).lines().collect(Collectors.joining(System.lineSeparator()));
+    }
+
     @Test
     public void testHandler() {
         // test tcp handler
@@ -32,10 +45,6 @@ public class JsonRpcTcpClient4Test {
 
     @Test
     public void testLongParams() {
-        InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
-        String text1 = new BufferedReader(new InputStreamReader(text1IS)).lines().collect(Collectors.joining(System.lineSeparator()));
-        InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
-        String text2 = new BufferedReader(new InputStreamReader(text2IS)).lines().collect(Collectors.joining(System.lineSeparator()));
         assertEquals(text1 + text2, jsonRpcTcpClient4.splice(text1, text2));
     }
 }

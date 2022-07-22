@@ -12,6 +12,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,10 +20,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -39,6 +37,17 @@ public class JsonRpcHttpsClientTest {
 
     @Autowired
     private IJsonRpcHttpsClient jsonRpcHttpsClient;
+
+    private String text1;
+    private String text2;
+
+    @Before
+    public void beforeTest() throws UnsupportedEncodingException {
+        InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
+        text1 = new BufferedReader(new InputStreamReader(text1IS, "UTF-8")).lines().collect(Collectors.joining(System.lineSeparator()));
+        InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
+        text2 = new BufferedReader(new InputStreamReader(text2IS, "UTF-8")).lines().collect(Collectors.joining(System.lineSeparator()));
+    }
 
     @Test
     public void testRequest() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
@@ -76,10 +85,6 @@ public class JsonRpcHttpsClientTest {
 
     @Test
     public void testLongParams() {
-        InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
-        String text1 = new BufferedReader(new InputStreamReader(text1IS)).lines().collect(Collectors.joining(System.lineSeparator()));
-        InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
-        String text2 = new BufferedReader(new InputStreamReader(text2IS)).lines().collect(Collectors.joining(System.lineSeparator()));
         assertEquals(text1 + text2, jsonRpcHttpsClient.splice(text1, text2));
     }
 }
