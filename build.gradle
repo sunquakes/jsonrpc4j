@@ -6,7 +6,6 @@ buildscript {
         set("fastjsonVersion", "2.0.2")
         set("lombokVersion", "1.18.24")
         set("slf4jVersion", "1.7.36")
-        set("commonsPool2Version", "2.11.1")
         set("springbootVersion", "2.7.0")
         set("nettyVersion", "4.1.78.Final")
     }
@@ -46,7 +45,6 @@ dependencies {
     annotationProcessor group: 'org.projectlombok', name: 'lombok', version: "${lombokVersion}"
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: "${httpclientVersion}"
     implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
-    implementation group: 'org.apache.commons', name: 'commons-pool2', version: "${commonsPool2Version}"
     implementation group: 'io.netty', name: 'netty-all', version: "${nettyVersion}"
 
     testImplementation 'junit:junit:4.13.1'

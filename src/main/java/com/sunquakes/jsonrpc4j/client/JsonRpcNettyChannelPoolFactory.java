@@ -1,13 +1,11 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import io.netty.channel.Channel;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.pool.ChannelHealthChecker;
+import io.netty.channel.pool.FixedChannelPool;
 import lombok.Synchronized;
 import lombok.experimental.UtilityClass;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
-import java.net.Socket;
-import java.time.Duration;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,27 +16,19 @@ import java.util.concurrent.ConcurrentHashMap;
 @UtilityClass
 public class JsonRpcNettyChannelPoolFactory {
 
+    private ChannelHealthChecker healthCheck = ChannelHealthChecker.ACTIVE;
+
     ConcurrentHashMap poolMap = new ConcurrentHashMap();
 
     @Synchronized
-    public GenericObjectPool getPool(String url, JsonRpcNettyChannelFactory jsonRpcNettyChannelFactory) {
-        GenericObjectPool<Channel> objectPool = null;
+    public FixedChannelPool getPool(String url, Bootstrap bootstrap, JsonRpcNettyChannelPoolHandler handler) {
+        FixedChannelPool channelPool;
         if (!poolMap.containsKey(url)) {
-            GenericObjectPoolConfig genericObjectPoolConfig = new GenericObjectPoolConfig();
-
-            objectPool = new GenericObjectPool<>(jsonRpcNettyChannelFactory, genericObjectPoolConfig);
-            // Maximum idle
-            genericObjectPoolConfig.setMaxIdle(10);
-            // Minimum idle
-            genericObjectPoolConfig.setMinIdle(5);
-            // Maximum connection
-            genericObjectPoolConfig.setMaxTotal(100);
-
-            genericObjectPoolConfig.setSoftMinEvictableIdleTime(Duration.ofSeconds(5));
-            poolMap.putIfAbsent(url, objectPool);
+            channelPool = new FixedChannelPool(bootstrap, handler, 10);
+            poolMap.putIfAbsent(url, channelPool);
         } else {
-            objectPool = (GenericObjectPool<Channel>) poolMap.get(url);
+            channelPool = (FixedChannelPool) poolMap.get(url);
         }
-        return objectPool;
+        return channelPool;
     }
 }
