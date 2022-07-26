@@ -40,11 +40,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
 
     private String protocol;
 
-    private String url;
-
-    private String IP;
-
-    private Integer PORT;
+    private InetSocketAddress address;
 
     private JsonRpcNettyHttpClientHandler jsonRpcNettyHttpClientHandler;
 
@@ -53,10 +49,10 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
     public JsonRpcNettyHttpClient(String protocol, String url) {
         jsonRpcNettyHttpClientHandler = new JsonRpcNettyHttpClientHandler();
         this.protocol = protocol;
-        this.url = url;
         Object[] ipPort = getIpPort(protocol, url);
-        IP = (String) ipPort[0];
-        PORT = (Integer) ipPort[1];
+        String ip = (String) ipPort[0];
+        Integer port = (Integer) ipPort[1];
+        this.address = new InetSocketAddress(ip, port);
     }
 
     @Override
@@ -85,16 +81,16 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
     @Synchronized
     private FixedChannelPool getPool() throws Exception {
         JsonRpcNettyChannelPoolHandler handler = new JsonRpcNettyChannelPoolHandler(new Handler());
-        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(url);
+        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(this.address);
         if (bootstrap == null) {
             EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
             bootstrap = new Bootstrap();
             bootstrap.group(eventLoopGroup)
-                    .remoteAddress(new InetSocketAddress(IP, PORT))
+                    .remoteAddress(this.address)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.SO_KEEPALIVE, true);
         }
-        FixedChannelPool pool = JsonRpcNettyChannelPoolFactory.getPool(url, bootstrap, handler);
+        FixedChannelPool pool = JsonRpcNettyChannelPoolFactory.getPool(this.address, bootstrap, handler);
         return pool;
     }
 

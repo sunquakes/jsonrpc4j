@@ -1,11 +1,13 @@
 package com.sunquakes.jsonrpc4j.client;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelHealthChecker;
 import io.netty.channel.pool.FixedChannelPool;
 import lombok.Synchronized;
 import lombok.experimental.UtilityClass;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -18,16 +20,16 @@ public class JsonRpcNettyChannelPoolFactory {
 
     private ChannelHealthChecker healthCheck = ChannelHealthChecker.ACTIVE;
 
-    ConcurrentHashMap poolMap = new ConcurrentHashMap();
+    ConcurrentHashMap<InetSocketAddress, FixedChannelPool> poolMap = new ConcurrentHashMap();
 
     @Synchronized
-    public FixedChannelPool getPool(String url, Bootstrap bootstrap, JsonRpcNettyChannelPoolHandler handler) {
+    public FixedChannelPool getPool(InetSocketAddress address, Bootstrap bootstrap, JsonRpcNettyChannelPoolHandler handler) {
         FixedChannelPool channelPool;
-        if (!poolMap.containsKey(url)) {
+        if (!poolMap.containsKey(address)) {
             channelPool = new FixedChannelPool(bootstrap, handler, 10);
-            poolMap.putIfAbsent(url, channelPool);
+            poolMap.putIfAbsent(address, channelPool);
         } else {
-            channelPool = (FixedChannelPool) poolMap.get(url);
+            channelPool = (FixedChannelPool) poolMap.get(address);
         }
         return channelPool;
     }

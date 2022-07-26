@@ -34,11 +34,7 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
 
     private Integer DEFAULT_PORT = 80;
 
-    private String url;
-
-    private String IP;
-
-    private Integer PORT;
+    private InetSocketAddress address;
 
     private TcpClientOption tcpClientOption;
 
@@ -49,10 +45,10 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
     public JsonRpcNettyTcpClient(String url, TcpClientOption tcpClientOption) {
         jsonRpcNettyTcpClientHandler = new JsonRpcNettyTcpClientHandler(tcpClientOption);
         this.tcpClientOption = tcpClientOption;
-        this.url = url;
         Object[] ipPort = getIpPort(url);
-        IP = (String) ipPort[0];
-        PORT = (Integer) ipPort[1];
+        String ip = (String) ipPort[0];
+        Integer port = (Integer) ipPort[1];
+        this.address = new InetSocketAddress(ip, port);
     }
 
     @Override
@@ -81,13 +77,13 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
     @Synchronized
     private FixedChannelPool getPool() throws Exception {
         JsonRpcNettyChannelPoolHandler handler = new JsonRpcNettyChannelPoolHandler(new Handler());
-        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(url);
+        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(this.address);
         if (bootstrap == null) {
             EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
             bootstrap = new Bootstrap();
             bootstrap.group(eventLoopGroup)
                     .channel(NioSocketChannel.class)
-                    .remoteAddress(new InetSocketAddress(IP, PORT))
+                    .remoteAddress(this.address)
                     .option(ChannelOption.SO_RCVBUF, tcpClientOption.getPackageMaxLength())
                     .option(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new ChannelInitializer<SocketChannel>() {
@@ -100,7 +96,7 @@ public class JsonRpcNettyTcpClient implements JsonRpcClientHandlerInterface {
                         }
                     });
         }
-        FixedChannelPool pool = JsonRpcNettyChannelPoolFactory.getPool(url, bootstrap, handler);
+        FixedChannelPool pool = JsonRpcNettyChannelPoolFactory.getPool(this.address, bootstrap, handler);
         return pool;
     }
 
