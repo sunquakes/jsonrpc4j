@@ -95,6 +95,7 @@ public class JsonRpcTest {
     }
 }
 ```
-
-
-
+## Test
+```shell
+gradle test -Dfile.encoding=UTF-8
+```
