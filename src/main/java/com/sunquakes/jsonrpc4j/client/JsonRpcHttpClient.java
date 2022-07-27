@@ -89,6 +89,7 @@ public class JsonRpcHttpClient implements JsonRpcClientHandlerInterface {
                     .remoteAddress(this.address)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.SO_KEEPALIVE, true);
+            bootstrapMap.put(this.address, bootstrap);
         }
         FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(this.address, bootstrap, handler);
         return pool;

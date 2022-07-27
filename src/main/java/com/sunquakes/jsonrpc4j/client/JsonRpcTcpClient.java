@@ -95,6 +95,7 @@ public class JsonRpcTcpClient implements JsonRpcClientHandlerInterface {
                                     .addLast(jsonRpcTcpClientHandler);
                         }
                     });
+            bootstrapMap.put(this.address, bootstrap);
         }
         FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(this.address, bootstrap, handler);
         return pool;
