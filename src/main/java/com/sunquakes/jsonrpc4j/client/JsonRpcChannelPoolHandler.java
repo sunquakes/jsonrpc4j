@@ -9,11 +9,11 @@ import io.netty.channel.pool.ChannelPoolHandler;
  * @version : 2.0.0
  * @since : 2022/7/25 6:47 PM
  **/
-public class JsonRpcNettyChannelPoolHandler implements ChannelPoolHandler {
+public class JsonRpcChannelPoolHandler implements ChannelPoolHandler {
 
-    JsonRpcNettyChannelHandler handler;
+    JsonRpcChannelHandler handler;
 
-    JsonRpcNettyChannelPoolHandler(JsonRpcNettyChannelHandler handler) {
+    JsonRpcChannelPoolHandler(JsonRpcChannelHandler handler) {
         this.handler = handler;
     }
 

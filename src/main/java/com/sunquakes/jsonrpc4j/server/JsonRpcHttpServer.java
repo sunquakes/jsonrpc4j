@@ -36,7 +36,7 @@ import java.util.concurrent.Executors;
  * @since : 2022/7/2 12:32 PM
  **/
 @Slf4j
-public class JsonRpcNettyHttpServer extends JsonRpcServer implements InitializingBean {
+public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean {
 
     @Value("${jsonrpc.server.ssl.key-store}")
     private String sslKeyStore;
@@ -94,7 +94,7 @@ public class JsonRpcNettyHttpServer extends JsonRpcServer implements Initializin
                                     sh.pipeline()
                                             .addLast("codec", new HttpServerCodec())
                                             .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
-                                            .addLast(new JsonRpcNettyHttpServerHandler(applicationContext));
+                                            .addLast(new JsonRpcHttpServerHandler(applicationContext));
                                 }
                             });
                     ChannelFuture future;

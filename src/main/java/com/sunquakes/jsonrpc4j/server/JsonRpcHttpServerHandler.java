@@ -15,11 +15,11 @@ import org.springframework.context.ApplicationContext;
  * @version : 2.0.0
  * @since : 2022/7/2 12:32 PM
  **/
-public class JsonRpcNettyHttpServerHandler extends ChannelInboundHandlerAdapter {
+public class JsonRpcHttpServerHandler extends ChannelInboundHandlerAdapter {
 
     private ApplicationContext applicationContext;
 
-    public JsonRpcNettyHttpServerHandler(ApplicationContext applicationContext) {
+    public JsonRpcHttpServerHandler(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
     }
 

@@ -72,9 +72,9 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
         if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
             String packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
             int packageMaxLength = Integer.valueOf(environment.getProperty("jsonrpc.client.package-max-length", String.valueOf(RequestUtils.TCP_PACKAG_MAX_LENGHT)));
-            return new JsonRpcNettyTcpClient(url, new TcpClientOption(packageEof, packageMaxLength));
+            return new JsonRpcTcpClient(url, new TcpClientOption(packageEof, packageMaxLength));
         } else {
-            return new JsonRpcNettyHttpClient(protocol, url);
+            return new JsonRpcHttpClient(protocol, url);
         }
     }
 }

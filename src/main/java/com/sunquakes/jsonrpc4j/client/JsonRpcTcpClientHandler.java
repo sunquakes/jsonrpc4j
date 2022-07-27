@@ -23,7 +23,7 @@ import java.util.concurrent.SynchronousQueue;
  **/
 @Slf4j
 @Sharable
-public class JsonRpcNettyTcpClientHandler extends ChannelInboundHandlerAdapter {
+public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
 
     private byte[] initBytes = new byte[0];
 
@@ -31,7 +31,7 @@ public class JsonRpcNettyTcpClientHandler extends ChannelInboundHandlerAdapter {
 
     private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
-    public JsonRpcNettyTcpClientHandler(TcpClientOption tcpClientOption) {
+    public JsonRpcTcpClientHandler(TcpClientOption tcpClientOption) {
         this.tcpClientOption = tcpClientOption;
     }
 

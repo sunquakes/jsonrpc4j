@@ -8,17 +8,15 @@ import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.FixedChannelPool;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.codec.http.HttpClientCodec;
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.ssl.OptionalSslHandler;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.codec.bytes.ByteArrayDecoder;
+import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,27 +27,25 @@ import java.util.concurrent.SynchronousQueue;
 /**
  * @author : Robert, sunquakes@outlook.com
  * @version : 2.0.0
- * @since : 2022/7/8 12:39 PM
+ * @since : 2022/6/28 9:05 PM
  **/
 @Slf4j
-public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
+public class JsonRpcTcpClient implements JsonRpcClientHandlerInterface {
 
-    private Integer DEFAULT_HTTP_PORT = 80;
-
-    private Integer DEFAULT_HTTPS_PORT = 443;
-
-    private String protocol;
+    private Integer DEFAULT_PORT = 80;
 
     private InetSocketAddress address;
 
-    private JsonRpcNettyHttpClientHandler jsonRpcNettyHttpClientHandler;
+    private TcpClientOption tcpClientOption;
+
+    private JsonRpcTcpClientHandler jsonRpcTcpClientHandler;
 
     private static ConcurrentHashMap bootstrapMap = new ConcurrentHashMap();
 
-    public JsonRpcNettyHttpClient(String protocol, String url) {
-        jsonRpcNettyHttpClientHandler = new JsonRpcNettyHttpClientHandler();
-        this.protocol = protocol;
-        Object[] ipPort = getIpPort(protocol, url);
+    public JsonRpcTcpClient(String url, TcpClientOption tcpClientOption) {
+        jsonRpcTcpClientHandler = new JsonRpcTcpClientHandler(tcpClientOption);
+        this.tcpClientOption = tcpClientOption;
+        Object[] ipPort = getIpPort(url);
         String ip = (String) ipPort[0];
         Integer port = (Integer) ipPort[1];
         this.address = new InetSocketAddress(ip, port);
@@ -64,7 +60,7 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
         request.put("method", method);
         request.put("params", args);
         Channel channel = pool.acquire().get();
-        SynchronousQueue<Object> queue = jsonRpcNettyHttpClientHandler.send(request, channel);
+        SynchronousQueue<Object> queue = jsonRpcTcpClientHandler.send(request, channel);
         String body = (String) queue.take();
         pool.release(channel);
         ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
@@ -80,44 +76,46 @@ public class JsonRpcNettyHttpClient implements JsonRpcClientHandlerInterface {
 
     @Synchronized
     private FixedChannelPool getPool() throws Exception {
-        JsonRpcNettyChannelPoolHandler handler = new JsonRpcNettyChannelPoolHandler(new Handler());
+        JsonRpcChannelPoolHandler handler = new JsonRpcChannelPoolHandler(new Handler());
         Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(this.address);
         if (bootstrap == null) {
             EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
             bootstrap = new Bootstrap();
             bootstrap.group(eventLoopGroup)
-                    .remoteAddress(this.address)
                     .channel(NioSocketChannel.class)
-                    .option(ChannelOption.SO_KEEPALIVE, true);
+                    .remoteAddress(this.address)
+                    .option(ChannelOption.SO_RCVBUF, tcpClientOption.getPackageMaxLength())
+                    .option(ChannelOption.SO_KEEPALIVE, true)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ch.pipeline()
+                                    .addLast(new ByteArrayDecoder())
+                                    .addLast(new ByteArrayEncoder())
+                                    .addLast(jsonRpcTcpClientHandler);
+                        }
+                    });
         }
-        FixedChannelPool pool = JsonRpcNettyChannelPoolFactory.getPool(this.address, bootstrap, handler);
+        FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(this.address, bootstrap, handler);
         return pool;
     }
 
-    class Handler implements JsonRpcNettyChannelHandler {
+    class Handler implements JsonRpcChannelHandler {
         @Override
         public void channelUpdated(Channel ch) throws Exception {
             ch.pipeline()
-                    .addLast("codec", new HttpClientCodec())
-                    .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
-                    .addLast(jsonRpcNettyHttpClientHandler);
-            if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-                SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-                ch.pipeline().addLast(new OptionalSslHandler(sslContext));
-            }
+                    .addLast(new ByteArrayDecoder())
+                    .addLast(new ByteArrayEncoder())
+                    .addLast(jsonRpcTcpClientHandler);
         }
     }
 
-    private Object[] getIpPort(String protocol, String url) {
+    private Object[] getIpPort(String url) {
         String[] ipPort = url.split(":");
         String ip = ipPort[0];
         Integer port;
         if (ipPort.length < 2) {
-            if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-                port = DEFAULT_HTTPS_PORT;
-            } else {
-                port = DEFAULT_HTTP_PORT;
-            }
+            port = DEFAULT_PORT;
         } else {
             port = Integer.valueOf(ipPort[1]);
         }

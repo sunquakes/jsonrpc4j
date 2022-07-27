@@ -1,59 +1,61 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.sunquakes.jsonrpc4j.ErrorEnum;
-import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
-import com.sunquakes.jsonrpc4j.utils.RequestUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.*;
+import io.netty.util.CharsetUtil;
+import lombok.Synchronized;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author : Robert, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @version : 2.0.0
+ * @since : 2022/7/8 12:39 PM
  **/
-public class JsonRpcHttpClientHandler implements JsonRpcClientHandlerInterface {
+@Slf4j
+@Sharable
+public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private String url;
+    private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
-    public JsonRpcHttpClientHandler(String protocol, String url) {
-        if (url.substring(0, 4).equals(RequestUtils.PROTOCOL_HTTP)) {
-            this.url = url;
-        } else {
-            this.url = String.format("%s://%s", protocol, url);
-        }
+    @Synchronized
+    public synchronized SynchronousQueue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
+        SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
+        queueMap.put(data.getString("id"), synchronousQueue);
+
+        String message = data.toJSONString();
+        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
+        request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8");
+        ByteBuf buffer = request.content().clear();
+        buffer.writerIndex();
+        buffer.writeBytes(message.getBytes());
+        buffer.writerIndex();
+        buffer.readableBytes();
+        request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
+
+        channel.writeAndFlush(request).sync();
+        channel.closeFuture().sync();
+        return synchronousQueue;
     }
 
     @Override
-    public Object handle(String method, Object[] args) throws Exception {
-        JSONObject request = new JSONObject();
-        request.put("id", RequestUtils.getId());
-        request.put("jsonrpc", RequestUtils.JSONRPC);
-        request.put("method", method);
-        request.put("params", args);
-
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost(url);
-        httpPost.setEntity(new StringEntity(request.toString(), ContentType.APPLICATION_JSON));
-        HttpResponse response = httpClient.execute(httpPost);
-
-        String body = EntityUtils.toString(response.getEntity());
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        FullHttpResponse httpResponse = (FullHttpResponse) msg;
+        ByteBuf buf = httpResponse.content();
+        String body = buf.toString(CharsetUtil.UTF_8);
         ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
-        // Throw exception if there is error in response.
-        if (responseDto.getResult() == null) {
-            JSONObject bodyJSON = JSON.parseObject(body);
-            if (bodyJSON.containsKey("error")) {
-                ErrorDto errorDto = JSONObject.parseObject(bodyJSON.getString("error"), ErrorDto.class);
-                throw ErrorEnum.getException(errorDto.getCode(), errorDto.getMessage());
-            }
-        }
-        return responseDto.getResult();
+        String id = responseDto.getId();
+        SynchronousQueue<Object> queue = queueMap.get(id);
+        queue.put(body);
+        queueMap.remove(id);
+        httpResponse.release();
     }
 }

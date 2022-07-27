@@ -7,6 +7,6 @@ import io.netty.channel.Channel;
  * @version : 2.0.0
  * @since : 2022/7/25 6:47 PM
  **/
-public interface JsonRpcNettyChannelHandler {
+public interface JsonRpcChannelHandler {
     void channelUpdated(Channel channel) throws Exception;
 }

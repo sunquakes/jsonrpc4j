@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
  * @since : 2022/6/28 9:05 PM
  **/
 @Slf4j
-public class JsonRpcNettyTcpServer extends JsonRpcServer implements InitializingBean {
+public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean {
 
     @Value("${jsonrpc.server.port}")
     private int port;
@@ -71,7 +71,7 @@ public class JsonRpcNettyTcpServer extends JsonRpcServer implements Initializing
                                     sh.pipeline()
                                             .addLast(new ByteArrayDecoder())
                                             .addLast(new ByteArrayEncoder())
-                                            .addLast(new JsonRpcNettyTcpServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
+                                            .addLast(new JsonRpcTcpServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
                                 }
                             });
                     ChannelFuture future;
