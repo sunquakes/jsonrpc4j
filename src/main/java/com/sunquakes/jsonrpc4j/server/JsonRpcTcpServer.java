@@ -33,6 +33,12 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
     @Value("${jsonrpc.server.pool.max-active:168}")
     private int poolMaxActive;
 
+    @Value("${jsonrpc.server.netty.boss-group.thread-num:1}")
+    private int bossGroupThreadNum;
+
+    @Value("${jsonrpc.server.netty.worker-group.thread-num}")
+    private int workerGroupThreadNum;
+
     private String packageEof;
 
     private int packageMaxLength;
@@ -56,8 +62,8 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
             @Override
             public void run() {
                 try {
-                    EventLoopGroup bossGroup = new NioEventLoopGroup();
-                    EventLoopGroup workerGroup = new NioEventLoopGroup();
+                    EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupThreadNum);
+                    EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupThreadNum);
 
                     ServerBootstrap sb = new ServerBootstrap();
                     sb.group(bossGroup, workerGroup)

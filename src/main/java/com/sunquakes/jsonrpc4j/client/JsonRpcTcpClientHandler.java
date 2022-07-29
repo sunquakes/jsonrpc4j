@@ -94,11 +94,15 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
                 String body = new String(bytes);
                 ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
                 String id = responseDto.getId();
-                SynchronousQueue<Object> queue = queueMap.get(id);
-                queue.put(body);
-                queueMap.remove(id);
-                ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
-                idMap.remove(id, 0);
+                synchronized (id) {
+                    SynchronousQueue<Object> queue = queueMap.get(id);
+                    if (queue != null) {
+                        queue.put(body);
+                        queueMap.remove(id);
+                        ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
+                        idMap.remove(id, 0);
+                    }
+                }
                 bytes = initBytes;
             }
         }
@@ -109,10 +113,14 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
-            SynchronousQueue<Object> queue = queueMap.get(id);
-            queue.put(JSON.toJSON(errorResponseDto));
-            idMap.remove(id);
-            queueMap.remove(id);
+            synchronized (id) {
+                SynchronousQueue<Object> queue = queueMap.get(id);
+                if (queue != null) {
+                    queue.put(JSON.toJSON(errorResponseDto));
+                    idMap.remove(id);
+                    queueMap.remove(id);
+                }
+            }
         }
     }
 
@@ -121,10 +129,14 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
-            SynchronousQueue<Object> queue = queueMap.get(id);
-            queue.put(JSON.toJSON(errorResponseDto));
-            idMap.remove(id);
-            queueMap.remove(id);
+            synchronized (id) {
+                SynchronousQueue<Object> queue = queueMap.get(id);
+                if (queue != null) {
+                    queue.put(JSON.toJSON(errorResponseDto));
+                    idMap.remove(id);
+                    queueMap.remove(id);
+                }
+            }
         }
     }
 }

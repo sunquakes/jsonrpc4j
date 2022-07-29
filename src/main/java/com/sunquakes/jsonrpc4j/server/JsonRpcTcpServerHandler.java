@@ -1,13 +1,19 @@
 package com.sunquakes.jsonrpc4j.server;
 
 import com.alibaba.fastjson.JSON;
+import com.sunquakes.jsonrpc4j.ErrorEnum;
+import com.sunquakes.jsonrpc4j.dto.ErrorDto;
+import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
+import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.springframework.context.ApplicationContext;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author : Robert, sunquakes@outlook.com
@@ -67,5 +73,15 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
                 bytes = initBytes;
             }
         }
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        ctx.channel().close();
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+        ctx.channel().close();
     }
 }

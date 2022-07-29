@@ -56,6 +56,12 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
     @Value("${jsonrpc.server.pool.max-active:168}")
     private int poolMaxActive;
 
+    @Value("${jsonrpc.server.netty.boss-group.thread-num:1}")
+    private int bossGroupThreadNum;
+
+    @Value("${jsonrpc.server.netty.worker-group.thread-num}")
+    private int workerGroupThreadNum;
+
     public void start() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, CertificateException {
         SslContext sslContext = null;
         if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
@@ -65,7 +71,6 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
             keyStore.load(sslInputStream, sslKeyStorePassword.toCharArray());
             keyManagerFactory.init(keyStore, sslKeyStorePassword.toCharArray());
             sslContext = SslContextBuilder.forServer(keyManagerFactory).build();
-
         }
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -77,8 +82,8 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
             @Override
             public void run() {
                 try {
-                    EventLoopGroup bossGroup = new NioEventLoopGroup();
-                    EventLoopGroup workerGroup = new NioEventLoopGroup();
+                    EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupThreadNum);
+                    EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupThreadNum);
 
                     ServerBootstrap sb = new ServerBootstrap();
                     sb.group(bossGroup, workerGroup)

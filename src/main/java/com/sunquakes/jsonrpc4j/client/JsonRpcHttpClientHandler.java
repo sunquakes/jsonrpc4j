@@ -77,10 +77,14 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
-            SynchronousQueue<Object> queue = queueMap.get(id);
-            queue.put(JSON.toJSON(errorResponseDto));
-            idMap.remove(id);
-            queueMap.remove(id);
+            synchronized (id) {
+                SynchronousQueue<Object> queue = queueMap.get(id);
+                if (queue != null) {
+                    queue.put(JSON.toJSON(errorResponseDto));
+                    idMap.remove(id);
+                    queueMap.remove(id);
+                }
+            }
         }
     }
 
@@ -89,10 +93,14 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
-            SynchronousQueue<Object> queue = queueMap.get(id);
-            queue.put(JSON.toJSON(errorResponseDto));
-            idMap.remove(id);
-            queueMap.remove(id);
+            synchronized (id) {
+                SynchronousQueue<Object> queue = queueMap.get(id);
+                if (queue != null) {
+                    queue.put(JSON.toJSON(errorResponseDto));
+                    idMap.remove(id);
+                    queueMap.remove(id);
+                }
+            }
         }
     }
 }
