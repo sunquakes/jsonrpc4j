@@ -59,7 +59,7 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
     @Value("${jsonrpc.server.netty.boss-group.thread-num:1}")
     private int bossGroupThreadNum;
 
-    @Value("${jsonrpc.server.netty.worker-group.thread-num}")
+    @Value("${jsonrpc.server.netty.worker-group.thread-num:0}")
     private int workerGroupThreadNum;
 
     public void start() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, CertificateException {
