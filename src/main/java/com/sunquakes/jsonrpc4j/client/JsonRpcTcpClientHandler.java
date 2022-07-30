@@ -31,7 +31,7 @@ import java.util.concurrent.SynchronousQueue;
 @Sharable
 public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private byte[] initBytes = new byte[0];
+    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap();
 
     private TcpClientOption tcpClientOption;
 
@@ -61,6 +61,9 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     @Synchronized
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        Channel channel = ctx.channel();
+        byte[] initBytes = bufferMap.getOrDefault(channel, new byte[0]);
+
         byte[] msgBytes = (byte[]) msg;
 
         String packageEof = tcpClientOption.getPackageEof();
@@ -88,6 +91,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
                 bytes = Arrays.copyOfRange(bytes, 0, i);
             } else {
                 initBytes = bytes;
+                bufferMap.put(channel, initBytes);
                 break;
             }
             if (bytes.length > 0) {
@@ -116,7 +120,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
-                    queue.put(JSON.toJSON(errorResponseDto));
+                    queue.put(JSON.toJSONString(errorResponseDto));
                     idMap.remove(id);
                     queueMap.remove(id);
                 }
@@ -132,7 +136,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
-                    queue.put(JSON.toJSON(errorResponseDto));
+                    queue.put(JSON.toJSONString(errorResponseDto));
                     idMap.remove(id);
                     queueMap.remove(id);
                 }

@@ -80,7 +80,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
-                    queue.put(JSON.toJSON(errorResponseDto));
+                    queue.put(JSON.toJSONString(errorResponseDto));
                     idMap.remove(id);
                     queueMap.remove(id);
                 }
@@ -96,7 +96,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
-                    queue.put(JSON.toJSON(errorResponseDto));
+                    queue.put(JSON.toJSONString(errorResponseDto));
                     idMap.remove(id);
                     queueMap.remove(id);
                 }

@@ -6,6 +6,7 @@ import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.springframework.context.ApplicationContext;
@@ -26,7 +27,7 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
 
     private TcpServerOption tcpServerOption;
 
-    private byte[] initBytes = new byte[0];
+    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap();
 
     public JsonRpcTcpServerHandler(ApplicationContext applicationContext, TcpServerOption tcpServerOption) {
         this.applicationContext = applicationContext;
@@ -35,6 +36,8 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        Channel channel = ctx.channel();
+        byte[] initBytes = bufferMap.getOrDefault(channel, new byte[0]);
 
         byte[] msgBytes = (byte[]) msg;
 
@@ -63,6 +66,7 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
                 bytes = Arrays.copyOfRange(bytes, 0, i);
             } else {
                 initBytes = bytes;
+                bufferMap.put(channel, initBytes);
                 break;
             }
             if (bytes.length > 0) {
