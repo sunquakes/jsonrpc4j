@@ -13,17 +13,17 @@ import java.lang.reflect.Method;
 @Slf4j
 public class  JsonRpcClientInvocationHandler<T> implements InvocationHandler {
 
-    private JsonRpcClientHandlerInterface jsonRpcClientHandler;
+    private JsonRpcClientInterface jsonRpcClient;
 
     private String service;
 
-    public JsonRpcClientInvocationHandler(JsonRpcClientHandlerInterface jsonRpcClientHandler, String service) {
-        this.jsonRpcClientHandler = jsonRpcClientHandler;
+    public JsonRpcClientInvocationHandler(JsonRpcClientInterface jsonRpcClient, String service) {
+        this.jsonRpcClient = jsonRpcClient;
         this.service = service;
     }
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodPath = String.format("/%s/%s", service, method.getName());
-        return jsonRpcClientHandler.handle(methodPath, args);
+        return jsonRpcClient.handle(methodPath, args);
     }
 }

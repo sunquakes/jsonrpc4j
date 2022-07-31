@@ -52,11 +52,11 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                         log.error("The url of JsonRpcClient is required.");
                         return false;
                     }
-                    JsonRpcClientHandlerInterface jsonRpcClientHandler = getJsonRpcClientHandler(protocol, url);
+                    JsonRpcClientInterface jsonRpcClient = getJsonRpcClient(protocol, url);
 
                     BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
                     builder.addConstructorArgValue(interfaceType);
-                    builder.addPropertyValue("jsonRpcClientHandler", jsonRpcClientHandler);
+                    builder.addPropertyValue("jsonRpcClient", jsonRpcClient);
                     builder.addPropertyValue("service", annotationAttributes.get("value"));
                     beanDefinitionRegistry.registerBeanDefinition(interfaceType.getName(), builder.getBeanDefinition());
                     return true;
@@ -68,7 +68,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
         });
     }
 
-    private JsonRpcClientHandlerInterface getJsonRpcClientHandler(String protocol, String url) throws IllegalArgumentException {
+    private JsonRpcClientInterface getJsonRpcClient(String protocol, String url) throws IllegalArgumentException {
         if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
             String packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
             int packageMaxLength = Integer.valueOf(environment.getProperty("jsonrpc.client.package-max-length", String.valueOf(RequestUtils.TCP_PACKAG_MAX_LENGHT)));

@@ -1,6 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.client.JsonRpcClientHandlerInterface;
+import com.sunquakes.jsonrpc4j.client.JsonRpcClientInterface;
 import com.sunquakes.jsonrpc4j.client.JsonRpcClientInvocationHandler;
 import org.springframework.beans.factory.FactoryBean;
 
@@ -15,7 +15,7 @@ public class JsonRpcClientFactoryBean<T> implements FactoryBean<T> {
 
     private Class<T> interfaceType;
 
-    private JsonRpcClientHandlerInterface jsonRpcClientHandler;
+    private JsonRpcClientInterface jsonRpcClient;
 
     private String service;
 
@@ -25,7 +25,7 @@ public class JsonRpcClientFactoryBean<T> implements FactoryBean<T> {
 
     @Override
     public T getObject() {
-        return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new JsonRpcClientInvocationHandler(jsonRpcClientHandler, service));
+        return (T) Proxy.newProxyInstance(interfaceType.getClassLoader(), new Class[]{interfaceType}, new JsonRpcClientInvocationHandler(jsonRpcClient, service));
     }
 
     @Override
@@ -38,8 +38,8 @@ public class JsonRpcClientFactoryBean<T> implements FactoryBean<T> {
         return true;
     }
 
-    public void setJsonRpcClientHandler(JsonRpcClientHandlerInterface jsonRpcClientHandler) {
-        this.jsonRpcClientHandler = jsonRpcClientHandler;
+    public void setJsonRpcClient(JsonRpcClientInterface jsonRpcClient) {
+        this.jsonRpcClient = jsonRpcClient;
     }
 
     public void setService(String service) {

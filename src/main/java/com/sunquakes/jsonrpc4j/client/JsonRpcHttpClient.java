@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
+import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -22,6 +23,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
@@ -32,7 +34,7 @@ import java.util.concurrent.SynchronousQueue;
  * @since : 2022/7/8 12:39 PM
  **/
 @Slf4j
-public class JsonRpcHttpClient implements JsonRpcClientHandlerInterface {
+public class JsonRpcHttpClient implements JsonRpcClientInterface {
 
     private Integer DEFAULT_HTTP_PORT = 80;
 
@@ -57,17 +59,23 @@ public class JsonRpcHttpClient implements JsonRpcClientHandlerInterface {
 
     @Override
     public Object handle(String method, Object[] args) throws Exception {
-        FixedChannelPool pool = getPool();
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
         request.put("method", method);
         request.put("params", args);
-        Channel channel = pool.acquire().get();
-        SynchronousQueue<Object> queue = jsonRpcHttpClientHandler.send(request, channel);
-        String body = (String) queue.take();
-        pool.release(channel);
-        ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
+        ResponseDto responseDto;
+        String body;
+        try {
+            FixedChannelPool pool = getPool();
+            Channel channel = pool.acquire().get();
+            SynchronousQueue<Object> queue = jsonRpcHttpClientHandler.send(request, channel);
+            body = (String) queue.take();
+            pool.release(channel);
+            responseDto = JSONObject.parseObject(body, ResponseDto.class);
+        } catch (UndeclaredThrowableException e) {
+            throw new JsonRpcClientException(e.getMessage());
+        }
         if (responseDto.getResult() == null) {
             JSONObject bodyJSON = JSON.parseObject(body);
             if (bodyJSON.containsKey("error")) {
