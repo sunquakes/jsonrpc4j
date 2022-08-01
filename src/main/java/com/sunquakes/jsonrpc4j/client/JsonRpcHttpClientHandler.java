@@ -75,6 +75,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
+        if (idMap == null) return;
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
             synchronized (id) {
@@ -91,6 +92,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
+        if (idMap == null) return;
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
             synchronized (id) {

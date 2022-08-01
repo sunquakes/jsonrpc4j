@@ -73,7 +73,7 @@ public class JsonRpcHttpClient implements JsonRpcClientInterface {
             body = (String) queue.take();
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
-        } catch (UndeclaredThrowableException e) {
+        } catch (Exception e) {
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {
