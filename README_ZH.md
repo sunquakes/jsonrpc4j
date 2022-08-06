@@ -7,13 +7,13 @@
 <dependency>
     <groupId>com.sunquakes</groupId>
     <artifactId>jsonrpc4j</artifactId>
-    <version>1.0.1</version>
+    <version>2.0.2</version>
 </dependency>
 ```
 - gradle
 ```groovy
 // https://mvnrepository.com/artifact/com.sunquakes/jsonrpc4j
-implementation group: 'com.sunquakes', name: 'jsonrpc4j', version: '1.0.1'
+implementation group: 'com.sunquakes', name: 'jsonrpc4j', version: '2.0.2'
 ```
 
 ## 开始使用
