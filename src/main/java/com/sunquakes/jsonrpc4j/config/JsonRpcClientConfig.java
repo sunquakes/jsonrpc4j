@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "jsonrpc.client")
 public class JsonRpcClientConfig {
 
-    private String packageEof;
+    private String packageEof = "\r\n";
 
-    private int packageMaxLength;
+    private int packageMaxLength = 4096;
 }
