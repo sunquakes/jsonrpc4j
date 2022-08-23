@@ -1,6 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.ProtocolEnum;
+import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
 import com.sunquakes.jsonrpc4j.server.JsonRpcTcpServer;
 import org.springframework.beans.BeansException;
@@ -36,9 +36,9 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
         String serverBeanName = String.format("%s_%s_%s", "JsonRpcServer", protocol, port);
         if (protocol != null && port != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
             BeanDefinitionBuilder serverBuilder;
-            if (protocol.equals(ProtocolEnum.Tcp.getName())) {
+            if (protocol.equals(JsonRpcProtocol.tcp.name())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
-            } else if (protocol.equals(ProtocolEnum.Http.getName()) || protocol.equals(ProtocolEnum.Https.getName())) {
+            } else if (protocol.equals(JsonRpcProtocol.http.name()) || protocol.equals(JsonRpcProtocol.https.name())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
             } else {
                 throw new IllegalArgumentException("Invalid protocol.");

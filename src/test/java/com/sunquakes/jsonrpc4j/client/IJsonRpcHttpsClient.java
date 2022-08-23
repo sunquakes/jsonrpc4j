@@ -1,8 +1,9 @@
 package com.sunquakes.jsonrpc4j.client;
 
 import com.sunquakes.jsonrpc4j.JsonRpcClient;
+import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 
-@JsonRpcClient(value = "JsonRpc", protocol = "https", url = "localhost:3205")
+@JsonRpcClient(value = "JsonRpc", protocol = JsonRpcProtocol.https, url = "localhost:3205")
 public interface IJsonRpcHttpsClient {
     
     int add(int a, int b);

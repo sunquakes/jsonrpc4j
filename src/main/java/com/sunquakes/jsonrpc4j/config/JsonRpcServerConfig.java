@@ -24,7 +24,7 @@ public class JsonRpcServerConfig {
 
     private int port = 3200;
 
-    private String packageEof = "\r\n";
+    private String packageEof = "\\r\\n";
 
     private int packageMaxLength = 4096;
 
