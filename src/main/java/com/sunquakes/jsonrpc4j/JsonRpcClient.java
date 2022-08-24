@@ -35,4 +35,10 @@ public @interface JsonRpcClient {
      * @return the client package end of in tcp protocol
      */
     String packageEof() default "";
+
+    /**
+     * The client package max length in tcp protocol;
+     * @return the client package max length in tcp protocol
+     */
+    int packageMaxLength() default 0;
 }
