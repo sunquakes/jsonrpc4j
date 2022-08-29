@@ -53,7 +53,6 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
 
         channel.writeAndFlush(request).sync();
-        channel.closeFuture().sync();
         return synchronousQueue;
     }
 

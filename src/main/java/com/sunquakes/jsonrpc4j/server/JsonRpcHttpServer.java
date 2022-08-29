@@ -38,13 +38,13 @@ import java.util.concurrent.Executors;
 @Slf4j
 public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean {
 
-    @Value("${jsonrpc.server.ssl.key-store}")
+    @Value("${jsonrpc.server.ssl.key-store:#{null}}")
     private String sslKeyStore;
 
-    @Value("${jsonrpc.server.ssl.key-store-type}")
+    @Value("${jsonrpc.server.ssl.key-store-type:#{null}}")
     private String sslKeyStoreType;
 
-    @Value("${jsonrpc.server.ssl.key-store-password}")
+    @Value("${jsonrpc.server.ssl.key-store-password:#{null}}")
     private String sslKeyStorePassword;
 
     @Value("${jsonrpc.server.protocol}")
