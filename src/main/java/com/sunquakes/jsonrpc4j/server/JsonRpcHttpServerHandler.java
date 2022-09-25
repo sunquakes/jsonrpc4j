@@ -28,7 +28,6 @@ public class JsonRpcHttpServerHandler extends ChannelInboundHandlerAdapter {
 
         FullHttpRequest httpRequest = (FullHttpRequest) msg;
         HttpVersion httpVersion = httpRequest.protocolVersion();
-        System.out.println(httpVersion);
 
         ByteBuf buf = httpRequest.content();
         HttpMethod method = httpRequest.method();
