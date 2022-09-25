@@ -27,11 +27,13 @@ public class JsonRpcHttpServerHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         FullHttpRequest httpRequest = (FullHttpRequest) msg;
+        HttpVersion httpVersion = httpRequest.protocolVersion();
+        System.out.println(httpVersion);
 
         ByteBuf buf = httpRequest.content();
         HttpMethod method = httpRequest.method();
         if (!HttpMethod.POST.equals(method)) {
-            send(ctx, "", HttpResponseStatus.METHOD_NOT_ALLOWED);
+            send(ctx, "", HttpResponseStatus.METHOD_NOT_ALLOWED, httpVersion);
             return;
         }
 
@@ -41,14 +43,15 @@ public class JsonRpcHttpServerHandler extends ChannelInboundHandlerAdapter {
         Object res = jsonRpcServerHandler.handle(body);
         String output = JSON.toJSONString(res);
 
-        send(ctx, output, HttpResponseStatus.OK);
+        send(ctx, output, HttpResponseStatus.OK, httpVersion);
         httpRequest.release();
     }
 
-    private void send(ChannelHandlerContext ctx, String context, HttpResponseStatus status) {
-        FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, status, Unpooled.copiedBuffer(context, CharsetUtil.UTF_8));
-        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8");
-        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    private void send(ChannelHandlerContext ctx, String context, HttpResponseStatus status, HttpVersion httpVersion) {
+        FullHttpResponse response = new DefaultFullHttpResponse(httpVersion, status, Unpooled.copiedBuffer(context, CharsetUtil.UTF_8));
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
+        response.headers().add(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
+        ctx.writeAndFlush(response);
     }
 
     @Override
