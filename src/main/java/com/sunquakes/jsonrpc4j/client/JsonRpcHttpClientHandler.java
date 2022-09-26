@@ -17,6 +17,7 @@ import io.netty.util.CharsetUtil;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
@@ -32,6 +33,12 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
     private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
     private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap();
+
+    private InetSocketAddress address;
+
+    public JsonRpcHttpClientHandler(InetSocketAddress address) {
+        this.address = address;
+    }
 
     @Synchronized
     public synchronized SynchronousQueue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
@@ -51,6 +58,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         buffer.writerIndex();
         buffer.readableBytes();
         request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
+        request.headers().add(HttpHeaderNames.HOST, address.getHostString());
 
         channel.writeAndFlush(request).sync();
         return synchronousQueue;

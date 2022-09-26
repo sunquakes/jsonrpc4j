@@ -49,12 +49,12 @@ public class JsonRpcHttpClient implements JsonRpcClientInterface {
     private static ConcurrentHashMap bootstrapMap = new ConcurrentHashMap();
 
     public JsonRpcHttpClient(String protocol, String url) {
-        jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler();
         this.protocol = protocol;
         Object[] ipPort = getIpPort(protocol, url);
         String ip = (String) ipPort[0];
         Integer port = (Integer) ipPort[1];
         this.address = new InetSocketAddress(ip, port);
+        jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler(address);
     }
 
     @Override
