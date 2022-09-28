@@ -13,10 +13,11 @@ buildscript {
 
 plugins {
     id 'java'
+    id 'maven-publish'
 }
 
 group 'com.sunquakes'
-version '2.0.2'
+version '2.0.3'
 
 gradle.projectsEvaluated {
     tasks.withType(JavaCompile) {
