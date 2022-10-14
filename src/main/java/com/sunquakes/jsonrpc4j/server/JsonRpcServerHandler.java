@@ -73,13 +73,7 @@ public class JsonRpcServerHandler {
                 throw new MethodNotFoundException();
             }
             Parameter[] paramsReflect = m.getParameters();
-            String[] paramNames = new String[paramsReflect.length];
-            if (params != null) {
-                for (int i = 0; i < paramsReflect.length; i++) {
-                    paramNames[i] = paramsReflect[i].getName();
-                }
-            }
-            Object[] paramArr = RequestUtils.parseParams(params, paramNames);
+            Object[] paramArr = RequestUtils.parseParams(params, paramsReflect);
             Object result = m.invoke(clazz, paramArr);
             return ResponseUtils.success(id, result);
         } catch (InvocationTargetException | IllegalAccessException | BeansException e) {

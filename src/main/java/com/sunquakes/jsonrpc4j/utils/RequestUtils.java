@@ -10,9 +10,11 @@ import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
 import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import lombok.experimental.UtilityClass;
 
+import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * @author : Robert, sunquakes@outlook.com
@@ -75,6 +77,7 @@ public class RequestUtils {
         return methodArr;
     }
 
+    @Deprecated
     public Object[] parseParams(Object params, String[] names) throws InvalidParamsException {
         if (params instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) params;
@@ -85,6 +88,32 @@ public class RequestUtils {
             Object[] res = new Object[l];
             for (int i = 0; i < l; i++) {
                 res[i] = jsonObject.get(names[i]);
+            }
+            return res;
+        } else {
+            throw new InvalidParamsException();
+        }
+    }
+
+    public Object[] parseParams(Object params, Parameter[] paramsReflect) throws InvalidParamsException {
+        int l = paramsReflect.length;
+        if (params instanceof JSONArray) {
+            JSONArray jsonArray = (JSONArray) params;
+            Object[] res = new Object[l];
+            for (int i = 0; i < l; i++) {
+                Object item = jsonArray.get(i);
+                res[i] = JSON.toJavaObject(item, paramsReflect[i].getType());
+            }
+            return res;
+        } else if (params instanceof JSONObject) {
+            JSONObject jsonObject = (JSONObject) params;
+            Object[] res = new Object[l];
+            for (int i = 0; i < l; i++) {
+                String key = paramsReflect[i].getName();
+                if (!jsonObject.containsKey(key)) {
+                    throw new InvalidParamsException();
+                }
+                res[i] = JSON.toJavaObject(jsonObject.get(key), paramsReflect[i].getType());
             }
             return res;
         } else {

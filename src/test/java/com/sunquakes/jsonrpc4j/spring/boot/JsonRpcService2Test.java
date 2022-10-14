@@ -1,5 +1,7 @@
 package com.sunquakes.jsonrpc4j.spring.boot;
 
+import com.sunquakes.jsonrpc4j.spring.boot.dto.ArgsDto;
+import com.sunquakes.jsonrpc4j.spring.boot.dto.ResultDto;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +48,12 @@ public class JsonRpcService2Test {
 
             assertEquals(jsonRpcClient.sub(3, 2), 1);
             assertEquals(jsonRpcClient.sub(7, 5), 2);
+
+            ArgsDto argsDto = new ArgsDto();
+            argsDto.setA(8);
+            argsDto.setB(9);
+            ResultDto resultDto = jsonRpcClient.add2(argsDto);
+            assertEquals(17, resultDto.getC());
         }
     }
 }
