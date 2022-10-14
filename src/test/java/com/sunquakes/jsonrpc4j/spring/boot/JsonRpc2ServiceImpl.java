@@ -17,8 +17,17 @@ public class JsonRpc2ServiceImpl implements IJsonRpc2Service {
 
     @Override
     public ResultDto add2(ArgsDto args) {
-        ResultDto resultDto = new ResultDto();
-        resultDto.setC(args.getA() + args.getB());
-        return resultDto;
+        ResultDto result = new ResultDto();
+        result.setC(args.getA() + args.getB());
+        return result;
+    }
+
+    @Override
+    public ResultDto add3(ArgsDto args) {
+        ResultDto innerResult = new ResultDto();
+        innerResult.setC(args.getArgs().getA() + args.getArgs().getB());
+        ResultDto result = new ResultDto();
+        result.setResult(innerResult);
+        return result;
     }
 }

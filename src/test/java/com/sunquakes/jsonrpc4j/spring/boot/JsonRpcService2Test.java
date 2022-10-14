@@ -49,11 +49,18 @@ public class JsonRpcService2Test {
             assertEquals(jsonRpcClient.sub(3, 2), 1);
             assertEquals(jsonRpcClient.sub(7, 5), 2);
 
-            ArgsDto argsDto = new ArgsDto();
-            argsDto.setA(8);
-            argsDto.setB(9);
-            ResultDto resultDto = jsonRpcClient.add2(argsDto);
-            assertEquals(17, resultDto.getC());
+            ArgsDto args = new ArgsDto();
+            args.setA(8);
+            args.setB(9);
+            ResultDto result = jsonRpcClient.add2(args);
+            assertEquals(17, result.getC());
+
+            ArgsDto innerArgs = new ArgsDto();
+            innerArgs.setA(10);
+            innerArgs.setB(11);
+            args.setArgs(innerArgs);
+            result = jsonRpcClient.add3(args);
+            assertEquals(21, result.getResult().getC());
         }
     }
 }

@@ -12,4 +12,6 @@ public interface IJsonRpc2Service {
     int sub(int a, int b);
 
     ResultDto add2(ArgsDto args);
+
+    ResultDto add3(ArgsDto args);
 }
