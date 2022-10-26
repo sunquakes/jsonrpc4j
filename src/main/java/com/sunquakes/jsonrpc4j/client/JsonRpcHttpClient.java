@@ -7,6 +7,7 @@ import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
+import com.sunquakes.jsonrpc4j.utils.RobinUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -23,7 +24,6 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
@@ -118,6 +118,7 @@ public class JsonRpcHttpClient implements JsonRpcClientInterface {
     }
 
     private Object[] getIpPort(String protocol, String url) {
+        url = RobinUtils.getServer(url);
         String[] ipPort = url.split(":");
         String ip = ipPort[0];
         Integer port;
