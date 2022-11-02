@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.annotation.ClassPathBeanDefinitionScanner;
+import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -24,8 +25,9 @@ import java.util.Set;
  **/
 public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 
-    public JsonRpcServiceClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry) {
+    public JsonRpcServiceClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, Environment environment) {
         super(registry);
+        super.setEnvironment(environment);
         addIncludeFilter(new TypeFilter() {
             @Override
             public boolean match(MetadataReader metadataReader, MetadataReaderFactory metadataReaderFactory) throws IOException {
@@ -46,6 +48,16 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
 
     @Override
     protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
+        Environment environment = getEnvironment();
+        String governanceDriverName = environment.getProperty("jsonrpc.governance.driver-name");
+        String governanceUrl = environment.getProperty("jsonrpc.governance.url");
+        boolean hasGovernance = governanceDriverName != null && governanceUrl != null;
+        JsonRpcServiceRegistrar jsonRpcServiceRegistrar = null;
+        int port = 0;
+        if (hasGovernance) {
+            port = Integer.parseInt(environment.getProperty("jsonrpc.server.port"));
+            jsonRpcServiceRegistrar = new JsonRpcServiceRegistrar(governanceUrl, governanceDriverName);
+        }
         try {
             BeanDefinitionRegistry registry = getRegistry();
             Assert.notEmpty(basePackages, "At least one base package must be specified");
@@ -65,6 +77,10 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                 BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, customBeanName);
                                 beanDefinitions.add(definitionHolder);
                                 registerBeanDefinition(definitionHolder, registry);
+                                // Register service
+                                if (hasGovernance) {
+                                    jsonRpcServiceRegistrar.registerService(customBeanName, port);
+                                }
                             }
                         }
                     }

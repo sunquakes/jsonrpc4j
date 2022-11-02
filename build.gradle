@@ -8,6 +8,7 @@ buildscript {
         set("slf4jVersion", "1.7.36")
         set("springbootVersion", "2.7.0")
         set("nettyVersion", "4.1.78.Final")
+        set("consulVersion", "1.4.5")
     }
 }
 
@@ -47,6 +48,7 @@ dependencies {
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: "${httpclientVersion}"
     implementation group: 'org.slf4j', name: 'slf4j-api', version: "${slf4jVersion}"
     implementation group: 'io.netty', name: 'netty-all', version: "${nettyVersion}"
+    implementation group: 'com.ecwid.consul', name: 'consul-api', version: "${consulVersion}"
     compileOnly group: 'org.springframework.boot', name: 'spring-boot', version: "${springbootVersion}"
     annotationProcessor group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: "${springbootVersion}"
 
@@ -55,7 +57,6 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
     testImplementation group: 'org.springframework', name: 'spring-test', version: "${springVersion}"
-    testImplementation group: 'org.easymock', name: 'easymock', version: "${easymockVersion}"
     testImplementation group: 'org.slf4j', name: 'slf4j-nop', version: "${slf4jVersion}"
     testImplementation (group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "${springbootVersion}") {
         exclude group: "org.springframework.boot", module: "spring-boot-starter-logging"

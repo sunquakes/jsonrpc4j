@@ -20,6 +20,8 @@ public class JsonRpcServerConfig {
         TCP;
     }
 
+    private String name;
+
     private Protocol protocol;
 
     private int port = 3200;
@@ -69,4 +71,14 @@ public class JsonRpcServerConfig {
     }
 
     private Netty netty;
+
+    @Data
+    public static class Governance {
+
+        private String url;
+
+        private String driverName;
+    }
+
+    private Governance governance;
 }

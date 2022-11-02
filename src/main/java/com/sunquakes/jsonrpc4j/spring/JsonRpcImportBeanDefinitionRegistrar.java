@@ -32,7 +32,7 @@ public class JsonRpcImportBeanDefinitionRegistrar implements ImportBeanDefinitio
         String[] basePackages = (String[]) data.get("basePackages");
 
         ClassPathScanningCandidateComponentProvider classPathScanningCandidateComponentProvider = new JsonRpcClientClassPathScanningCandidateComponentProvider(false, environment, beanDefinitionRegistry);
-        ClassPathBeanDefinitionScanner scanner = new JsonRpcServiceClassPathBeanDefinitionScanner(beanDefinitionRegistry);
+        ClassPathBeanDefinitionScanner scanner = new JsonRpcServiceClassPathBeanDefinitionScanner(beanDefinitionRegistry, environment);
         for (String basePackage : basePackages) {
             classPathScanningCandidateComponentProvider.findCandidateComponents(basePackage);
             scanner.scan(basePackage);
