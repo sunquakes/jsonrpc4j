@@ -73,12 +73,12 @@ public class JsonRpcServerConfig {
     private Netty netty;
 
     @Data
-    public static class Governance {
+    public static class Discovery {
 
         private String url;
 
         private String driverName;
     }
 
-    private Governance governance;
+    private Discovery discovery;
 }

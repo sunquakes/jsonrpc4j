@@ -42,9 +42,23 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                     // Select handler according to different protocol
                     String protocol = annotationAttributes.get("protocol").toString();
                     String url = annotationAttributes.get("url").toString();
-                    if (!StringUtils.hasLength(url)) {
-                        log.error("The url of JsonRpcClient is required.");
-                        return false;
+                    String name = annotationAttributes.get("value").toString();
+
+                    String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
+                    String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
+                    boolean hasDiscovery = discoveryDriverName != null && discoveryUrl != null;
+                    // Get url from discovery.
+                    if (hasDiscovery) {
+                        JsonRpcServiceDiscovery jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
+                        String serviceUrl = jsonRpcServiceDiscovery.get(name);
+                        if (serviceUrl != null) {
+                            url = serviceUrl;
+                        }
+                    } else {
+                        if (!StringUtils.hasLength(url)) {
+                            log.error("The url of JsonRpcClient is required.");
+                            return false;
+                        }
                     }
 
                     String packageEof = annotationAttributes.get("packageEof").toString();
@@ -60,7 +74,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                     BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
                     builder.addConstructorArgValue(interfaceType);
                     builder.addPropertyValue("jsonRpcClient", jsonRpcClient);
-                    builder.addPropertyValue("service", annotationAttributes.get("value"));
+                    builder.addPropertyValue("service", name);
                     beanDefinitionRegistry.registerBeanDefinition(interfaceType.getName(), builder.getBeanDefinition());
                     return true;
                 } catch (ClassNotFoundException e) {

@@ -49,14 +49,15 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
     @Override
     protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
         Environment environment = getEnvironment();
-        String governanceDriverName = environment.getProperty("jsonrpc.governance.driver-name");
-        String governanceUrl = environment.getProperty("jsonrpc.governance.url");
-        boolean hasGovernance = governanceDriverName != null && governanceUrl != null;
-        JsonRpcServiceRegistrar jsonRpcServiceRegistrar = null;
+        String hostname = environment.getProperty("jsonrpc.discovery.hostname");
+        String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
+        String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
+        boolean hasDiscovery = discoveryDriverName != null && discoveryUrl != null;
+        JsonRpcServiceDiscovery jsonRpcServiceDiscovery = null;
         int port = 0;
-        if (hasGovernance) {
+        if (hasDiscovery) {
             port = Integer.parseInt(environment.getProperty("jsonrpc.server.port"));
-            jsonRpcServiceRegistrar = new JsonRpcServiceRegistrar(governanceUrl, governanceDriverName);
+            jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
         }
         try {
             BeanDefinitionRegistry registry = getRegistry();
@@ -78,8 +79,8 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                 beanDefinitions.add(definitionHolder);
                                 registerBeanDefinition(definitionHolder, registry);
                                 // Register service
-                                if (hasGovernance) {
-                                    jsonRpcServiceRegistrar.registerService(customBeanName, port);
+                                if (hasDiscovery) {
+                                    jsonRpcServiceDiscovery.register(customBeanName, hostname, port);
                                 }
                             }
                         }

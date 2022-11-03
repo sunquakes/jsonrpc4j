@@ -83,7 +83,7 @@ public class JsonRpcTcpClient implements JsonRpcClientInterface {
     }
 
     @Synchronized
-    private FixedChannelPool getPool() throws Exception {
+    private FixedChannelPool getPool() {
         JsonRpcChannelPoolHandler handler = new JsonRpcChannelPoolHandler(new Handler());
         Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(this.address);
         if (bootstrap == null) {
