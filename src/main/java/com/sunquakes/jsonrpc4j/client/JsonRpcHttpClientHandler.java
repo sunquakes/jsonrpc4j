@@ -36,10 +36,6 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
 
     private InetSocketAddress address;
 
-    public JsonRpcHttpClientHandler(InetSocketAddress address) {
-        this.address = address;
-    }
-
     @Synchronized
     public synchronized SynchronousQueue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
         String id = data.getString("id");
@@ -58,7 +54,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         buffer.writerIndex();
         buffer.readableBytes();
         request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
-        request.headers().add(HttpHeaderNames.HOST, address.getHostString());
+        // request.headers().add(HttpHeaderNames.HOST, address.getHostString());
 
         channel.writeAndFlush(request).sync();
         return synchronousQueue;

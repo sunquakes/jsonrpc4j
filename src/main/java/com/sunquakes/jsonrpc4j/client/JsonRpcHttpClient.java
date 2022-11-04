@@ -3,6 +3,8 @@ package com.sunquakes.jsonrpc4j.client;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
+import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
+import com.sunquakes.jsonrpc4j.config.JsonRpcServerConfig;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
@@ -40,21 +42,21 @@ public class JsonRpcHttpClient implements JsonRpcClientInterface {
 
     private Integer DEFAULT_HTTPS_PORT = 443;
 
+    private String name;
+
     private String protocol;
 
-    private InetSocketAddress address;
+    private String url;
 
     private JsonRpcHttpClientHandler jsonRpcHttpClientHandler;
 
     private static ConcurrentHashMap bootstrapMap = new ConcurrentHashMap();
 
-    public JsonRpcHttpClient(String protocol, String url) {
+    public JsonRpcHttpClient(String name, String protocol, String url) {
+        this.name = name;
+        this.url = url;
         this.protocol = protocol;
-        Object[] ipPort = getIpPort(protocol, url);
-        String ip = (String) ipPort[0];
-        Integer port = (Integer) ipPort[1];
-        this.address = new InetSocketAddress(ip, port);
-        jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler(address);
+        jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler();
     }
 
     @Override
@@ -89,17 +91,16 @@ public class JsonRpcHttpClient implements JsonRpcClientInterface {
     @Synchronized
     private FixedChannelPool getPool() {
         JsonRpcChannelPoolHandler handler = new JsonRpcChannelPoolHandler(new Handler());
-        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(this.address);
+        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(name);
         if (bootstrap == null) {
             EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
             bootstrap = new Bootstrap();
             bootstrap.group(eventLoopGroup)
-                    .remoteAddress(this.address)
                     .channel(NioSocketChannel.class)
                     .option(ChannelOption.SO_KEEPALIVE, true);
-            bootstrapMap.put(this.address, bootstrap);
+            bootstrapMap.putIfAbsent(name, bootstrap);
         }
-        FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(this.address, bootstrap, handler);
+        FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(name, url, bootstrap, handler, protocol.equals(JsonRpcProtocol.https) ? DEFAULT_HTTPS_PORT: DEFAULT_HTTP_PORT);
         return pool;
     }
 

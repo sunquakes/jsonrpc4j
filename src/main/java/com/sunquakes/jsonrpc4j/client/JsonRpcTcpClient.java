@@ -36,21 +36,21 @@ public class JsonRpcTcpClient implements JsonRpcClientInterface {
 
     private Integer DEFAULT_PORT = 80;
 
-    private InetSocketAddress address;
-
     private TcpClientOption tcpClientOption;
 
     private JsonRpcTcpClientHandler jsonRpcTcpClientHandler;
 
     private static ConcurrentHashMap bootstrapMap = new ConcurrentHashMap();
 
-    public JsonRpcTcpClient(String url, TcpClientOption tcpClientOption) {
+    private String name;
+
+    private String url;
+
+    public JsonRpcTcpClient(String name, String url, TcpClientOption tcpClientOption) {
+        this.name = name;
+        this.url = url;
         jsonRpcTcpClientHandler = new JsonRpcTcpClientHandler(tcpClientOption);
         this.tcpClientOption = tcpClientOption;
-        Object[] ipPort = getIpPort(url);
-        String ip = (String) ipPort[0];
-        Integer port = (Integer) ipPort[1];
-        this.address = new InetSocketAddress(ip, port);
     }
 
     @Override
@@ -85,13 +85,12 @@ public class JsonRpcTcpClient implements JsonRpcClientInterface {
     @Synchronized
     private FixedChannelPool getPool() {
         JsonRpcChannelPoolHandler handler = new JsonRpcChannelPoolHandler(new Handler());
-        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(this.address);
+        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(name);
         if (bootstrap == null) {
             EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
             bootstrap = new Bootstrap();
             bootstrap.group(eventLoopGroup)
                     .channel(NioSocketChannel.class)
-                    .remoteAddress(this.address)
                     .option(ChannelOption.SO_RCVBUF, tcpClientOption.getPackageMaxLength())
                     .option(ChannelOption.SO_KEEPALIVE, true)
                     .handler(new ChannelInitializer<SocketChannel>() {
@@ -103,9 +102,9 @@ public class JsonRpcTcpClient implements JsonRpcClientInterface {
                                     .addLast(jsonRpcTcpClientHandler);
                         }
                     });
-            bootstrapMap.put(this.address, bootstrap);
+            bootstrapMap.putIfAbsent(name, bootstrap);
         }
-        FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(this.address, bootstrap, handler);
+        FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(name, url, bootstrap, handler, DEFAULT_PORT);
         return pool;
     }
 
@@ -117,18 +116,5 @@ public class JsonRpcTcpClient implements JsonRpcClientInterface {
                     .addLast(new ByteArrayEncoder())
                     .addLast(jsonRpcTcpClientHandler);
         }
-    }
-
-    private Object[] getIpPort(String url) {
-        url = RobinUtils.getServer(url);
-        String[] ipPort = url.split(":");
-        String ip = ipPort[0];
-        Integer port;
-        if (ipPort.length < 2) {
-            port = DEFAULT_PORT;
-        } else {
-            port = Integer.valueOf(ipPort[1]);
-        }
-        return new Object[]{ip, port};
     }
 }
