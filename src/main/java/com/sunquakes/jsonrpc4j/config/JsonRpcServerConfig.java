@@ -71,14 +71,4 @@ public class JsonRpcServerConfig {
     }
 
     private Netty netty;
-
-    @Data
-    public static class Discovery {
-
-        private String url;
-
-        private String driverName;
-    }
-
-    private Discovery discovery;
 }

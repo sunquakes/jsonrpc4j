@@ -54,8 +54,6 @@ public class Consul implements Driver {
                 .build();
         Response<List<HealthService>> healthyServices = client.getHealthServices(name, request);
         String url = healthyServices.getValue().stream().map(item -> String.format("%s:%d", item.getService().getAddress(), item.getService().getPort())).collect(Collectors.joining(","));
-        System.out.println(healthyServices.getValue());
-        System.out.println(url);
         return url;
     }
 

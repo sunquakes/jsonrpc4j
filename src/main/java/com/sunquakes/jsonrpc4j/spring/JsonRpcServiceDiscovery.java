@@ -1,7 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.discovery.Driver;
-import com.sunquakes.jsonrpc4j.utils.RobinUtils;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,20 +41,7 @@ public class JsonRpcServiceDiscovery {
         return instance;
     }
 
-    public void register(String name, String hostname, int port) {
-        if (driver != null) {
-            driver.register(name, hostname, port);
-        }
-    }
-
-    public String get(String name) {
-        String url = null;
-        if (driver != null) {
-            url = driver.get(name);
-            if (url != null) {
-                url = RobinUtils.getServer(url);
-            }
-        }
-        return url;
+    public Driver getDriver() {
+        return this.driver;
     }
 }

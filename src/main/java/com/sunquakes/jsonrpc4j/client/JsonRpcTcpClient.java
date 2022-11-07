@@ -3,11 +3,11 @@ package com.sunquakes.jsonrpc4j.client;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
+import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
-import com.sunquakes.jsonrpc4j.utils.RobinUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -19,11 +19,8 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -32,25 +29,44 @@ import java.util.concurrent.SynchronousQueue;
  * @since : 2022/6/28 9:05 PM
  **/
 @Slf4j
-public class JsonRpcTcpClient implements JsonRpcClientInterface {
+public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInterface {
 
-    private Integer DEFAULT_PORT = 80;
-
-    private TcpClientOption tcpClientOption;
+    private static int DEFAULT_PORT = 80;
 
     private JsonRpcTcpClientHandler jsonRpcTcpClientHandler;
 
-    private static ConcurrentHashMap bootstrapMap = new ConcurrentHashMap();
+    public JsonRpcTcpClient(Config config) {
+        super(config);
+    }
 
-    private String name;
-
-    private String url;
-
-    public JsonRpcTcpClient(String name, String url, TcpClientOption tcpClientOption) {
-        this.name = name;
-        this.url = url;
+    @Override
+    public void initLoadBalancer() {
+        JsonRpcChannelPoolHandler poolHandler = new JsonRpcChannelPoolHandler(new Handler());
+        String packageEof = (String) config.get("packageEof").value();
+        int packageMaxLength = (int) config.get("packageMaxLength").value();
+        TcpClientOption tcpClientOption = new TcpClientOption(packageEof, packageMaxLength);
         jsonRpcTcpClientHandler = new JsonRpcTcpClientHandler(tcpClientOption);
-        this.tcpClientOption = tcpClientOption;
+        EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
+        Bootstrap bootstrap = new Bootstrap();
+        bootstrap.group(eventLoopGroup)
+                .channel(NioSocketChannel.class)
+                .option(ChannelOption.SO_RCVBUF, tcpClientOption.getPackageMaxLength())
+                .option(ChannelOption.SO_KEEPALIVE, true)
+                .handler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline()
+                                .addLast(new ByteArrayDecoder())
+                                .addLast(new ByteArrayEncoder())
+                                .addLast(jsonRpcTcpClientHandler);
+                    }
+                });
+
+        if (discovery != null) {
+            loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), DEFAULT_PORT, bootstrap, poolHandler);
+        } else {
+            loadBalancer = new JsonRpcLoadBalancer(() -> url.value(), DEFAULT_PORT, bootstrap, poolHandler);
+        }
     }
 
     @Override
@@ -62,9 +78,10 @@ public class JsonRpcTcpClient implements JsonRpcClientInterface {
         request.put("params", args);
         ResponseDto responseDto;
         String body;
+        FixedChannelPool pool = loadBalancer.getPool();
         try {
-            FixedChannelPool pool = getPool();
             Channel channel = pool.acquire().get();
+            System.out.println(channel.remoteAddress());
             SynchronousQueue<Object> queue = jsonRpcTcpClientHandler.send(request, channel);
             body = (String) queue.take();
             pool.release(channel);
@@ -82,35 +99,9 @@ public class JsonRpcTcpClient implements JsonRpcClientInterface {
         return responseDto.getResult();
     }
 
-    @Synchronized
-    private FixedChannelPool getPool() {
-        JsonRpcChannelPoolHandler handler = new JsonRpcChannelPoolHandler(new Handler());
-        Bootstrap bootstrap = (Bootstrap) bootstrapMap.get(name);
-        if (bootstrap == null) {
-            EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-            bootstrap = new Bootstrap();
-            bootstrap.group(eventLoopGroup)
-                    .channel(NioSocketChannel.class)
-                    .option(ChannelOption.SO_RCVBUF, tcpClientOption.getPackageMaxLength())
-                    .option(ChannelOption.SO_KEEPALIVE, true)
-                    .handler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline()
-                                    .addLast(new ByteArrayDecoder())
-                                    .addLast(new ByteArrayEncoder())
-                                    .addLast(jsonRpcTcpClientHandler);
-                        }
-                    });
-            bootstrapMap.putIfAbsent(name, bootstrap);
-        }
-        FixedChannelPool pool = JsonRpcChannelPoolFactory.getPool(name, url, bootstrap, handler, DEFAULT_PORT);
-        return pool;
-    }
-
     class Handler implements JsonRpcChannelHandler {
         @Override
-        public void channelUpdated(Channel ch) throws Exception {
+        public void channelUpdated(Channel ch) {
             ch.pipeline()
                     .addLast(new ByteArrayDecoder())
                     .addLast(new ByteArrayEncoder())

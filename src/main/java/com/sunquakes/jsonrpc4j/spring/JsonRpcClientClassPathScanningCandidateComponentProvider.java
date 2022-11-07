@@ -1,6 +1,9 @@
 package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.client.*;
+import com.sunquakes.jsonrpc4j.config.Config;
+import com.sunquakes.jsonrpc4j.config.ConfigEntry;
+import com.sunquakes.jsonrpc4j.discovery.Driver;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -14,6 +17,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author : Robert, sunquakes@outlook.com
@@ -38,38 +42,44 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                 Class<?> interfaceType = null;
                 try {
                     interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
+                    Config config = new Config();
 
                     // Select handler according to different protocol
                     String protocol = annotationAttributes.get("protocol").toString();
+                    config.put(new ConfigEntry("protocol", protocol));
                     String url = annotationAttributes.get("url").toString();
                     String name = annotationAttributes.get("value").toString();
-
-                    String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
-                    String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
-                    boolean hasDiscovery = discoveryDriverName != null && discoveryUrl != null;
-                    // Get url from discovery.
-                    if (hasDiscovery) {
-                        JsonRpcServiceDiscovery jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
-                        String serviceUrl = jsonRpcServiceDiscovery.get(name);
-                        if (serviceUrl != null) {
-                            url = serviceUrl;
-                        }
-                    } else {
-                        if (!StringUtils.hasLength(url)) {
-                            log.error("The url of JsonRpcClient is required.");
-                            return false;
-                        }
-                    }
+                    config.put(new ConfigEntry("name", name));
 
                     String packageEof = annotationAttributes.get("packageEof").toString();
                     if (!StringUtils.hasLength(packageEof)) {
                         packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
                     }
+                    config.put(new ConfigEntry("packageEof", packageEof));
                     int packageMaxLength = (int) annotationAttributes.get("packageMaxLength");
                     if (packageMaxLength == 0) {
-                        packageMaxLength = Integer.valueOf(environment.getProperty("jsonrpc.client.package-max-length", String.valueOf(RequestUtils.TCP_PACKAG_MAX_LENGHT)));
+                        packageMaxLength = environment.getProperty("jsonrpc.client.package-max-length", Integer.class, RequestUtils.TCP_PACKAG_MAX_LENGHT);
                     }
-                    JsonRpcClientInterface jsonRpcClient = getJsonRpcClient(name, protocol, url, packageEof, packageMaxLength);
+                    config.put(new ConfigEntry("packageMaxLength", packageMaxLength));
+
+                    String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
+                    String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
+
+                    JsonRpcClientInterface jsonRpcClient;
+                    if (StringUtils.hasLength(url)) {
+                        config.put(new ConfigEntry("url", url));
+                        jsonRpcClient = getJsonRpcClient(protocol, config);
+                    } else {
+                        JsonRpcServiceDiscovery jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
+                        Driver discovery = jsonRpcServiceDiscovery.getDriver();
+                        if (discovery != null) {
+                            config.put(new ConfigEntry("discovery", discovery));
+                            jsonRpcClient = getJsonRpcClient(protocol, config);
+                        } else {
+                            log.error("The url of JsonRpcClient is required.");
+                            return false;
+                        }
+                    }
 
                     BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
                     builder.addConstructorArgValue(interfaceType);
@@ -85,11 +95,11 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
         });
     }
 
-    private JsonRpcClientInterface getJsonRpcClient(String name, String protocol, String url, String packageEof, int packageMaxLength) throws IllegalArgumentException {
+    private JsonRpcClientInterface getJsonRpcClient(String protocol, Config config) throws IllegalArgumentException {
         if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
-            return new JsonRpcTcpClient(name, url, new TcpClientOption(packageEof, packageMaxLength));
+            return new JsonRpcTcpClient(config);
         } else {
-            return new JsonRpcHttpClient(name, protocol, url);
+            return new JsonRpcHttpClient(config);
         }
     }
 }

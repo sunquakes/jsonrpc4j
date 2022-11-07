@@ -80,7 +80,7 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                 registerBeanDefinition(definitionHolder, registry);
                                 // Register service
                                 if (hasDiscovery) {
-                                    jsonRpcServiceDiscovery.register(customBeanName, hostname, port);
+                                    jsonRpcServiceDiscovery.getDriver().register(customBeanName, hostname, port);
                                 }
                             }
                         }
