@@ -81,7 +81,6 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            System.out.println(channel.remoteAddress());
             SynchronousQueue<Object> queue = jsonRpcTcpClientHandler.send(request, channel);
             body = (String) queue.take();
             pool.release(channel);
