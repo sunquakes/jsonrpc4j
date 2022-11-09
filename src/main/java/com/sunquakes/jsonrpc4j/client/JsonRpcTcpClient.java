@@ -86,6 +86,7 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
         } catch (Exception e) {
+            loadBalancer.removePool(pool);
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {

@@ -1,7 +1,9 @@
 package com.sunquakes.jsonrpc4j.client;
 
+import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.pool.FixedChannelPool;
+import org.springframework.util.StringUtils;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
@@ -27,15 +29,20 @@ public class JsonRpcLoadBalancer {
 
     private final int defaultPort;
 
+    private int times = 0;
+
+    private final int MAX_RETRY_TIMES = 3;
+
     public JsonRpcLoadBalancer(Supplier<String> url, int defaultPort, Bootstrap bootstrap, JsonRpcChannelPoolHandler poolHandler) {
         this.bootstrap = bootstrap;
         this.poolHandler = poolHandler;
         this.url = url;
         this.defaultPort = defaultPort;
+        this.initPools();
     }
 
     public void initPools() {
-        Arrays.asList(url.get().split(",")).stream().forEach(item -> {
+        Arrays.asList(url.get().split(",")).stream().filter(item -> StringUtils.hasLength(item)).forEach(item -> {
             String[] ipPort = item.split(":");
             String hostname = ipPort[0];
             int port = defaultPort;
@@ -50,14 +57,24 @@ public class JsonRpcLoadBalancer {
     }
 
     public FixedChannelPool getPool() {
-        FixedChannelPool channelPool;
+        FixedChannelPool pool;
         if (pools.size() <= 0) {
+            if (times >= MAX_RETRY_TIMES) {
+                times = 0;
+                throw new JsonRpcClientException("Fail to get service address.");
+            }
+            times++;
             initPools();
             return getPool();
         } else {
             int index = ThreadLocalRandom.current().nextInt(pools.size());
-            channelPool = pools.get(index);
+            pool = pools.get(index);
         }
-        return channelPool;
+        return pool;
+    }
+
+    public boolean removePool(FixedChannelPool pool) {
+        pool.close();
+        return pools.remove(pool);
     }
 }
