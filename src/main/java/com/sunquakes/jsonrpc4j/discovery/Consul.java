@@ -6,8 +6,10 @@ import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
+import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -34,14 +36,24 @@ public class Consul implements Driver {
     }
 
     @Override
-    public void register(String name, String hostname, int port) {
+    public void register(String name, String protocol, String hostname, int port) {
         MultiValueMap<String, String> queryParams = url.getQueryParams();
         NewService newService = new NewService();
-        newService.setId(String.format("%s-%s:%d", name, queryParams.get("instanceId"), port));
+        newService.setId(String.format("%s-%s:%d", name, queryParams.getFirst("instanceId"), port));
         newService.setName(name);
         newService.setPort(port);
         if (hostname != null) {
             newService.setAddress(hostname);
+        }
+        if (queryParams.containsKey("check") && queryParams.getFirst("check").equals("true")) {
+            NewService.Check serviceCheck = new NewService.Check();
+            if (protocol.equals(JsonRpcProtocol.tcp.name())) {
+                serviceCheck.setTcp(String.format("%s:%d", hostname, port));
+            } else {
+                serviceCheck.setHttp(String.format("%s://%s:%d", protocol, hostname, port));
+            }
+            serviceCheck.setInterval("60s");
+            newService.setCheck(serviceCheck);
         }
         client.agentServiceRegister(newService);
     }

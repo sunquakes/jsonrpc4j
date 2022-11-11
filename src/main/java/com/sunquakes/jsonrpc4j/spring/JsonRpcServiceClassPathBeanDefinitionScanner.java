@@ -54,9 +54,9 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
         String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
         boolean hasDiscovery = discoveryDriverName != null && discoveryUrl != null;
         JsonRpcServiceDiscovery jsonRpcServiceDiscovery = null;
-        int port = 0;
+        Integer port = environment.getProperty("jsonrpc.server.port", Integer.class);
+        String protocol = environment.getProperty("jsonrpc.server.protocol");
         if (hasDiscovery) {
-            port = Integer.parseInt(environment.getProperty("jsonrpc.server.port"));
             jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
         }
         try {
@@ -80,7 +80,7 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                 registerBeanDefinition(definitionHolder, registry);
                                 // Register service
                                 if (hasDiscovery) {
-                                    jsonRpcServiceDiscovery.getDriver().register(customBeanName, hostname, port);
+                                    jsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, hostname, port);
                                 }
                             }
                         }

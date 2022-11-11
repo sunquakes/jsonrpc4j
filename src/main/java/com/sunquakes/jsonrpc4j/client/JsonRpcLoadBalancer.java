@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.client;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.pool.FixedChannelPool;
+import lombok.Synchronized;
 import org.springframework.util.StringUtils;
 
 import java.net.InetSocketAddress;
@@ -38,7 +39,7 @@ public class JsonRpcLoadBalancer {
         this.poolHandler = poolHandler;
         this.url = url;
         this.defaultPort = defaultPort;
-        this.initPools();
+        // this.initPools();
     }
 
     public void initPools() {
@@ -56,6 +57,7 @@ public class JsonRpcLoadBalancer {
         });
     }
 
+    @Synchronized
     public FixedChannelPool getPool() {
         FixedChannelPool pool;
         if (pools.size() <= 0) {

@@ -4,7 +4,7 @@ public interface Driver {
 
     Driver newClient(String url);
 
-    void register(String name, String hostname, int port);
+    void register(String name, String protocol, String hostname, int port);
 
     String get(String name);
 }
