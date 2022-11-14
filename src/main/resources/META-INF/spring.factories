@@ -1,1 +1,2 @@
 org.springframework.context.ApplicationContextInitializer=com.sunquakes.jsonrpc4j.spring.JsonRpcServerInitializer
+org.springframework.context.ApplicationListener=com.sunquakes.jsonrpc4j.spring.JsonRpcListener

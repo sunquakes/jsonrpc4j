@@ -3,13 +3,10 @@ package com.sunquakes.jsonrpc4j.client;
 import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.config.ConfigEntry;
 import com.sunquakes.jsonrpc4j.discovery.Driver;
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.pool.FixedChannelPool;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**

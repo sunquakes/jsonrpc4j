@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * @author : Robert, sunquakes@outlook.com
@@ -80,7 +81,11 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                 registerBeanDefinition(definitionHolder, registry);
                                 // Register service
                                 if (hasDiscovery) {
-                                    jsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, hostname, port);
+                                    JsonRpcServiceDiscovery finalJsonRpcServiceDiscovery = jsonRpcServiceDiscovery;
+                                    JsonRpcServiceDiscovery.addService(() -> {
+                                        finalJsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, hostname, port);
+                                        return true;
+                                    });
                                 }
                             }
                         }

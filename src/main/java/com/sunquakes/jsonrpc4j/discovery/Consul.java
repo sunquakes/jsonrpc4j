@@ -52,9 +52,12 @@ public class Consul implements Driver {
             } else {
                 serviceCheck.setHttp(String.format("%s://%s:%d", protocol, hostname, port));
             }
-            serviceCheck.setInterval("60s");
+            serviceCheck.setInterval("5s");
+            // Set the init status passing
+            serviceCheck.setStatus("passing");
             newService.setCheck(serviceCheck);
         }
+        // Register the service;
         client.agentServiceRegister(newService);
     }
 
