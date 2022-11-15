@@ -63,6 +63,7 @@ public class JsonRpcService2Test {
     public void testRequest() throws IOException, InterruptedException {
         // test request
         {
+            // When running the test case, if the client and the server are in the same app, sleep time should be greater than the health interval.
             Thread.sleep(10000);
             assertEquals(jsonRpcClient.add(1, 2), 3);
             assertEquals(jsonRpcClient.add(3, 4), 7);

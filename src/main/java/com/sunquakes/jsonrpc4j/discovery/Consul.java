@@ -28,6 +28,14 @@ public class Consul implements Driver {
 
     private ConsulClient client;
 
+    private String token; // Request token.
+
+    private boolean check; // Whether to enable health check.
+
+    private String checkInterval = "60s"; // Health check interval.
+
+    private String instanceId; // Identify the same services in the different node.
+
     @Override
     public Consul newClient(String url) {
         this.url = UriComponentsBuilder.fromUriString(url).build();
@@ -37,36 +45,49 @@ public class Consul implements Driver {
 
     @Override
     public void register(String name, String protocol, String hostname, int port) {
-        MultiValueMap<String, String> queryParams = url.getQueryParams();
         NewService newService = new NewService();
-        newService.setId(String.format("%s-%s:%d", name, queryParams.getFirst("instanceId"), port));
+        String id;
+        if (instanceId != null) {
+            id = String.format("%s-%s:%d", name, instanceId, port);
+        } else {
+            id = String.format("%s:%d", name, port);
+        }
+        newService.setId(id);
         newService.setName(name);
         newService.setPort(port);
         if (hostname != null) {
             newService.setAddress(hostname);
         }
-        if (queryParams.containsKey("check") && queryParams.getFirst("check").equals("true")) {
+        if (check) {
             NewService.Check serviceCheck = new NewService.Check();
             if (protocol.equals(JsonRpcProtocol.tcp.name())) {
                 serviceCheck.setTcp(String.format("%s:%d", hostname, port));
             } else {
                 serviceCheck.setHttp(String.format("%s://%s:%d", protocol, hostname, port));
             }
-            serviceCheck.setInterval("5s");
+            serviceCheck.setInterval(checkInterval);
             // Set the init status passing
             serviceCheck.setStatus("passing");
             newService.setCheck(serviceCheck);
         }
+
         // Register the service;
-        client.agentServiceRegister(newService);
+        if (token != null) {
+            client.agentServiceRegister(newService, token);
+        } else {
+            client.agentServiceRegister(newService);
+        }
     }
 
     @Override
     public String get(String name) {
-        HealthServicesRequest request = HealthServicesRequest.newBuilder()
+        HealthServicesRequest.Builder builder = HealthServicesRequest.newBuilder()
                 .setPassing(true)
-                .setQueryParams(QueryParams.DEFAULT)
-                .build();
+                .setQueryParams(QueryParams.DEFAULT);
+        if (token != null) {
+            builder.setToken(token);
+        }
+        HealthServicesRequest request = builder.build();
         Response<List<HealthService>> healthyServices = client.getHealthServices(name, request);
         String url = healthyServices.getValue().stream().map(item -> String.format("%s:%d", item.getService().getAddress(), item.getService().getPort())).collect(Collectors.joining(","));
         return url;
@@ -78,6 +99,21 @@ public class Consul implements Driver {
             client = new ConsulClient(String.format("%s://%s", url.getScheme(), url.getHost()));
         } else {
             client = new ConsulClient(String.format("%s://%s", url.getScheme(), url.getHost()), url.getPort());
+        }
+
+        // Deserialize url parameters.
+        MultiValueMap<String, String> queryParams = url.getQueryParams();
+        if (queryParams.containsKey("token") && StringUtils.hasLength(queryParams.getFirst("token"))) {
+            token = queryParams.getFirst("token");
+        }
+        if (queryParams.containsKey("check") && queryParams.getFirst("check").equals("true")) {
+            check = true;
+        }
+        if (queryParams.containsKey("checkInterval") && StringUtils.hasLength(queryParams.getFirst("checkInterval"))) {
+            checkInterval = queryParams.getFirst("checkInterval");
+        }
+        if (queryParams.containsKey("instanceId") && StringUtils.hasLength(queryParams.getFirst("instanceId"))) {
+            instanceId = queryParams.getFirst("instanceId");
         }
         return client;
     }

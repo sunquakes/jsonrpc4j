@@ -53,6 +53,13 @@ publishing {
                 password sonatypePassword
             }
         }
+        maven {
+            url "https://oss.sonatype.org/content/repositories/snapshots"
+            credentials {
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
     }
 }
 
