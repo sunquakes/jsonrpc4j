@@ -95,6 +95,24 @@ public class JsonRpcTest {
     }
 }
 ```
+
+## More Feature
+### Service Discovery
+- Consul
+```properties
+# The service hostname
+jsonrpc.discovery.hostname=192.168.39.1 
+
+# The consul address
+# instanceId: If there are the same service has same service name and port in difference nodes, the parameter is required. 
+# check: true is enable health check. The default value is false
+# checkInterval: If the check parameter is true, the parameter valid. The default value is 60s
+jsonrpc.discovery.url=http://127.0.0.1:8500?instanceId=2&check=true&checkInterval=5s
+
+# The consul driver
+jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Consul
+```
+
 ## Test
 ```shell
 gradle test -Dfile.encoding=UTF-8

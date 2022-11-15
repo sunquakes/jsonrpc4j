@@ -94,6 +94,24 @@ public class JsonRpcTest {
     }
 }
 ```
+
+## 更多特性
+### 服务发现
+- Consul
+```properties
+# 主机名
+jsonrpc.discovery.hostname=192.168.39.1 
+
+# consul地址
+# instanceId: 用来区分不同节点上拥有相同主机名和端口的 
+# check: 开启健康检查，默认关闭
+# checkInterval: 健康检查周期，默认60s
+jsonrpc.discovery.url=http://127.0.0.1:8500?instanceId=2&check=true&checkInterval=5s
+
+# consul驱动
+jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Consul
+```
+
 ## 测试
 ```shell
 gradle test -Dfile.encoding=UTF-8
