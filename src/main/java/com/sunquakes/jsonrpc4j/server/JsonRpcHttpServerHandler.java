@@ -32,7 +32,7 @@ public class JsonRpcHttpServerHandler extends ChannelInboundHandlerAdapter {
         ByteBuf buf = httpRequest.content();
         HttpMethod method = httpRequest.method();
         if (!HttpMethod.POST.equals(method)) {
-            send(ctx, "", HttpResponseStatus.OK, httpVersion);
+            send(ctx, "", HttpResponseStatus.METHOD_NOT_ALLOWED, httpVersion);
             return;
         }
 

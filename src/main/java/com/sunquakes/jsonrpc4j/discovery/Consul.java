@@ -68,6 +68,8 @@ public class Consul implements Driver {
             serviceCheck.setInterval(checkInterval);
             // Set the init status passing
             serviceCheck.setStatus("passing");
+            // Set the http method
+            serviceCheck.setMethod("POST");
             newService.setCheck(serviceCheck);
         }
 
