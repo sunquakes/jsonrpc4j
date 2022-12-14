@@ -1,5 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring;
 
+import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -14,6 +15,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +57,12 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
     protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
         Environment environment = getEnvironment();
         String hostname = environment.getProperty("jsonrpc.discovery.hostname");
+        if (!StringUtils.hasLength(hostname)) {
+            hostname = getHostname();
+        }
+        if (!StringUtils.hasLength(hostname)) {
+            throw new JsonRpcException("Failed to get hostname.");
+        }
         String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
         String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
         boolean hasDiscovery = discoveryDriverName != null && discoveryUrl != null;
@@ -82,8 +94,9 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                 // Register service
                                 if (hasDiscovery) {
                                     JsonRpcServiceDiscovery finalJsonRpcServiceDiscovery = jsonRpcServiceDiscovery;
+                                    String ip = hostname;
                                     JsonRpcServiceDiscovery.addService(() -> {
-                                        finalJsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, hostname, port);
+                                        finalJsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, ip, port);
                                         return true;
                                     });
                                 }
@@ -94,14 +107,33 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
             }
             return beanDefinitions;
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new JsonRpcException(e.getMessage());
         }
-        return null;
     }
 
     @Override
     protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
         AnnotationMetadata metadata = beanDefinition.getMetadata();
         return metadata.isIndependent() && (metadata.isConcrete() || metadata.isInterface());
+    }
+
+    private String getHostname() {
+        Enumeration<NetworkInterface> netInterfaces;
+        try {
+            netInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (netInterfaces.hasMoreElements()) {
+                NetworkInterface ni = netInterfaces.nextElement();
+                Enumeration<InetAddress> address = ni.getInetAddresses();
+                while (address.hasMoreElements()) {
+                    InetAddress ip = address.nextElement();
+                    if (ip instanceof Inet4Address && !ip.isLoopbackAddress()) {
+                        return ip.getHostAddress();
+                    }
+                }
+            }
+            return null;
+        } catch (SocketException e) {
+            return null;
+        }
     }
 }
