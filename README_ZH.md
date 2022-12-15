@@ -99,7 +99,7 @@ public class JsonRpcTest {
 ### 服务发现
 - Consul
 ```properties
-# 主机名
+# 主机名，非必填项，如果用默认主机ip，此项可以不配置
 jsonrpc.discovery.hostname=192.168.39.1 
 
 # consul地址

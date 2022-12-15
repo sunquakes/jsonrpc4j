@@ -100,7 +100,7 @@ public class JsonRpcTest {
 ### Service Discovery
 - Consul
 ```properties
-# The service hostname
+# The service hostname, not required, if the default node ip is used, it can be ignored .
 jsonrpc.discovery.hostname=192.168.39.1 
 
 # The consul address
