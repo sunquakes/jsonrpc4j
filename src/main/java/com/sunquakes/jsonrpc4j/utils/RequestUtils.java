@@ -9,9 +9,15 @@ import com.sunquakes.jsonrpc4j.exception.InvalidParamsException;
 import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
 import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import lombok.experimental.UtilityClass;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Parameter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,6 +27,7 @@ import java.util.stream.Collectors;
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM
  **/
+@Slf4j
 @UtilityClass
 public class RequestUtils {
 
@@ -123,5 +130,25 @@ public class RequestUtils {
 
     public String getId() {
         return UUID.randomUUID().toString();
+    }
+
+    public String getLocalIp() {
+        Enumeration<NetworkInterface> netInterfaces;
+        try {
+            netInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (netInterfaces.hasMoreElements()) {
+                NetworkInterface ni = netInterfaces.nextElement();
+                Enumeration<InetAddress> address = ni.getInetAddresses();
+                while (address.hasMoreElements()) {
+                    InetAddress ip = address.nextElement();
+                    if (ip instanceof Inet4Address && !ip.isLoopbackAddress()) {
+                        return ip.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            log.error(e.getMessage(), e);
+        }
+        return "127.0.0.1";
     }
 }

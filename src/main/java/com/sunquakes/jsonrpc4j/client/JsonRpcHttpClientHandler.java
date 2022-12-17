@@ -34,8 +34,6 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
 
     private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap();
 
-    private InetSocketAddress address;
-
     @Synchronized
     public synchronized SynchronousQueue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
         String id = data.getString("id");
@@ -54,7 +52,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         buffer.writerIndex();
         buffer.readableBytes();
         request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
-        // request.headers().add(HttpHeaderNames.HOST, address.getHostString());
+        request.headers().add(HttpHeaderNames.HOST, RequestUtils.getLocalIp());
 
         channel.writeAndFlush(request).sync();
         return synchronousQueue;

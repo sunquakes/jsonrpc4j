@@ -69,7 +69,7 @@ public class Consul implements Driver {
             // Set the init status passing
             serviceCheck.setStatus("passing");
             // Set the http method
-            serviceCheck.setMethod("POST");
+            serviceCheck.setMethod("GET");
             newService.setCheck(serviceCheck);
         }
 
