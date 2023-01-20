@@ -1,1 +1,2 @@
 com.sunquakes.jsonrpc4j.discovery.Consul
+com.sunquakes.jsonrpc4j.discovery.Nacos

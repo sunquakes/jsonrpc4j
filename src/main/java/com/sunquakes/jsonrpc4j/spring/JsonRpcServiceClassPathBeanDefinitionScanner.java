@@ -1,6 +1,7 @@
 package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
@@ -30,6 +31,7 @@ import java.util.function.Supplier;
  * @version : 1.0.0
  * @since : 2022/6/2 1:19 PM
  **/
+@Slf4j
 public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 
     public JsonRpcServiceClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, Environment environment) {
@@ -96,7 +98,11 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                                     JsonRpcServiceDiscovery finalJsonRpcServiceDiscovery = jsonRpcServiceDiscovery;
                                     String ip = hostname;
                                     JsonRpcServiceDiscovery.addService(() -> {
-                                        finalJsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, ip, port);
+                                        try {
+                                            finalJsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, ip, port);
+                                        } catch (Exception e) {
+                                            log.error(e.getMessage(), e);
+                                        }
                                         return true;
                                     });
                                 }

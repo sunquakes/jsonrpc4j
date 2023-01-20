@@ -1,6 +1,6 @@
 package com.sunquakes.jsonrpc4j.spring.boot;
 
-import com.sunquakes.jsonrpc4j.discovery.Consul;
+import com.sunquakes.jsonrpc4j.discovery.Nacos;
 import com.sunquakes.jsonrpc4j.spring.JsonRpcServiceDiscovery;
 import com.sunquakes.jsonrpc4j.spring.boot.dto.ArgsDto;
 import com.sunquakes.jsonrpc4j.spring.boot.dto.ResultDto;
@@ -8,27 +8,22 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-/**
- * @Project: jsonrpc4j
- * @Package: com.sunquakes.jsonrpc4j.spring.boot
- * @Author: Robert
- * @CreateTime: 2022/5/30 12:48 PM
- **/
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = JsonRpcApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("boot")
-public class JsonRpcService2Test {
+@ActiveProfiles("nacos")
+public class NacosTest {
 
     @Value("${jsonrpc.server.protocol}")
     private String protocol;
@@ -38,11 +33,11 @@ public class JsonRpcService2Test {
 
     private static MockedStatic<JsonRpcServiceDiscovery> mockStatic;
 
-    public JsonRpcService2Test() {
-        Consul consul = mock(Consul.class);
-        when(consul.get(anyString())).thenReturn("localhost:" + 3202);
+    public NacosTest() {
+        Nacos nacos = mock(Nacos.class);
+        when(nacos.get(anyString())).thenReturn("localhost:" + 3207);
         JsonRpcServiceDiscovery instanse = mock(JsonRpcServiceDiscovery.class);
-        when(instanse.getDriver()).thenReturn(consul);
+        when(instanse.getDriver()).thenReturn(nacos);
         mockStatic = mockStatic(JsonRpcServiceDiscovery.class);
         mockStatic.when(() -> JsonRpcServiceDiscovery.newInstance(anyString(), anyString())).thenReturn(instanse);
     }
@@ -52,21 +47,19 @@ public class JsonRpcService2Test {
         mockStatic.close();
     }
 
-    @Autowired
+    @Resource
     private IJsonRpcClient jsonRpcClient;
 
     @Test
     public void testGetConfiguration() {
-        assertEquals(protocol, "tcp");
-        assertEquals(port, 3202);
+        assertEquals("tcp", protocol);
+        assertEquals(3207, port);
     }
 
     @Test
     public void testRequest() throws IOException, InterruptedException {
         // test request
         {
-            // When running the test case, if the client and the server are in the same app, sleep time should be greater than the health interval.
-            Thread.sleep(10000);
             assertEquals(jsonRpcClient.add(1, 2), 3);
             assertEquals(jsonRpcClient.add(3, 4), 7);
             assertEquals(jsonRpcClient.add(5, 2), 7);
