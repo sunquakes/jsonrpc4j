@@ -7,7 +7,7 @@ English | [🇨🇳中文](README_ZH.md)
 <dependency>
     <groupId>com.sunquakes</groupId>
     <artifactId>jsonrpc4j</artifactId>
-    <version>2.0.3</version>
+    <version>2.1.1-SNAPSHOT</version>
 </dependency>
 ```
 - gradle
@@ -111,6 +111,18 @@ jsonrpc.discovery.url=http://127.0.0.1:8500?instanceId=2&check=true&checkInterva
 
 # The consul driver
 jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Consul
+```
+- Nacos 
+```properties
+# The service hostname, not required, if the default node ip is used, it can be ignored.
+jsonrpc.discovery.hostname=192.168.39.1 
+
+# The nacos address
+# Support [Open API Guide](https://nacos.io/en-us/docs/open-api.html) Register instance chapter Request Parameters.
+jsonrpc.discovery.url=http://127.0.0.1:8849?namespaceId=XXXXXX&...
+
+# The nacos driver
+jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Nacos
 ```
 
 ## Test

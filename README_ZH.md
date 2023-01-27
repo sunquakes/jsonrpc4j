@@ -7,7 +7,7 @@
 <dependency>
     <groupId>com.sunquakes</groupId>
     <artifactId>jsonrpc4j</artifactId>
-    <version>2.0.3</version>
+    <version>2.1.1-SNAPSHOT</version>
 </dependency>
 ```
 - gradle
@@ -110,6 +110,18 @@ jsonrpc.discovery.url=http://127.0.0.1:8500?instanceId=2&check=true&checkInterva
 
 # consul驱动
 jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Consul
+```
+- Nacos 
+```properties
+# 主机名，非必填项，如果用默认主机ip，此项可以不配置
+jsonrpc.discovery.hostname=192.168.39.1 
+
+# nacos地址
+# 支持 [Open API Guide](https://nacos.io/zh-cn/docs/open-api.html) 注册实例章节的请求参数
+jsonrpc.discovery.url=http://127.0.0.1:8849?namespaceId=XXXXXX&...
+
+# consul驱动
+jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Nacos
 ```
 
 ## 测试
