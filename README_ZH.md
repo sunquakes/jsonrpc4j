@@ -13,7 +13,7 @@
 - gradle
 ```groovy
 // https://mvnrepository.com/artifact/com.sunquakes/jsonrpc4j
-implementation group: 'com.sunquakes', name: 'jsonrpc4j', version: '2.0.3'
+implementation group: 'com.sunquakes', name: 'jsonrpc4j', version: '2.1.1-SNAPSHOT'
 ```
 
 ## 开始使用
