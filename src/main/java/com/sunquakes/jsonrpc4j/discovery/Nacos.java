@@ -13,7 +13,6 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,7 +27,6 @@ public class Nacos implements Driver {
     private UriComponents url;
 
     private CloseableHttpClient client = HttpClients.createDefault();
-    ;
 
     @Override
     public Nacos newClient(String url) {

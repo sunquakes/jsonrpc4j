@@ -2,7 +2,7 @@ buildscript {
     ext {
         set("springVersion", "5.3.19")
         set("httpclientVersion", "4.5.13")
-        set("fastjsonVersion", "2.0.2")
+        set("fastjsonVersion", "2.0.23")
         set("lombokVersion", "1.18.24")
         set("slf4jVersion", "1.7.36")
         set("springbootVersion", "2.7.0")
