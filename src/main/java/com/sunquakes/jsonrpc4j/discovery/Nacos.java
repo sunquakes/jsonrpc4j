@@ -19,6 +19,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
@@ -31,6 +33,12 @@ public class Nacos implements Driver {
 
     private static final int STATUS_CODE_SUCCESS = 200;
 
+    private static final int HEARTBEAT_INTERVAL = 5000;
+
+    private static final String EPHEMERAL_KEY = "ephemeral";
+
+    private static final String IS_EPHEMERAL = "true";
+
     private UriComponents url;
 
     private CloseableHttpClient client = HttpClients.createDefault();
@@ -42,8 +50,9 @@ public class Nacos implements Driver {
     @Override
     public Nacos newClient(String url) {
         this.url = UriComponentsBuilder.fromUriString(url).build();
-        ephemeral = this.url.getQueryParams().getFirst("ephemeral");
-        heartbeat();
+        if (this.url.getQueryParams().containsKey(EPHEMERAL_KEY)) {
+            ephemeral = this.url.getQueryParams().getFirst("ephemeral");
+        }
         return this;
     }
 
@@ -65,7 +74,7 @@ public class Nacos implements Driver {
             if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
                 new JsonRpcException("Failed to register to nacos.");
             }
-            if ("true".equals(ephemeral)) {
+            if (IS_EPHEMERAL.equals(ephemeral)) {
                 registerHeartbeat(name, hostname, port);
             }
         } catch (Exception e) {
@@ -97,7 +106,7 @@ public class Nacos implements Driver {
         return name;
     }
 
-    private String beat(String serviceName, String ip, int port) {
+    public String beat(String serviceName, String ip, int port) {
         UriComponents url = this.url;
         UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
         url = builder.uriComponents(url)
@@ -112,7 +121,7 @@ public class Nacos implements Driver {
         try {
             HttpResponse res = client.execute(put);
             if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
-                new JsonRpcException("Failed to get the service list from nacos.");
+                new JsonRpcException("Failed to send heartbeat to nacos.");
             }
             String json = EntityUtils.toString(res.getEntity());
             return json;
@@ -123,23 +132,27 @@ public class Nacos implements Driver {
     }
 
     private void registerHeartbeat(String serviceName, String ip, int port) {
+        if (heartbeatList.isEmpty()) {
+            heartbeat();
+        }
         heartbeatList.add(new Pair<>(serviceName, new Service(ip, port, null, null)));
     }
 
     private void heartbeat() {
-        new Thread(() -> {
+        ExecutorService es = Executors.newSingleThreadExecutor();
+        es.submit(() -> {
             while (true) {
                 try {
                     heartbeatList.forEach(item -> {
                         Service service = item.getValue();
                         beat(item.getKey(), service.getIp(), service.getPort());
                     });
-                    Thread.sleep(10000);
+                    Thread.sleep(HEARTBEAT_INTERVAL);
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
                 }
             }
-        }).start();
+        });
     }
 
     @Data
