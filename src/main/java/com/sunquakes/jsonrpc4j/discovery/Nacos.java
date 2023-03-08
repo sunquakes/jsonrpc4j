@@ -2,7 +2,6 @@ package com.sunquakes.jsonrpc4j.discovery;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
-import javafx.util.Pair;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,8 +16,10 @@ import org.apache.http.util.EntityUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class Nacos implements Driver {
 
     private String ephemeral = "true";
 
-    private List<Pair<String, Service>> heartbeatList = new ArrayList<>();
+    private List<Map.Entry<String, Service>> heartbeatList = new ArrayList<>();
 
     @Override
     public Nacos newClient(String url) {
@@ -114,8 +115,7 @@ public class Nacos implements Driver {
                 .queryParam("serviceName", serviceName)
                 .queryParam("ip", ip)
                 .queryParam("port", port)
-                .queryParam("ephemeral", ephemeral)
-                .build();
+                .queryParam("ephemeral", ephemeral) .build();
 
         HttpPut put = new HttpPut(url.toString());
         try {
@@ -135,7 +135,7 @@ public class Nacos implements Driver {
         if (heartbeatList.isEmpty()) {
             heartbeat();
         }
-        heartbeatList.add(new Pair<>(serviceName, new Service(ip, port, null, null)));
+        heartbeatList.add(new AbstractMap.SimpleEntry<>(serviceName, new Service(ip, port, null, null)));
     }
 
     private void heartbeat() {
