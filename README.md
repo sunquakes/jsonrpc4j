@@ -9,16 +9,16 @@ English | [🇨🇳中文](README_ZH.md)
 ```xml
 
 <repositories>
-    <repository>
-        <id>releases</id>
-        <name>Releases</name>
-        <url>https://oss.sonatyorg/content/repositories/releases/</url>
-    </repository>
-    <repository>
-        <id>snapshots</id>
-        <name>Snapshots</name>
-        <url>https://oss.sonatyorg/content/repositories/snapshots/</url>
-    </repository>
+  <repository>
+    <id>releases</id>
+    <name>Releases</name>
+    <url>https://oss.sonatype.org/content/repositories/releases/</url>
+  </repository>
+  <repository>
+    <id>snapshots</id>
+    <name>Snapshots</name>
+    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+  </repository>
 </repositories>
 ```
 
