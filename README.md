@@ -2,6 +2,13 @@ English | [🇨🇳中文](README_ZH.md)
 
 # jsonrpc4j
 
+<p align="center"><a href="https://moonquakes.io/" target="_blank" rel="noopener noreferrer"><img width="200" src="https://www.moonquakes.io/images/logo.png" alt="moonquakes logo"></a></p>
+<p align="center">
+    <img alt="gradle" src="https://img.shields.io/badge/gradle-%3E%3D7.1-red">
+    <a href="https://github.com/sunquakes/jsonrpc4j"><img alt="Maven Central" src="https://img.shields.io/maven-central/v/com.sunquakes/jsonrpc4j"></a>
+    <img alt="GitHub" src="https://img.shields.io/github/license/sunquakes/jsonrpc4j?color=blue">
+</p> 
+
 ## Installing
 
 - Add maven source to the pom.xml
@@ -9,16 +16,16 @@ English | [🇨🇳中文](README_ZH.md)
 ```xml
 
 <repositories>
-  <repository>
-    <id>releases</id>
-    <name>Releases</name>
-    <url>https://oss.sonatype.org/content/repositories/releases/</url>
-  </repository>
-  <repository>
-    <id>snapshots</id>
-    <name>Snapshots</name>
-    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-  </repository>
+    <repository>
+        <id>releases</id>
+        <name>Releases</name>
+        <url>https://oss.sonatype.org/content/repositories/releases/</url>
+    </repository>
+    <repository>
+        <id>snapshots</id>
+        <name>Snapshots</name>
+        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
 </repositories>
 ```
 
