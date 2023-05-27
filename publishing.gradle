@@ -50,16 +50,16 @@ publishing {
             name "maven"
             url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             credentials {
-                username sonatypeUsername
-                password sonatypePassword
+                username = project.hasProperty('sonatypeUsername') ? project.sonatypeUsername : System.getenv("SONATYPE_USERNAME")
+                password = project.hasProperty('sonatypePassword') ? project.sonatypePassword : System.getenv("SONATYPE_PASSWORD")
             }
         }
         maven {
             name "mavenSnapShot"
             url "https://oss.sonatype.org/content/repositories/snapshots/"
             credentials {
-                username sonatypeUsername
-                password sonatypePassword
+                username = project.hasProperty('sonatypeUsername') ? project.sonatypeUsername : System.getenv("SONATYPE_USERNAME")
+                password = project.hasProperty('sonatypePassword') ? project.sonatypePassword : System.getenv("SONATYPE_PASSWORD")
             }
         }
     }
@@ -72,4 +72,9 @@ signing {
 javadoc {
     // <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     options.addStringOption("charset", "UTF-8")
+}
+
+// Add a task to publish to mavenSnapShot repository
+task publishToMavenSnapShotRepository {
+    dependsOn('publishMavenJavaPublicationToMavenSnapShotRepository')
 }
