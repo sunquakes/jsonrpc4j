@@ -17,6 +17,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 public class JsonRpcServerHandler {
 
     private ApplicationContext applicationContext;
+
+    private final static Map<String, Optional<Method>> METHOD_MAP = new ConcurrentHashMap<>();
 
     public Object handle(String json) {
         try {
@@ -60,14 +65,20 @@ public class JsonRpcServerHandler {
         try {
             String[] methodArr = RequestUtils.parseMethod(method);
             String className = methodArr[0];
+            String methodName = methodArr[1];
             Object clazz = applicationContext.getBean(className);
             Method[] methods = clazz.getClass().getMethods();
             Method m = null;
-            for (Method m2 : methods) {
-                if (m2.getName().equals(methodArr[1])) {
-                    m = m2;
-                    break;
+            if (METHOD_MAP.containsKey(method)) {
+                m = METHOD_MAP.get(method).orElse(null);
+            } else {
+                for (Method m2 : methods) {
+                    if (m2.getName().equals(methodName)) {
+                        m = m2;
+                        break;
+                    }
                 }
+                METHOD_MAP.put(method, Optional.ofNullable(m));
             }
             if (m == null) {
                 throw new MethodNotFoundException();
