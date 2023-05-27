@@ -54,7 +54,7 @@ jobs:
 
     - name: Publish to Maven Central
       run: |
-        if [[ ${{ env.TAG_NAME }} == *"SNAPSHOT" ]]; then
+        if [[ ${{ env.TAG_NAME }} == *"beta" || ${{ env.TAG_NAME }} == *"alpha" ]]; then
           ./gradlew publishToMavenSnapShotRepository
         else
           ./gradlew publish
