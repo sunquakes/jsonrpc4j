@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
- * @author : Robert, sunquakes@outlook.com
+ * @author : Shing, sunquakes@outlook.com
  * @version : 2.2.0
  * @since : 2023/1/15 10:34 AM
  **/

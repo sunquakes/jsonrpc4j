@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 /**
- * @author : Robert, sunquakes@outlook.com
+ * @author : Shing, sunquakes@outlook.com
  * @version : 1.0.0
  * @since : 2022/6/2 1:19 PM
  **/

@@ -33,7 +33,7 @@ publishing {
                 }
                 developers {
                     developer {
-                        name = 'Robert'
+                        name = 'Shing'
                         email = 'sunquakes@outlook.com'
                     }
                 }

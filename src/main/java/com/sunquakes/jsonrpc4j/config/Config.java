@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 /**
- * @author : Robert, sunquakes@outlook.com
+ * @author : Shing, sunquakes@outlook.com
  * @version : 2.1.0
  * @since : 2022/11/6 6:20 PM
  **/
