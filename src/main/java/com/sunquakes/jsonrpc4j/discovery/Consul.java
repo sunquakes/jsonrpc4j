@@ -7,6 +7,7 @@ import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
+import com.sunquakes.jsonrpc4j.utils.AddressUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -17,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author : Robert, sunquakes@outlook.com
+ * @author : Shing, sunquakes@outlook.com
  * @version : 2.1.0
  * @since : 2022/11/1 7:12 PM
  **/
@@ -36,6 +37,14 @@ public class Consul implements Driver {
 
     private String instanceId; // Identify the same services in the different node.
 
+    private static final String CHECK_FIELD = "check";
+
+    private static final String TOKEN_FIELD = "token";
+
+    private static final String CHECK_INTERVAL_FIELD = "checkInterval";
+
+    private static final String INSTANCE_ID_FIELD = "instanceId";
+
     @Override
     public Consul newClient(String url) {
         this.url = UriComponentsBuilder.fromUriString(url).build();
@@ -50,7 +59,7 @@ public class Consul implements Driver {
         if (instanceId != null) {
             id = String.format("%s-%s:%d", name, instanceId, port);
         } else {
-            id = String.format("%s:%d", name, port);
+            id = AddressUtils.getUrl(name, port);
         }
         newService.setId(id);
         newService.setName(name);
@@ -61,7 +70,7 @@ public class Consul implements Driver {
         if (check) {
             NewService.Check serviceCheck = new NewService.Check();
             if (protocol.equals(JsonRpcProtocol.tcp.name())) {
-                serviceCheck.setTcp(String.format("%s:%d", hostname, port));
+                serviceCheck.setTcp(AddressUtils.getUrl(hostname, port));
             } else {
                 serviceCheck.setHttp(String.format("%s://%s:%d", protocol, hostname, port));
             }
@@ -73,7 +82,6 @@ public class Consul implements Driver {
             newService.setCheck(serviceCheck);
         }
 
-        // Register the service;
         if (token != null) {
             client.agentServiceRegister(newService, token);
         } else {
@@ -91,12 +99,10 @@ public class Consul implements Driver {
         }
         HealthServicesRequest request = builder.build();
         Response<List<HealthService>> healthyServices = client.getHealthServices(name, request);
-        String url = healthyServices.getValue().stream().map(item -> String.format("%s:%d", item.getService().getAddress(), item.getService().getPort())).collect(Collectors.joining(","));
-        return url;
+        return healthyServices.getValue().stream().map(item -> AddressUtils.getUrl(item.getService().getAddress(), item.getService().getPort())).collect(Collectors.joining(","));
     }
 
     private ConsulClient getClient() {
-        ConsulClient client;
         if (url.getPort() == -1) {
             client = new ConsulClient(String.format("%s://%s", url.getScheme(), url.getHost()));
         } else {
@@ -105,17 +111,17 @@ public class Consul implements Driver {
 
         // Deserialize url parameters.
         MultiValueMap<String, String> queryParams = url.getQueryParams();
-        if (queryParams.containsKey("token") && StringUtils.hasLength(queryParams.getFirst("token"))) {
-            token = queryParams.getFirst("token");
+        if (queryParams.containsKey(TOKEN_FIELD) && StringUtils.hasLength(queryParams.getFirst(TOKEN_FIELD))) {
+            token = queryParams.getFirst(TOKEN_FIELD);
         }
-        if (queryParams.containsKey("check") && queryParams.getFirst("check").equals("true")) {
-            check = true;
+        if (queryParams.containsKey(CHECK_FIELD)) {
+            check = Boolean.parseBoolean(queryParams.getFirst(CHECK_FIELD));
         }
-        if (queryParams.containsKey("checkInterval") && StringUtils.hasLength(queryParams.getFirst("checkInterval"))) {
-            checkInterval = queryParams.getFirst("checkInterval");
+        if (queryParams.containsKey(CHECK_INTERVAL_FIELD) && StringUtils.hasLength(queryParams.getFirst(CHECK_INTERVAL_FIELD))) {
+            checkInterval = queryParams.getFirst(CHECK_INTERVAL_FIELD);
         }
-        if (queryParams.containsKey("instanceId") && StringUtils.hasLength(queryParams.getFirst("instanceId"))) {
-            instanceId = queryParams.getFirst("instanceId");
+        if (queryParams.containsKey(INSTANCE_ID_FIELD) && StringUtils.hasLength(queryParams.getFirst(INSTANCE_ID_FIELD))) {
+            instanceId = queryParams.getFirst(INSTANCE_ID_FIELD);
         }
         return client;
     }
