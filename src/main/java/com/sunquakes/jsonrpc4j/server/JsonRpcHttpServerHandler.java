@@ -11,7 +11,7 @@ import io.netty.util.CharsetUtil;
 import org.springframework.context.ApplicationContext;
 
 /**
- * @author : Robert, sunquakes@outlook.com
+ * @author : Shing, sunquakes@outlook.com
  * @version : 2.0.0
  * @since : 2022/7/2 12:32 PM
  **/

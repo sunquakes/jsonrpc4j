@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 /**
- * @author : Robert, sunquakes@outlook.com
+ * @author : Shing, sunquakes@outlook.com
  * @version : 2.1.0
  * @since : 2022/11/7 0:23 PM
  **/

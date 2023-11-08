@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * @author : Robert, sunquakes@outlook.com
+ * @author : Shing, sunquakes@outlook.com
  * @version : 1.0.0
  * @since: 2022/6/6 9:17 PM
  **/

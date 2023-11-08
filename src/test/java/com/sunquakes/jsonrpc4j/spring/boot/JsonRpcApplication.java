@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * @Project: jsonrpc4j
  * @Package: com.sunquakes.jsonrpc4j.spring.boot
- * @Author: Robert
+ * @Author: Shing
  * @CreateTime: 2022/5/30 12:45 PM
  **/
 @SpringBootApplication

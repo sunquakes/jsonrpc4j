@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 /**
  * @Project: jsonrpc4j
  * @Package: com.sunquakes.jsonrpc4j.spring.boot
- * @Author: Robert
+ * @Author: Shing
  * @CreateTime: 2022/5/30 12:48 PM
  **/
 @RunWith(SpringRunner.class)
