@@ -58,7 +58,7 @@ public class Nacos implements Driver {
     }
 
     @Override
-    public void register(String name, String protocol, String hostname, int port) {
+    public boolean register(String name, String protocol, String hostname, int port) {
         UriComponents url = this.url;
         UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
         url = builder.uriComponents(url)
@@ -80,7 +80,9 @@ public class Nacos implements Driver {
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            return false;
         }
+        return true;
     }
 
     @Override

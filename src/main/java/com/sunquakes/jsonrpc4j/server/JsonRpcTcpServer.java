@@ -58,45 +58,42 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
     public void start() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupThreadNum);
-                    EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupThreadNum);
+        executorService.submit(() -> {
+            try {
+                EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupThreadNum);
+                EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupThreadNum);
 
-                    ServerBootstrap sb = new ServerBootstrap();
-                    sb.group(bossGroup, workerGroup)
-                            .channel(NioServerSocketChannel.class)
-                            .option(ChannelOption.SO_BACKLOG, poolMaxActive)
-                            .option(ChannelOption.SO_RCVBUF, packageMaxLength)
-                            .childOption(ChannelOption.SO_KEEPALIVE, true)
-                            .childHandler(new ChannelInitializer<SocketChannel>() {  // 绑定客户端连接时候触发操作
-                                @Override
-                                protected void initChannel(SocketChannel sh) throws Exception {
-                                    sh.pipeline()
-                                            .addLast(new ByteArrayDecoder())
-                                            .addLast(new ByteArrayEncoder())
-                                            .addLast(new JsonRpcTcpServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
-                                }
-                            });
-                    ChannelFuture future;
-                    future = sb.bind(port).sync();
-                    countDownLatch.countDown();
+                ServerBootstrap sb = new ServerBootstrap();
+                sb.group(bossGroup, workerGroup)
+                        .channel(NioServerSocketChannel.class)
+                        .option(ChannelOption.SO_BACKLOG, poolMaxActive)
+                        .option(ChannelOption.SO_RCVBUF, packageMaxLength)
+                        .childOption(ChannelOption.SO_KEEPALIVE, true)
+                        .childHandler(new ChannelInitializer<SocketChannel>() {  // 绑定客户端连接时候触发操作
+                            @Override
+                            protected void initChannel(SocketChannel sh) throws Exception {
+                                sh.pipeline()
+                                        .addLast(new ByteArrayDecoder())
+                                        .addLast(new ByteArrayEncoder())
+                                        .addLast(new JsonRpcTcpServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
+                            }
+                        });
+                ChannelFuture future;
+                future = sb.bind(port).sync();
+                countDownLatch.countDown();
 
-                    if (future.isSuccess()) {
-                        log.info("JsonRpc tcp server startup successfully.");
-                    } else {
-                        log.info("JsonRpc tcp server startup failed.");
-                        future.cause().printStackTrace();
-                        bossGroup.shutdownGracefully();
-                        workerGroup.shutdownGracefully();
-                    }
-
-                    future.channel().closeFuture().sync();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (future.isSuccess()) {
+                    log.info("JsonRpc tcp server startup successfully.");
+                } else {
+                    log.info("JsonRpc tcp server startup failed.");
+                    future.cause().printStackTrace();
+                    bossGroup.shutdownGracefully();
+                    workerGroup.shutdownGracefully();
                 }
+
+                future.channel().closeFuture().sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         });
         countDownLatch.await();
