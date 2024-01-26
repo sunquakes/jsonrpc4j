@@ -78,47 +78,44 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
 
         final SslContext finalSslContext = sslContext;
 
-        executorService.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupThreadNum);
-                    EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupThreadNum);
+        executorService.submit(() -> {
+            try {
+                EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupThreadNum);
+                EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupThreadNum);
 
-                    ServerBootstrap sb = new ServerBootstrap();
-                    sb.group(bossGroup, workerGroup)
-                            .channel(NioServerSocketChannel.class)
-                            .option(ChannelOption.SO_BACKLOG, poolMaxActive)
-                            .childOption(ChannelOption.SO_KEEPALIVE, true)
-                            .childHandler(new ChannelInitializer<SocketChannel>() {
-                                @Override
-                                protected void initChannel(SocketChannel sh) throws Exception {
-                                    if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
-                                        sh.pipeline().addFirst(new OptionalSslHandler(finalSslContext));
-                                    }
-                                    sh.pipeline()
-                                            .addLast("codec", new HttpServerCodec())
-                                            .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
-                                            .addLast(new JsonRpcHttpServerHandler(applicationContext));
+                ServerBootstrap sb = new ServerBootstrap();
+                sb.group(bossGroup, workerGroup)
+                        .channel(NioServerSocketChannel.class)
+                        .option(ChannelOption.SO_BACKLOG, poolMaxActive)
+                        .childOption(ChannelOption.SO_KEEPALIVE, true)
+                        .childHandler(new ChannelInitializer<SocketChannel>() {
+                            @Override
+                            protected void initChannel(SocketChannel sh) throws Exception {
+                                if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+                                    sh.pipeline().addFirst(new OptionalSslHandler(finalSslContext));
                                 }
-                            });
-                    ChannelFuture future;
-                    future = sb.bind(port).sync();
-                    countDownLatch.countDown();
+                                sh.pipeline()
+                                        .addLast("codec", new HttpServerCodec())
+                                        .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
+                                        .addLast(new JsonRpcHttpServerHandler(applicationContext));
+                            }
+                        });
+                ChannelFuture future;
+                future = sb.bind(port).sync();
+                countDownLatch.countDown();
 
-                    if (future.isSuccess()) {
-                        log.info("JsonRpc http server startup successfully.");
-                    } else {
-                        log.info("JsonRpc http server startup failed.");
-                        future.cause().printStackTrace();
-                        bossGroup.shutdownGracefully();
-                        workerGroup.shutdownGracefully();
-                    }
-
-                    future.channel().closeFuture().sync();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (future.isSuccess()) {
+                    log.info("JsonRpc http server startup successfully.");
+                } else {
+                    log.info("JsonRpc http server startup failed.");
+                    future.cause().printStackTrace();
+                    bossGroup.shutdownGracefully();
+                    workerGroup.shutdownGracefully();
                 }
+
+                future.channel().closeFuture().sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         });
         countDownLatch.await();

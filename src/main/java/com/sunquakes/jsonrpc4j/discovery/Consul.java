@@ -53,7 +53,7 @@ public class Consul implements Driver {
     }
 
     @Override
-    public void register(String name, String protocol, String hostname, int port) {
+    public boolean register(String name, String protocol, String hostname, int port) {
         NewService newService = new NewService();
         String id;
         if (instanceId != null) {
@@ -82,11 +82,17 @@ public class Consul implements Driver {
             newService.setCheck(serviceCheck);
         }
 
-        if (token != null) {
-            client.agentServiceRegister(newService, token);
-        } else {
-            client.agentServiceRegister(newService);
+        try {
+            if (token != null) {
+                client.agentServiceRegister(newService, token);
+            } else {
+                client.agentServiceRegister(newService);
+            }
+        } catch (RuntimeException e) {
+            log.error(e.getMessage(), e);
+            return false;
         }
+        return true;
     }
 
     @Override
