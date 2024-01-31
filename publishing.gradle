@@ -78,3 +78,7 @@ javadoc {
 task publishToMavenSnapShotRepository {
     dependsOn('publishMavenJavaPublicationToMavenSnapShotRepository')
 }
+// Add a task to publish to maven repository
+task publishToMavenRepository {
+    dependsOn('publishMavenJavaPublicationToMavenRepository')
+}

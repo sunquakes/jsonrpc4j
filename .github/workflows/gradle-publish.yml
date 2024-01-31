@@ -57,7 +57,7 @@ jobs:
         if [[ ${{ env.TAG_NAME }} == *"beta" || ${{ env.TAG_NAME }} == *"alpha" ]]; then
           ./gradlew publishToMavenSnapShotRepository
         else
-          ./gradlew publish
+          ./gradlew publishToMavenRepository
         fi
       env:
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
