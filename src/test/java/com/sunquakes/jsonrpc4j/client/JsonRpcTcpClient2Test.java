@@ -60,16 +60,13 @@ public class JsonRpcTcpClient2Test {
         CountDownLatch countDownLatch = new CountDownLatch(total);
         ExecutorService pool = Executors.newFixedThreadPool(co);
         for (int i = 0; i < total; i++) {
-            pool.submit(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        assertEquals(3, jsonRpcTcpClient2.add(1, 2));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        countDownLatch.countDown();
-                    }
+            pool.submit(() -> {
+                try {
+                    assertEquals(3, jsonRpcTcpClient2.add(1, 2));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    countDownLatch.countDown();
                 }
             });
         }

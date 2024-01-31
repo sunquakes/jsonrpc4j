@@ -6,8 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.ServiceLoader;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
@@ -22,7 +23,13 @@ public class JsonRpcServiceDiscovery {
 
     private static JsonRpcServiceDiscovery instance;
 
-    private static List<Supplier> services = new CopyOnWriteArrayList<>();
+    private static final List<Supplier> services = new CopyOnWriteArrayList<>();
+
+    public static ScheduledExecutorService retryThread = Executors.newScheduledThreadPool(2);
+
+    public static Map<String, Future> retryMap = new ConcurrentHashMap<>();
+
+    public static final int REGISTRY_RETRY_INTERVAL = 3000;
 
     private JsonRpcServiceDiscovery(String url, String driverName) {
 
