@@ -1,0 +1,34 @@
+name: Maven Package And Publish To Maven Central
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+
+      - name: Import GPG private key
+        run: echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import
+
+      - name: Build and sign artifacts
+        run: |
+          mvn -B clean package
+          mvn -B gpg:sign deploy --settings settings.xml
+        env:
+          GPG_PASSPHRASE: ${{ secrets.SIGNING_PASSWORD }}
+          MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
