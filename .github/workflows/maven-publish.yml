@@ -54,7 +54,8 @@ jobs:
           prerelease: false
 
       - name: Import GPG private key
-        run: echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
 
       - name: Build and sign artifacts
         run: |
