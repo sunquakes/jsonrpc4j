@@ -61,5 +61,6 @@ jobs:
         run: |
           mvn --batch-mode deploy
         env:
+          GPG_PASSPHRASE: ${{ secrets.SIGNING_PASSWORD }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
