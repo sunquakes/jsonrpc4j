@@ -5,7 +5,7 @@ on:
   push:
     tags:
       - 'v*.*.*'
-      - 'v*.*.*-SNAPSHOT'
+      - 'v*.*.*-alpha'
 
 jobs:
   build:
