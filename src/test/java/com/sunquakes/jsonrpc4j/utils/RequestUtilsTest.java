@@ -5,7 +5,6 @@ import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.exception.InvalidParamsException;
 import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
 import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
-import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import org.junit.Test;
 
 import java.util.ArrayList;

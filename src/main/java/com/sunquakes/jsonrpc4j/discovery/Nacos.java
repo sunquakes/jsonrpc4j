@@ -1,6 +1,6 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
