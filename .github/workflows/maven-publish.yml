@@ -53,11 +53,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Import GPG private key
-        run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
-
-      - name: Build and sign artifacts
+      - name: Publish to the Maven Central Repository
         run: |
           mvn --batch-mode deploy
         env:
