@@ -1,10 +1,8 @@
-name: Maven Package And Publish To Maven Central
-
+name: Maven Package And Publish Snapshot To Maven Central
 
 on:
   push:
     tags:
-      - 'v*.*.*'
       - 'v*.*.*-alpha'
 
 jobs:
@@ -24,6 +22,9 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          server-id: sonatype-snapshots
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
 
       - name: Extract Changelog
         id: extract_changelog
@@ -53,14 +54,9 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Import GPG private key
-        run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
-
-      - name: Publish to the Maven Central Repository
+      - name: Publish package
         run: |
           mvn --batch-mode deploy
         env:
-          GPG_PASSPHRASE: ${{ secrets.SIGNING_PASSWORD }}
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
