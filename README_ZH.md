@@ -36,7 +36,7 @@
 <dependency>
     <groupId>com.sunquakes</groupId>
     <artifactId>jsonrpc4j</artifactId>
-    <version>2.1.1</version>
+    <version>3.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
