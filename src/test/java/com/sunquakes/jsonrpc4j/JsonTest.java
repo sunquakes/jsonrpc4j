@@ -2,13 +2,13 @@ package com.sunquakes.jsonrpc4j;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.discovery.Nacos;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 public class JsonTest {
 
     @Test

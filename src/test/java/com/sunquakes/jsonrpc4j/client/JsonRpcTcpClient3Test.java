@@ -1,18 +1,19 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+import javax.annotation.Resource;
+
+@ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-tcp3.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcTcpClient3Test {
 
-    @Autowired
+    @Resource
     private IJsonRpcTcpClient3 jsonRpcTcpClient3;
 
     @Test

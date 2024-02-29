@@ -2,19 +2,20 @@ package com.sunquakes.jsonrpc4j.server;
 
 import com.sunquakes.jsonrpc4j.dto.NotifyResponseDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration("classpath:applicationContext.xml")
 public class JsonRpcServerHandlerTest {
 
@@ -31,7 +32,7 @@ public class JsonRpcServerHandlerTest {
                     "\"method\":\"JsonRpc/add\"" +
                     "\"params\":{\"a\":1,\"b\":2}" +
                     "}";
-            JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(JsonRpcServerHandler.class);
+            com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler.class);
             ResponseDto responseDto = (ResponseDto) jsonRpcServerHandler.handle(json);
             assertEquals(responseDto.getId(), "1234567890");
             assertEquals(responseDto.getJsonrpc(), "2.0");
@@ -63,7 +64,7 @@ public class JsonRpcServerHandlerTest {
                     "\"jsonrpc\":2.0" +
                     "\"params\":[2, 1]" +
                     "}]";
-            JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(JsonRpcServerHandler.class);
+            com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler.class);
             Object res = jsonRpcServerHandler.handle(json);
             assertTrue(res instanceof ArrayList);
 
