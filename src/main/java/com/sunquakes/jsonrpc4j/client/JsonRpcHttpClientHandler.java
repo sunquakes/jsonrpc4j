@@ -44,7 +44,6 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         channelQueueMap.putIfAbsent(channel, idMap);
 
         String message = data.toJSONString();
-        System.out.println(message);
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
         request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8");
         ByteBuf buffer = request.content().clear();

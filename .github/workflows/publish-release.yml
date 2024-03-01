@@ -3,7 +3,7 @@ name: Maven Package And Publish Release To Maven Central
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   build:
