@@ -4,23 +4,23 @@ import com.sunquakes.jsonrpc4j.discovery.Nacos;
 import com.sunquakes.jsonrpc4j.spring.JsonRpcServiceDiscovery;
 import com.sunquakes.jsonrpc4j.spring.boot.dto.ArgsDto;
 import com.sunquakes.jsonrpc4j.spring.boot.dto.ResultDto;
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = JsonRpcApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("nacos")
 public class NacosTest {
@@ -42,7 +42,7 @@ public class NacosTest {
         mockStatic.when(() -> JsonRpcServiceDiscovery.newInstance(anyString(), anyString())).thenReturn(instanse);
     }
 
-    @After
+    @AfterEach
     public void releaseMocks() throws Exception {
         mockStatic.close();
     }
