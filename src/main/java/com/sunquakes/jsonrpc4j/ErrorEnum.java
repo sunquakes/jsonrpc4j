@@ -4,12 +4,12 @@ import com.sunquakes.jsonrpc4j.exception.*;
 
 public enum ErrorEnum {
 
-    ParseError(-32700, "Parse error"),
-    InvalidRequest(-32600, "Invalid request"),
-    MethodNotFound(-32601, "Method not found"),
-    InvalidParams(-32602, "Invalid params"),
-    InternalError(-32603, "Internal error"),
-    CustomError(-32000, null);
+    PARSE_ERROR(-32700, "Parse error"),
+    INVALID_REQUEST(-32600, "Invalid request"),
+    METHOD_NOT_FOUND(-32601, "Method not found"),
+    INVALID_PARAMS(-32602, "Invalid params"),
+    INTERNAL_ERROR(-32603, "Internal error"),
+    CUSTOM_ERROR(-32000, null);
 
     private int code;
 

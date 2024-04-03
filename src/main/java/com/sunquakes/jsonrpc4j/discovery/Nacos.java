@@ -38,6 +38,8 @@ public class Nacos implements Driver {
 
     private static final String EPHEMERAL_KEY = "ephemeral";
 
+    private static final String SERVICE_NAME_KEY = "serviceName";
+
     private static final String IS_EPHEMERAL = "true";
 
     private UriComponents url;
@@ -52,28 +54,28 @@ public class Nacos implements Driver {
     public Nacos newClient(String url) {
         this.url = UriComponentsBuilder.fromUriString(url).build();
         if (this.url.getQueryParams().containsKey(EPHEMERAL_KEY)) {
-            ephemeral = this.url.getQueryParams().getFirst("ephemeral");
+            ephemeral = this.url.getQueryParams().getFirst(EPHEMERAL_KEY);
         }
         return this;
     }
 
     @Override
     public boolean register(String name, String protocol, String hostname, int port) {
-        UriComponents url = this.url;
+        UriComponents fullUrl = this.url;
         UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-        url = builder.uriComponents(url)
+        fullUrl = builder.uriComponents(fullUrl)
                 .path("/nacos/v1/ns/instance")
-                .queryParam("serviceName", name)
+                .queryParam(SERVICE_NAME_KEY, name)
                 .queryParam("ip", hostname)
                 .queryParam("port", port)
-                .queryParam("ephemeral", ephemeral)
+                .queryParam(EPHEMERAL_KEY, ephemeral)
                 .build();
 
-        HttpPost post = new HttpPost(url.toString());
+        HttpPost post = new HttpPost(fullUrl.toString());
         try {
             HttpResponse res = client.execute(post);
             if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
-                new JsonRpcException("Failed to register to nacos.");
+                throw new JsonRpcException("Failed to register to nacos.");
             }
             if (IS_EPHEMERAL.equals(ephemeral)) {
                 registerHeartbeat(name, hostname, port);
@@ -87,18 +89,18 @@ public class Nacos implements Driver {
 
     @Override
     public String get(String name) {
-        UriComponents url = this.url;
+        UriComponents fullUrl = this.url;
         UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-        url = builder.uriComponents(url)
+        fullUrl = builder.uriComponents(fullUrl)
                 .path("/nacos/v1/ns/instance/list")
-                .queryParam("serviceName", name)
+                .queryParam(SERVICE_NAME_KEY, name)
                 .build();
 
-        HttpGet get = new HttpGet(url.toString());
+        HttpGet get = new HttpGet(fullUrl.toString());
         try {
             HttpResponse res = client.execute(get);
             if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
-                new JsonRpcException("Failed to get the service list from nacos.");
+                throw new JsonRpcException("Failed to get the service list from nacos.");
             }
             String json = EntityUtils.toString(res.getEntity());
             GetResp resp = JSONObject.parseObject(json, GetResp.class);
@@ -110,23 +112,22 @@ public class Nacos implements Driver {
     }
 
     public String beat(String serviceName, String ip, int port) {
-        UriComponents url = this.url;
+        UriComponents fullUrl = this.url;
         UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-        url = builder.uriComponents(url)
+        fullUrl = builder.uriComponents(fullUrl)
                 .path("/nacos/v1/ns/instance/beat")
-                .queryParam("serviceName", serviceName)
+                .queryParam(SERVICE_NAME_KEY, serviceName)
                 .queryParam("ip", ip)
                 .queryParam("port", port)
-                .queryParam("ephemeral", ephemeral) .build();
+                .queryParam(EPHEMERAL_KEY, ephemeral) .build();
 
-        HttpPut put = new HttpPut(url.toString());
+        HttpPut put = new HttpPut(fullUrl.toString());
         try {
             HttpResponse res = client.execute(put);
             if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
-                new JsonRpcException("Failed to send heartbeat to nacos.");
+                throw new JsonRpcException("Failed to send heartbeat to nacos.");
             }
-            String json = EntityUtils.toString(res.getEntity());
-            return json;
+            return EntityUtils.toString(res.getEntity());
         } catch (Exception e) {
             log.error(e.getMessage(), e);
             return null;
@@ -152,6 +153,7 @@ public class Nacos implements Driver {
                     Thread.sleep(HEARTBEAT_INTERVAL);
                 } catch (InterruptedException e) {
                     log.error(e.getMessage(), e);
+                    Thread.currentThread().interrupt();
                 }
             }
         });

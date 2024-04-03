@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = JsonRpcApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("nacos")
-public class NacosTest {
+class NacosTest {
 
     @Value("${jsonrpc.server.protocol}")
     private String protocol;
@@ -51,21 +51,21 @@ public class NacosTest {
     private IJsonRpcClient jsonRpcClient;
 
     @Test
-    public void testGetConfiguration() {
+    void testGetConfiguration() {
         assertEquals("tcp", protocol);
         assertEquals(3207, port);
     }
 
     @Test
-    public void testRequest() throws IOException, InterruptedException {
+    void testRequest() throws IOException, InterruptedException {
         // test request
         {
-            assertEquals(jsonRpcClient.add(1, 2), 3);
-            assertEquals(jsonRpcClient.add(3, 4), 7);
-            assertEquals(jsonRpcClient.add(5, 2), 7);
+            assertEquals(3, jsonRpcClient.add(1, 2));
+            assertEquals(7, jsonRpcClient.add(3, 4));
+            assertEquals(7, jsonRpcClient.add(5, 2));
 
-            assertEquals(jsonRpcClient.sub(3, 2), 1);
-            assertEquals(jsonRpcClient.sub(7, 5), 2);
+            assertEquals(1, jsonRpcClient.sub(3, 2));
+            assertEquals(2, jsonRpcClient.sub(7, 5));
 
             ArgsDto args = new ArgsDto();
             args.setA(8);

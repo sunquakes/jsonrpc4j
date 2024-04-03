@@ -88,7 +88,7 @@ public class JsonRpcServerHandler {
             Object result = m.invoke(clazz, paramArr);
             return ResponseUtils.success(id, result);
         } catch (InvocationTargetException | IllegalAccessException | BeansException e) {
-            return ResponseUtils.error(id, ErrorEnum.MethodNotFound.getCode());
+            return ResponseUtils.error(id, ErrorEnum.METHOD_NOT_FOUND.getCode());
         } catch (InvalidParamsException e) {
             return ResponseUtils.error(id, e.getCode(), e.getMessage());
         } catch (MethodNotFoundException e) {

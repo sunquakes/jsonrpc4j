@@ -94,6 +94,7 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
                 future.channel().closeFuture().sync();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         });
         countDownLatch.await();

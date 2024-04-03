@@ -17,7 +17,6 @@ import io.netty.util.CharsetUtil;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
@@ -78,7 +77,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
@@ -95,7 +94,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {

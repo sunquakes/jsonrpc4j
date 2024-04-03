@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-https.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcHttpsClientTest {
+class JsonRpcHttpsClientTest {
 
     @Resource
     private IJsonRpcHttpsClient jsonRpcHttpsClient;
@@ -49,7 +49,7 @@ public class JsonRpcHttpsClientTest {
     }
 
     @Test
-    public void testRequest() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    void testRequest() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
         JSONObject params = new JSONObject();
         params.put("a", 1);
         params.put("b", 2);
@@ -71,19 +71,19 @@ public class JsonRpcHttpsClientTest {
         HttpPost httpPost = new HttpPost("https://localhost:3205");
         httpPost.setEntity(new StringEntity(request.toString(), ContentType.APPLICATION_JSON));
         HttpResponse response = httpClient.execute(httpPost);
-        assertEquals(EntityUtils.toString(response.getEntity()), "{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}");
+        assertEquals("{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}", EntityUtils.toString(response.getEntity()));
     }
 
     @Test
-    public void testHandler() {
+    void testHandler() {
         // test https handler
-        assertEquals(jsonRpcHttpsClient.add(1, 2), 3);
-        assertEquals(jsonRpcHttpsClient.add(3, 4), 7);
-        assertEquals(jsonRpcHttpsClient.add(5, 6), 11);
+        assertEquals(3, jsonRpcHttpsClient.add(1, 2));
+        assertEquals(7, jsonRpcHttpsClient.add(3, 4));
+        assertEquals(11, jsonRpcHttpsClient.add(5, 6));
     }
 
     @Test
-    public void testLongParams() {
+    void testLongParams() {
         assertEquals(text1 + text2, jsonRpcHttpsClient.splice(text1, text2));
     }
 }

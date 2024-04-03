@@ -4,20 +4,15 @@ import com.sunquakes.jsonrpc4j.ErrorEnum;
 
 public class ParseErrorException extends RuntimeException {
 
-    private int code;
+    private final int code;
 
     public ParseErrorException() {
-        this(ErrorEnum.ParseError.getText());
+        this(ErrorEnum.PARSE_ERROR.getText());
     }
 
     public ParseErrorException(String message) {
         super(message);
-        this.code = ErrorEnum.ParseError.getCode();
-    }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
+        this.code = ErrorEnum.PARSE_ERROR.getCode();
     }
 
     public int getCode() {

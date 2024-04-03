@@ -40,7 +40,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
             Class<?> interfaceType;
             try {
                 interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
-                Config config = new Config();
+                Config<?> config = new Config();
 
                 // Select handler according to different protocol
                 String protocol = annotationAttributes.get("protocol").toString();

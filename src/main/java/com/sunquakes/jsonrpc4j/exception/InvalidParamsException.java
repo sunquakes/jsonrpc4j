@@ -4,20 +4,15 @@ import com.sunquakes.jsonrpc4j.ErrorEnum;
 
 public class InvalidParamsException extends RuntimeException {
 
-    private int code;
+    private final int code;
 
     public InvalidParamsException() {
-        this(ErrorEnum.InvalidParams.getText());
+        this(ErrorEnum.INVALID_PARAMS.getText());
     }
 
     public InvalidParamsException(String message) {
         super(message);
-        this.code = ErrorEnum.InvalidParams.getCode();
-    }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
+        this.code = ErrorEnum.INVALID_PARAMS.getCode();
     }
 
     public int getCode() {

@@ -24,6 +24,7 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLException;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -92,7 +93,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
 
     class Handler implements JsonRpcChannelHandler {
         @Override
-        public void channelUpdated(Channel ch) throws Exception {
+        public void channelUpdated(Channel ch) throws SSLException {
             ch.pipeline()
                     .addLast("codec", new HttpClientCodec())
                     .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))

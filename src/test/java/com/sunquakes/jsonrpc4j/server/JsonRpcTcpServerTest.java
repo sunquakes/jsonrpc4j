@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-tcp.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcTcpServerTest {
+class JsonRpcTcpServerTest {
 
     @Value("${jsonrpc.server.package-eof}")
     private String packageEof;
@@ -27,7 +27,7 @@ public class JsonRpcTcpServerTest {
     private int packageMaxLength;
 
     @Test
-    public void testHandle() throws IOException {
+    void testHandle() throws IOException {
         JSONObject params = new JSONObject();
         params.put("a", 1);
         params.put("b", 2);
@@ -85,7 +85,7 @@ public class JsonRpcTcpServerTest {
                 }
             }
             ResponseDto responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
-            assertEquals(responseDto.getResult(), 3);
+            assertEquals(3, responseDto.getResult());
 
             sb = new StringBuffer(init);
 
@@ -119,7 +119,7 @@ public class JsonRpcTcpServerTest {
             }
 
             responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
-            assertEquals(responseDto.getResult(), 3);
+            assertEquals(3, responseDto.getResult());
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

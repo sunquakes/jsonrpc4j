@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-tcp.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcTcpClientTest {
+class JsonRpcTcpClientTest {
 
     @Resource
     private IJsonRpcTcpClient jsonRpcTcpClient;
@@ -36,15 +36,15 @@ public class JsonRpcTcpClientTest {
     }
 
     @Test
-    public void testHandler() {
+    void testHandler() {
         // test tcp handler
-        assertEquals(jsonRpcTcpClient.add(1, 2), 3);
-        assertEquals(jsonRpcTcpClient.add(3, 4), 7);
-        assertEquals(jsonRpcTcpClient.add(5, 6), 11);
+        assertEquals(3, jsonRpcTcpClient.add(1, 2));
+        assertEquals(7, jsonRpcTcpClient.add(3, 4));
+        assertEquals(11, jsonRpcTcpClient.add(5, 6));
     }
 
     @Test
-    public void testLongParams() {
+    void testLongParams() {
         assertEquals(text1 + text2, jsonRpcTcpClient.splice(text1, text2));
     }
 }

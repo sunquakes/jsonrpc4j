@@ -29,7 +29,7 @@ import static org.mockito.Mockito.*;
 // @ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = JsonRpcApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("boot")
-public class JsonRpcService2Test {
+class JsonRpcService2Test {
 
     @Value("${jsonrpc.server.protocol}")
     private String protocol;
@@ -57,23 +57,22 @@ public class JsonRpcService2Test {
     private IJsonRpcClient jsonRpcClient;
 
     @Test
-    public void testGetConfiguration() {
-        assertEquals(protocol, "tcp");
-        assertEquals(port, 3202);
+    void testGetConfiguration() {
+        assertEquals("tcp", protocol);
+        assertEquals(3202, port);
     }
 
     @Test
-    public void testRequest() throws IOException, InterruptedException {
+    void testRequest() throws IOException, InterruptedException {
         // test request
         {
             // When running the test case, if the client and the server are in the same app, sleep time should be greater than the health interval.
-            Thread.sleep(10000);
-            assertEquals(jsonRpcClient.add(1, 2), 3);
-            assertEquals(jsonRpcClient.add(3, 4), 7);
-            assertEquals(jsonRpcClient.add(5, 2), 7);
+            assertEquals(3, jsonRpcClient.add(1, 2));
+            assertEquals(7, jsonRpcClient.add(3, 4));
+            assertEquals(7, jsonRpcClient.add(5, 2));
 
-            assertEquals(jsonRpcClient.sub(3, 2), 1);
-            assertEquals(jsonRpcClient.sub(7, 5), 2);
+            assertEquals(1, jsonRpcClient.sub(3, 2));
+            assertEquals(2, jsonRpcClient.sub(7, 5));
 
             ArgsDto args = new ArgsDto();
             args.setA(8);

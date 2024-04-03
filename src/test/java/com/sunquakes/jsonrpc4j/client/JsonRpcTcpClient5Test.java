@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-tcp5.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcTcpClient5Test {
+class JsonRpcTcpClient5Test {
 
     @Resource
     private IJsonRpcTcpClient5 jsonRpcTcpClient5;
@@ -28,7 +28,7 @@ public class JsonRpcTcpClient5Test {
     private String text2;
 
     @BeforeEach
-    public void beforeTest() throws UnsupportedEncodingException {
+    void beforeTest() throws UnsupportedEncodingException {
         InputStream text1IS = this.getClass().getClassLoader().getResourceAsStream("text1.txt");
         text1 = new BufferedReader(new InputStreamReader(text1IS, "UTF-8")).lines().collect(Collectors.joining(System.lineSeparator()));
         InputStream text2IS = this.getClass().getClassLoader().getResourceAsStream("text2.txt");
@@ -36,15 +36,15 @@ public class JsonRpcTcpClient5Test {
     }
 
     @Test
-    public void testHandler() {
+    void testHandler() {
         // test tcp handler
-        assertEquals(jsonRpcTcpClient5.add(1, 2), 3);
-        assertEquals(jsonRpcTcpClient5.add(3, 4), 7);
-        assertEquals(jsonRpcTcpClient5.add(5, 6), 11);
+        assertEquals(3, jsonRpcTcpClient5.add(1, 2));
+        assertEquals(7, jsonRpcTcpClient5.add(3, 4));
+        assertEquals(11, jsonRpcTcpClient5.add(5, 6));
     }
 
     @Test
-    public void testLongParams() {
+    void testLongParams() {
         assertEquals(text1 + text2, jsonRpcTcpClient5.splice(text1, text2));
     }
 }

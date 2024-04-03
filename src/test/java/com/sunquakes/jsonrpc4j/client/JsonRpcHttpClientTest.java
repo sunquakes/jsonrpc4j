@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-http.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcHttpClientTest {
+class JsonRpcHttpClientTest {
 
     @Resource
     private IJsonRpcHttpClient jsonRpcHttpClient;
@@ -38,7 +38,7 @@ public class JsonRpcHttpClientTest {
     }
 
     @Test
-    public void testException() {
+    void testException() {
         try {
             jsonRpcHttpClient.methodNotFount();
         } catch (Throwable e) {
@@ -48,15 +48,15 @@ public class JsonRpcHttpClientTest {
     }
 
     @Test
-    public void testHandler() {
+    void testHandler() {
         // test http handler
-        assertEquals(jsonRpcHttpClient.add(1, 2), 3);
-        assertEquals(jsonRpcHttpClient.add(3, 4), 7);
-        assertEquals(jsonRpcHttpClient.add(5, 6), 11);
+        assertEquals(3, jsonRpcHttpClient.add(1, 2));
+        assertEquals(7, jsonRpcHttpClient.add(3, 4));
+        assertEquals(11, jsonRpcHttpClient.add(5, 6));
     }
 
     @Test
-    public void testLongParams() throws UnsupportedEncodingException {
+    void testLongParams() throws UnsupportedEncodingException {
         assertEquals(text1 + text2, jsonRpcHttpClient.splice(text1, text2));
     }
 }

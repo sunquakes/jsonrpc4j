@@ -8,7 +8,6 @@ import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
-import com.sunquakes.jsonrpc4j.utils.ResponseUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -117,7 +116,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
@@ -134,7 +133,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
             synchronized (id) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {

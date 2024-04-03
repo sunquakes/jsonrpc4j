@@ -13,18 +13,18 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-public class RequestUtilsTest {
+class RequestUtilsTest {
 
     @Test
-    public void testParseRequestMethod() throws MethodNotFoundException {
+    void testParseRequestMethod() throws MethodNotFoundException {
         String method = "JsonRpc/add";
         String[] arr = RequestUtils.parseMethod(method);
-        assertEquals(arr[0], "JsonRpc");
-        assertEquals(arr[1], "add");
+        assertEquals("JsonRpc", arr[0]);
+        assertEquals("add", arr[1]);
     }
 
     @Test
-    public void testParseRequestBody() throws InvalidRequestException, InvalidParamsException {
+    void testParseRequestBody() throws InvalidRequestException, InvalidParamsException {
         // test RequestDto||NotifyRequestDto
         {
             String json = "{" +
@@ -35,13 +35,13 @@ public class RequestUtilsTest {
             Object request = RequestUtils.parseRequestBody(json);
             assertSame(RequestDto.class, request.getClass());
             RequestDto requestDto = (RequestDto) request;
-            assertEquals(requestDto.getId(), "1234567890");
-            assertEquals(requestDto.getJsonrpc(), "2.0");
+            assertEquals("1234567890", requestDto.getId());
+            assertEquals("2.0", requestDto.getJsonrpc());
 
             // test parse params
             Object[] params = RequestUtils.parseParams(requestDto.getParams(), new String[]{"a", "b"});
-            assertEquals(params[0], 1);
-            assertEquals(params[1], 2);
+            assertEquals(1, params[0]);
+            assertEquals(2, params[1]);
         }
 
         // test RequestDto||NotifyRequestDto Array
@@ -58,15 +58,15 @@ public class RequestUtilsTest {
             assertSame(ArrayList.class, request.getClass());
             List<Object> requestDtoList = (List<Object>) request;
             RequestDto requestDto = (RequestDto) requestDtoList.get(0);
-            assertEquals(requestDto.getId(), "1234567890");
-            assertEquals(requestDto.getJsonrpc(), "2.0");
+            assertEquals("1234567890", requestDto.getId());
+            assertEquals("2.0", requestDto.getJsonrpc());
             NotifyRequestDto notifyRequestDto = (NotifyRequestDto) requestDtoList.get(1);
-            assertEquals(notifyRequestDto.getJsonrpc(), "2.0");
+            assertEquals("2.0", notifyRequestDto.getJsonrpc());
 
             // test parse params
             Object[] params = RequestUtils.parseParams(requestDto.getParams(), new String[]{"a", "b"});
-            assertEquals(params[0], 1);
-            assertEquals(params[1], 2);
+            assertEquals(1, params[0]);
+            assertEquals(2, params[1]);
 
         }
     }

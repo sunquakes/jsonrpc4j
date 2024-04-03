@@ -3,11 +3,7 @@ package com.sunquakes.jsonrpc4j.client;
 import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.config.ConfigEntry;
 import com.sunquakes.jsonrpc4j.discovery.Driver;
-import io.netty.channel.pool.FixedChannelPool;
 import lombok.extern.slf4j.Slf4j;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author : Shing, sunquakes@outlook.com
@@ -16,8 +12,6 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 @Slf4j
 public class JsonRpcClient {
-
-    private ConcurrentHashMap<InetSocketAddress, FixedChannelPool> poolMap = new ConcurrentHashMap();
 
     protected Config config;
 
