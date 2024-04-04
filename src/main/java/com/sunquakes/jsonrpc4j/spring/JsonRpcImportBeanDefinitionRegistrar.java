@@ -29,6 +29,9 @@ public class JsonRpcImportBeanDefinitionRegistrar implements ImportBeanDefinitio
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
         Map<String, Object> data = annotationMetadata.getAnnotationAttributes("com.sunquakes.jsonrpc4j.spring.JsonRpcScan");
+        if (data == null) {
+            return;
+        }
         String[] basePackages = (String[]) data.get("basePackages");
 
         ClassPathScanningCandidateComponentProvider classPathScanningCandidateComponentProvider = new JsonRpcClientClassPathScanningCandidateComponentProvider(false, environment, beanDefinitionRegistry);

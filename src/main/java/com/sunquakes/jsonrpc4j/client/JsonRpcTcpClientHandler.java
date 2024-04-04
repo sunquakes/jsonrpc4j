@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
@@ -30,20 +31,20 @@ import java.util.concurrent.SynchronousQueue;
 @Sharable
 public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap();
+    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap<>();
 
     private TcpClientOption tcpClientOption;
 
     private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap();
+    private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap<>();
 
     public JsonRpcTcpClientHandler(TcpClientOption tcpClientOption) {
         this.tcpClientOption = tcpClientOption;
     }
 
     @Synchronized
-    public synchronized SynchronousQueue<Object> send(JSONObject request, Channel channel) {
+    public synchronized Queue<Object> send(JSONObject request, Channel channel) {
         String id = request.getString("id");
         String message = request.toJSONString() + tcpClientOption.getPackageEof();
         ByteBuf byteBuf = channel.alloc().buffer(tcpClientOption.getPackageMaxLength());
@@ -97,7 +98,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
                 String body = new String(bytes);
                 ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
                 String id = responseDto.getId();
-                synchronized (id) {
+                synchronized (responseDto) {
                     SynchronousQueue<Object> queue = queueMap.get(id);
                     if (queue != null) {
                         queue.put(body);
@@ -117,7 +118,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-            synchronized (id) {
+            synchronized (errorResponseDto) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
                     queue.put(JSON.toJSONString(errorResponseDto));
@@ -134,7 +135,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-            synchronized (id) {
+            synchronized (errorResponseDto) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
                     queue.put(JSON.toJSONString(errorResponseDto));

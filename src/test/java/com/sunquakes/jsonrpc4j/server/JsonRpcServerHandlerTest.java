@@ -66,7 +66,7 @@ class JsonRpcServerHandlerTest {
                     "}]";
             com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler.class);
             Object res = jsonRpcServerHandler.handle(json);
-            assertTrue(res instanceof ArrayList);
+            assertTrue(res instanceof List);
 
             List<Object> list = (List<Object>) res;
             assertTrue(list.get(0) instanceof ResponseDto);

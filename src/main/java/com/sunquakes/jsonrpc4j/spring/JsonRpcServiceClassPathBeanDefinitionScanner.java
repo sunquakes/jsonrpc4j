@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 
+    private static final String ANNOTATION_VALUE = "value";
+
     public JsonRpcServiceClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, Environment environment) {
         super(registry);
         super.setEnvironment(environment);
@@ -62,57 +64,12 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
         if (!StringUtils.hasLength(hostname)) {
             throw new JsonRpcException("Failed to get hostname.");
         }
-        String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
-        String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
-        boolean hasDiscovery = discoveryDriverName != null && discoveryUrl != null;
-        JsonRpcServiceDiscovery jsonRpcServiceDiscovery = null;
-        Integer port = environment.getProperty("jsonrpc.server.port", Integer.class);
-        String protocol = environment.getProperty("jsonrpc.server.protocol");
-        if (hasDiscovery) {
-            jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
-        }
         try {
-            BeanDefinitionRegistry registry = getRegistry();
             Assert.notEmpty(basePackages, "At least one base package must be specified");
             Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
-            Map<String, Object> annotationAttributes;
             for (String basePackage : basePackages) {
                 Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
-                for (BeanDefinition candidate : candidates) {
-                    String[] t = getMetadataReaderFactory().getMetadataReader(candidate.getBeanClassName()).getAnnotationMetadata().getInterfaceNames();
-                    for (int i = 0; i < t.length; i++) {
-                        annotationAttributes = getMetadataReaderFactory().getMetadataReader(t[i])
-                                .getAnnotationMetadata()
-                                .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");
-                        if (annotationAttributes != null) {
-                            String customBeanName = annotationAttributes.get("value").toString();
-                            if (StringUtils.hasLength(customBeanName) && checkCandidate(customBeanName, candidate)) {
-                                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, customBeanName);
-                                beanDefinitions.add(definitionHolder);
-                                registerBeanDefinition(definitionHolder, registry);
-                                // Register service
-                                if (hasDiscovery) {
-                                    JsonRpcServiceDiscovery finalJsonRpcServiceDiscovery = jsonRpcServiceDiscovery;
-                                    String ip = hostname;
-                                    JsonRpcServiceDiscovery.addService(() -> {
-                                        Future future = JsonRpcServiceDiscovery.retryThread.scheduleWithFixedDelay(() -> {
-                                            boolean res = finalJsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, ip, port);
-                                            if (res) {
-                                                Future f = JsonRpcServiceDiscovery.retryMap.get(customBeanName);
-                                                if (f != null) {
-                                                    JsonRpcServiceDiscovery.retryMap.remove(customBeanName);
-                                                    f.cancel(true);
-                                                }
-                                            }
-                                        }, JsonRpcServiceDiscovery.REGISTRY_RETRY_INTERVAL, JsonRpcServiceDiscovery.REGISTRY_RETRY_INTERVAL, TimeUnit.MILLISECONDS);
-                                        JsonRpcServiceDiscovery.retryMap.put(customBeanName, future);
-                                        return true;
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
+                handleCandidates(candidates, environment, hostname, beanDefinitions);
             }
             return beanDefinitions;
         } catch (IOException e) {
@@ -144,5 +101,64 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
         } catch (SocketException e) {
             return null;
         }
+    }
+
+    private void handleCandidates(Set<BeanDefinition> candidates, Environment environment, String hostname, Set<BeanDefinitionHolder> beanDefinitions) throws IOException {
+        BeanDefinitionRegistry registry = getRegistry();
+        String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
+        String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
+        boolean hasDiscovery = discoveryDriverName != null && discoveryUrl != null;
+        JsonRpcServiceDiscovery jsonRpcServiceDiscovery = null;
+        Integer port = environment.getProperty("jsonrpc.server.port", Integer.class);
+        String protocol = environment.getProperty("jsonrpc.server.protocol");
+        if (hasDiscovery) {
+            jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
+        }
+        Map<String, Object> annotationAttributes;
+        for (BeanDefinition candidate : candidates) {
+            String beanClassName = candidate.getBeanClassName();
+            if (beanClassName == null) {
+                continue;
+            }
+            String[] t = getMetadataReaderFactory().getMetadataReader(beanClassName).getAnnotationMetadata().getInterfaceNames();
+            for (int i = 0; i < t.length; i++) {
+                annotationAttributes = getMetadataReaderFactory().getMetadataReader(t[i])
+                        .getAnnotationMetadata()
+                        .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");
+                if (annotationAttributes == null || annotationAttributes.get(ANNOTATION_VALUE) == null || !StringUtils.hasLength(annotationAttributes.get(ANNOTATION_VALUE).toString()) || !checkCandidate(annotationAttributes.get(ANNOTATION_VALUE).toString(), candidate)) {
+                    continue;
+                }
+                String customBeanName = annotationAttributes.get(ANNOTATION_VALUE).toString();
+
+                BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, customBeanName);
+                beanDefinitions.add(definitionHolder);
+                registerBeanDefinition(definitionHolder, registry);
+                // Register service
+                if (hasDiscovery) {
+                    addService(protocol, hostname, port, customBeanName, jsonRpcServiceDiscovery);
+                }
+            }
+        }
+    }
+
+    private void addService(String protocol, String hostname, Integer port, String customBeanName, JsonRpcServiceDiscovery jsonRpcServiceDiscovery) {
+        JsonRpcServiceDiscovery finalJsonRpcServiceDiscovery = jsonRpcServiceDiscovery;
+        String ip = hostname;
+        JsonRpcServiceDiscovery.addService(() -> {
+            Future<?> future = JsonRpcServiceDiscovery.retryThread.scheduleWithFixedDelay(() -> {
+                boolean res = finalJsonRpcServiceDiscovery.getDriver().register(customBeanName, protocol, ip, port);
+                if (!res) {
+                    return;
+                }
+                Future<?> f = JsonRpcServiceDiscovery.retryMap.get(customBeanName);
+                if (f == null) {
+                    return;
+                }
+                JsonRpcServiceDiscovery.retryMap.remove(customBeanName);
+                f.cancel(true);
+            }, JsonRpcServiceDiscovery.REGISTRY_RETRY_INTERVAL, JsonRpcServiceDiscovery.REGISTRY_RETRY_INTERVAL, TimeUnit.MILLISECONDS);
+            JsonRpcServiceDiscovery.retryMap.put(customBeanName, future);
+            return true;
+        });
     }
 }

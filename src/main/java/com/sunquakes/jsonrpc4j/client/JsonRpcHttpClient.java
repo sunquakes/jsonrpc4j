@@ -35,9 +35,9 @@ import java.util.concurrent.SynchronousQueue;
 @Slf4j
 public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInterface {
 
-    private static int DEFAULT_HTTP_PORT = 80;
+    private static int defaultHttpPort = 80;
 
-    private static int DEFAULT_HTTPS_PORT = 443;
+    private static int defaultHttpsPort = 443;
 
     private JsonRpcHttpClientHandler jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler();
 
@@ -53,7 +53,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true);
-        int defaultPort = protocol.equals(JsonRpcProtocol.https) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
+        int defaultPort = protocol.equals(JsonRpcProtocol.https) ? defaultHttpsPort : defaultHttpPort;
         if (discovery != null) {
             loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {
@@ -77,8 +77,9 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
             body = (String) queue.take();
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             loadBalancer.removePool(pool);
+            Thread.currentThread().interrupt();
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {

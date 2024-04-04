@@ -23,11 +23,11 @@ public class JsonRpcServiceDiscovery {
 
     private static JsonRpcServiceDiscovery instance;
 
-    private static final List<Supplier> services = new CopyOnWriteArrayList<>();
+    private static final List<Supplier<Boolean>> services = new CopyOnWriteArrayList<>();
 
-    public static ScheduledExecutorService retryThread = Executors.newScheduledThreadPool(2);
+    public static final ScheduledExecutorService retryThread = Executors.newScheduledThreadPool(2);
 
-    public static Map<String, Future> retryMap = new ConcurrentHashMap<>();
+    protected static final Map<String, Future<?>> retryMap = new ConcurrentHashMap<>();
 
     public static final int REGISTRY_RETRY_INTERVAL = 3000;
 
@@ -37,9 +37,9 @@ public class JsonRpcServiceDiscovery {
         Iterator<Driver> driverIterator = driverServiceLoader.iterator();
 
         while (driverIterator.hasNext()) {
-            Driver driver = driverIterator.next();
-            if (driver.getClass().getName().equals(driverName)) {
-                this.driver = driver.newClient(url);
+            Driver d = driverIterator.next();
+            if (d.getClass().getName().equals(driverName)) {
+                driver = d.newClient(url);
                 break;
             }
         }
@@ -54,12 +54,12 @@ public class JsonRpcServiceDiscovery {
     }
 
     @Synchronized
-    public static boolean addService(Supplier service) {
+    public static boolean addService(Supplier<Boolean> service) {
         return services.add(service);
     }
 
     @Synchronized
-    public static List<Supplier> getServices() {
+    public static List<Supplier<Boolean>> getServices() {
         return services;
     }
 

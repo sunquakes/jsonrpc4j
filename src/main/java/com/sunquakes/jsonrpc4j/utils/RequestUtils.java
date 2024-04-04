@@ -31,27 +31,26 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class RequestUtils {
 
-    public String PROTOCOL_TCP = "tcp";
-    public String PROTOCOL_HTTP = "http";
-    public String PROTOCOL_HTTPS = "https";
+    public static final String PROTOCOL_TCP = "tcp";
+    public static final String PROTOCOL_HTTP = "http";
+    public static final String PROTOCOL_HTTPS = "https";
 
-    public String TCP_PACKAGE_EOF = "\r\n";
-    public int TCP_PACKAG_MAX_LENGHT = 2 * 1024 * 1024;
+    public static final String TCP_PACKAGE_EOF = "\r\n";
+    public static final int TCP_PACKAG_MAX_LENGHT = 2 * 1024 * 1024;
 
-    public String JSONRPC = "2.0";
+    public static final String JSONRPC = "2.0";
 
     public Object parseRequestBody(String json) throws InvalidRequestException {
         Object typeObject = JSON.parse(json);
-        if (typeObject instanceof JSONArray) {
+        if (typeObject instanceof JSONArray jsonArray) {
             List<Object> list = new ArrayList<>();
-            JSONArray jsonArray = (JSONArray) typeObject;
             for (int i = 0; i < jsonArray.size(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                 list.add(parseSingleRequestBody(jsonObject));
             }
             return list;
-        } else if (typeObject instanceof JSONObject) {
-            return parseSingleRequestBody((JSONObject) typeObject);
+        } else if (typeObject instanceof JSONObject jsonObject) {
+            return parseSingleRequestBody(jsonObject);
         } else {
             throw new InvalidRequestException();
         }
@@ -70,8 +69,8 @@ public class RequestUtils {
         if (first == '.' || first == '/') {
             method = method.substring(1);
         }
-        int m = method.length() - method.replaceAll("\\.", "").length();
-        int n = method.length() - method.replaceAll("/", "").length();
+        int m = method.length() - method.replace("\\.", "").length();
+        int n = method.length() - method.replace("/", "").length();
         if (m != 1 && n != 1) {
             throw new MethodNotFoundException(String.format("rpc: method request ill-formed: %s; need x.y or x/y", method));
         }
@@ -84,13 +83,10 @@ public class RequestUtils {
         return methodArr;
     }
 
-    @Deprecated
     public Object[] parseParams(Object params, String[] names) throws InvalidParamsException {
-        if (params instanceof JSONArray) {
-            JSONArray jsonArray = (JSONArray) params;
+        if (params instanceof JSONArray jsonArray) {
             return jsonArray.toArray();
-        } else if (params instanceof JSONObject) {
-            JSONObject jsonObject = (JSONObject) params;
+        } else if (params instanceof JSONObject jsonObject) {
             int l = names.length;
             Object[] res = new Object[l];
             for (int i = 0; i < l; i++) {
@@ -104,23 +100,21 @@ public class RequestUtils {
 
     public Object[] parseParams(Object params, Parameter[] paramsReflect) throws InvalidParamsException {
         int l = paramsReflect.length;
-        if (params instanceof JSONArray) {
-            JSONArray jsonArray = (JSONArray) params;
+        if (params instanceof JSONArray jsonArray) {
             Object[] res = new Object[l];
             for (int i = 0; i < l; i++) {
                 Object item = jsonArray.get(i);
-                res[i] = JSON.toJavaObject(item, paramsReflect[i].getType());
+                res[i] = JSON.to(paramsReflect[i].getType(), item);
             }
             return res;
-        } else if (params instanceof JSONObject) {
-            JSONObject jsonObject = (JSONObject) params;
+        } else if (params instanceof JSONObject jsonObject) {
             Object[] res = new Object[l];
             for (int i = 0; i < l; i++) {
                 String key = paramsReflect[i].getName();
                 if (!jsonObject.containsKey(key)) {
                     throw new InvalidParamsException();
                 }
-                res[i] = JSON.toJavaObject(jsonObject.get(key), paramsReflect[i].getType());
+                res[i] = JSON.to(paramsReflect[i].getType(), jsonObject.get(key));
             }
             return res;
         } else {

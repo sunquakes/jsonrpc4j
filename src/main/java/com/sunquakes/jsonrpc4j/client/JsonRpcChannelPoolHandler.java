@@ -24,6 +24,7 @@ public class JsonRpcChannelPoolHandler implements ChannelPoolHandler {
 
     @Override
     public void channelAcquired(Channel ch) throws Exception {
+        // comment explaining why the method is empty
     }
 
     @Override

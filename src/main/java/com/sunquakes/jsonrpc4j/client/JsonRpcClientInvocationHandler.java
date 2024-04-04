@@ -25,6 +25,6 @@ public class  JsonRpcClientInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         String methodPath = String.format("/%s/%s", service, method.getName());
-        return JSON.toJavaObject(jsonRpcClient.handle(methodPath, args), method.getReturnType());
+        return JSON.to(method.getReturnType(), jsonRpcClient.handle(methodPath, args));
     }
 }

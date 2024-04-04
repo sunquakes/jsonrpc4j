@@ -31,7 +31,7 @@ import java.util.concurrent.SynchronousQueue;
 @Slf4j
 public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInterface {
 
-    private static int DEFAULT_PORT = 80;
+    private static int defaultPort = 80;
 
     private JsonRpcTcpClientHandler jsonRpcTcpClientHandler;
 
@@ -63,9 +63,9 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
                 });
 
         if (discovery != null) {
-            loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), DEFAULT_PORT, bootstrap, poolHandler);
+            loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {
-            loadBalancer = new JsonRpcLoadBalancer(() -> url.value(), DEFAULT_PORT, bootstrap, poolHandler);
+            loadBalancer = new JsonRpcLoadBalancer(() -> url.value(), defaultPort, bootstrap, poolHandler);
         }
     }
 
@@ -81,12 +81,13 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            SynchronousQueue<Object> queue = jsonRpcTcpClientHandler.send(request, channel);
+            SynchronousQueue<Object> queue = (SynchronousQueue<Object>) jsonRpcTcpClientHandler.send(request, channel);
             body = (String) queue.take();
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             loadBalancer.removePool(pool);
+            Thread.currentThread().interrupt();
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {

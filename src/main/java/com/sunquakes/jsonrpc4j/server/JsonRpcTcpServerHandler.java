@@ -22,7 +22,7 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
 
     private TcpServerOption tcpServerOption;
 
-    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap();
+    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap<>();
 
     public JsonRpcTcpServerHandler(ApplicationContext applicationContext, TcpServerOption tcpServerOption) {
         this.applicationContext = applicationContext;
