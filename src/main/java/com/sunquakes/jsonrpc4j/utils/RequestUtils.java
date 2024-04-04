@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * @author : Shing, sunquakes@outlook.com
@@ -30,10 +29,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @UtilityClass
 public class RequestUtils {
-
-    public static final String PROTOCOL_TCP = "tcp";
-    public static final String PROTOCOL_HTTP = "http";
-    public static final String PROTOCOL_HTTPS = "https";
 
     public static final String TCP_PACKAGE_EOF = "\r\n";
     public static final int TCP_PACKAG_MAX_LENGHT = 2 * 1024 * 1024;
@@ -76,7 +71,7 @@ public class RequestUtils {
         }
         String[] methodArr;
         if (m == 1) {
-            methodArr = method.split(".");
+            methodArr = method.split("\\.");
         } else {
             methodArr = method.split("/");
         }

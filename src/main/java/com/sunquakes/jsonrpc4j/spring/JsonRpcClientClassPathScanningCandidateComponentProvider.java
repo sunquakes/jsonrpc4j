@@ -1,6 +1,9 @@
 package com.sunquakes.jsonrpc4j.spring;
 
-import com.sunquakes.jsonrpc4j.client.*;
+import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
+import com.sunquakes.jsonrpc4j.client.JsonRpcClientInterface;
+import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClient;
+import com.sunquakes.jsonrpc4j.client.JsonRpcTcpClient;
 import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.config.ConfigEntry;
 import com.sunquakes.jsonrpc4j.discovery.Driver;
@@ -12,17 +15,13 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
 import java.util.Map;
-import java.util.Properties;
 
 /**
  * @author : Shing, sunquakes@outlook.com
  * @version : 1.0.0
- * @since: 2022/6/6 9:17 PM
  **/
 @Slf4j
 public class JsonRpcClientClassPathScanningCandidateComponentProvider extends ClassPathScanningCandidateComponentProvider {
@@ -63,9 +62,9 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                 JsonRpcClientInterface jsonRpcClient;
 
                 String url = annotationAttributes.get("url").toString();
-                /**
-                 * Use the client annotaion url value priorly.
-                 * If there is no url, check whether is there the discovery configuration, if not, throw exception.
+                /*
+                 Use the client annotaion url value priorly.
+                 If there is no url, check whether is there the discovery configuration, if not, throw exception.
                  */
                 if (StringUtils.hasLength(url)) {
                     config.put(new ConfigEntry<>("url", url));
@@ -98,7 +97,8 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
     }
 
     private JsonRpcClientInterface getJsonRpcClient(String protocol, Config<Object> config) throws IllegalArgumentException {
-        if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
+        protocol = protocol.toUpperCase();
+        if (protocol.equals(JsonRpcProtocol.TCP.name())) {
             return new JsonRpcTcpClient(config);
         } else {
             return new JsonRpcHttpClient(config);
@@ -107,7 +107,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
 
     private String getPackageEof(Object value, Environment environment) {
         String packageEof;
-        if (value == null || !StringUtils.hasLength(value.toString())) {
+        if (!StringUtils.hasLength(value.toString())) {
             packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
         } else {
             packageEof = value.toString();

@@ -37,13 +37,13 @@ import java.util.concurrent.SynchronousQueue;
 @Slf4j
 public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInterface {
 
-    private static int defaultHttpPort = 80;
+    private static final int DEFAULT_HTTP_PORT = 80;
 
-    private static int defaultHttpsPort = 443;
+    private static final int DEFAULT_HTTPS_PORT = 443;
 
-    private JsonRpcHttpClientHandler jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler();
+    private final JsonRpcHttpClientHandler jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler();
 
-    public JsonRpcHttpClient(Config config) {
+    public JsonRpcHttpClient(Config<Object> config) {
         super(config);
     }
 
@@ -55,7 +55,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true);
-        int defaultPort = protocol.equals(JsonRpcProtocol.https.name()) ? defaultHttpsPort : defaultHttpPort;
+        int defaultPort = protocol.equals(JsonRpcProtocol.HTTPS.name()) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
         if (discovery != null) {
             loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {
@@ -103,7 +103,8 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
                     .addLast("codec", new HttpClientCodec())
                     .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
                     .addLast(jsonRpcHttpClientHandler);
-            if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+            protocol = protocol.toUpperCase();
+            if (protocol.equals(JsonRpcProtocol.HTTPS.name())) {
                 SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
                 ch.pipeline().addLast(new OptionalSslHandler(sslContext));
             }

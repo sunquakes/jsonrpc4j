@@ -20,7 +20,7 @@ public @interface JsonRpcClient {
      * The protocol of the client request to server;
      * @return the client protocol
      */
-    JsonRpcProtocol protocol() default JsonRpcProtocol.http;
+    JsonRpcProtocol protocol() default JsonRpcProtocol.HTTP;
 
     /**
      * The server url of the client request to server;
