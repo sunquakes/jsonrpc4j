@@ -8,6 +8,7 @@ import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
+import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -25,6 +26,7 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 /**
@@ -62,7 +64,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
     }
 
     @Override
-    public Object handle(String method, Object[] args) throws Exception {
+    public Object handle(String method, Object[] args) throws JsonRpcException {
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
@@ -80,6 +82,8 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         } catch (InterruptedException e) {
             loadBalancer.removePool(pool);
             Thread.currentThread().interrupt();
+            throw new JsonRpcClientException(e.getMessage());
+        } catch (ExecutionException e) {
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {

@@ -40,20 +40,20 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
             Class<?> interfaceType;
             try {
                 interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
-                Config config = new Config();
+                Config<Object> config = new Config<>();
 
                 // Select handler according to different protocol
                 String protocol = annotationAttributes.get("protocol").toString();
-                config.put(new ConfigEntry("protocol", protocol));
+                config.put(new ConfigEntry<>("protocol", protocol));
 
                 String name = annotationAttributes.get("value").toString();
-                config.put(new ConfigEntry("name", name));
+                config.put(new ConfigEntry<>("name", name));
 
                 String packageEof = getPackageEof(annotationAttributes.get("packageEof"), environment);
-                config.put(new ConfigEntry("packageEof", packageEof));
+                config.put(new ConfigEntry<>("packageEof", packageEof));
 
                 int packageMaxLength = getPackageMaxLength(annotationAttributes.get("packageMaxLength"), environment);
-                config.put(new ConfigEntry("packageMaxLength", packageMaxLength));
+                config.put(new ConfigEntry<>("packageMaxLength", packageMaxLength));
 
                 String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
                 String discoveryUrl = environment.getProperty("jsonrpc.discovery.url");
@@ -68,7 +68,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                  * If there is no url, check whether is there the discovery configuration, if not, throw exception.
                  */
                 if (StringUtils.hasLength(url)) {
-                    config.put(new ConfigEntry("url", url));
+                    config.put(new ConfigEntry<>("url", url));
                     jsonRpcClient = getJsonRpcClient(protocol, config);
                 } else {
                     Driver discovery = null;
@@ -80,7 +80,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                         log.error("The url of JsonRpcClient is required.");
                         return false;
                     }
-                    config.put(new ConfigEntry("discovery", discovery));
+                    config.put(new ConfigEntry<>("discovery", discovery));
                     jsonRpcClient = getJsonRpcClient(protocol, config);
                 }
 
@@ -97,7 +97,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
         });
     }
 
-    private JsonRpcClientInterface getJsonRpcClient(String protocol, Config config) throws IllegalArgumentException {
+    private JsonRpcClientInterface getJsonRpcClient(String protocol, Config<Object> config) throws IllegalArgumentException {
         if (protocol.equals(RequestUtils.PROTOCOL_TCP)) {
             return new JsonRpcTcpClient(config);
         } else {

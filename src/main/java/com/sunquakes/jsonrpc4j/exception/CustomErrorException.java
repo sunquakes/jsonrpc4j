@@ -2,7 +2,7 @@ package com.sunquakes.jsonrpc4j.exception;
 
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 
-public class CustomErrorException extends RuntimeException {
+public class CustomErrorException extends JsonRpcException {
 
     private final int code;
 

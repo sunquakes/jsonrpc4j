@@ -37,8 +37,8 @@ public enum ErrorEnum {
         return null;
     }
 
-    public static Exception getException(int code, String message) {
-        Exception e;
+    public static JsonRpcException getException(int code, String message) {
+        JsonRpcException e;
         switch (code) {
             case -32700:
                 e = new ParseErrorException(message);
@@ -59,7 +59,7 @@ public enum ErrorEnum {
                 e = new CustomErrorException(message);
                 break;
             default:
-                e = new Exception(message);
+                e = new JsonRpcException(message);
         }
         return e;
     }

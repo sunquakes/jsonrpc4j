@@ -2,7 +2,7 @@ package com.sunquakes.jsonrpc4j.exception;
 
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 
-public class MethodNotFoundException extends RuntimeException {
+public class MethodNotFoundException extends JsonRpcException {
 
     private final int code;
 
