@@ -32,18 +32,17 @@ public class JsonRpcLoadBalancer {
 
     private int times = 0;
 
-    private final int MAX_RETRY_TIMES = 3;
+    private static final int MAX_RETRY_TIMES = 3;
 
     public JsonRpcLoadBalancer(Supplier<String> url, int defaultPort, Bootstrap bootstrap, JsonRpcChannelPoolHandler poolHandler) {
         this.bootstrap = bootstrap;
         this.poolHandler = poolHandler;
         this.url = url;
         this.defaultPort = defaultPort;
-        // this.initPools();
     }
 
     public void initPools() {
-        Arrays.asList(url.get().split(",")).stream().filter(item -> StringUtils.hasLength(item)).forEach(item -> {
+        Arrays.asList(url.get().split(",")).stream().filter(StringUtils::hasLength).forEach(item -> {
             String[] ipPort = item.split(":");
             String hostname = ipPort[0];
             int port = defaultPort;
@@ -60,7 +59,7 @@ public class JsonRpcLoadBalancer {
     @Synchronized
     public FixedChannelPool getPool() {
         FixedChannelPool pool;
-        if (pools.size() <= 0) {
+        if (pools.isEmpty()) {
             if (times >= MAX_RETRY_TIMES) {
                 times = 0;
                 throw new JsonRpcClientException("Fail to get service address.");

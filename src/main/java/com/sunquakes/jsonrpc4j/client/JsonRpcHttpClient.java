@@ -53,7 +53,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true);
-        int defaultPort = protocol.equals(JsonRpcProtocol.https) ? defaultHttpsPort : defaultHttpPort;
+        int defaultPort = protocol.equals(JsonRpcProtocol.https.name()) ? defaultHttpsPort : defaultHttpPort;
         if (discovery != null) {
             loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {
@@ -73,7 +73,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            SynchronousQueue<Object> queue = jsonRpcHttpClientHandler.send(request, channel);
+            SynchronousQueue<Object> queue = (SynchronousQueue<Object>) jsonRpcHttpClientHandler.send(request, channel);
             body = (String) queue.take();
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);

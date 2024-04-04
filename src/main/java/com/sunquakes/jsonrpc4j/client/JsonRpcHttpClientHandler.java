@@ -17,6 +17,7 @@ import io.netty.util.CharsetUtil;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
@@ -31,10 +32,10 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
 
     private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap();
+    private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap<>();
 
     @Synchronized
-    public synchronized SynchronousQueue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
+    public synchronized Queue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
         String id = data.getString("id");
         SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
         queueMap.put(id, synchronousQueue);
@@ -78,7 +79,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-            synchronized (id) {
+            synchronized (idMap) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
                     queue.put(JSON.toJSONString(errorResponseDto));
@@ -95,7 +96,7 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
             ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-            synchronized (id) {
+            synchronized (idMap) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
                     queue.put(JSON.toJSONString(errorResponseDto));

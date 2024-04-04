@@ -40,7 +40,7 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
             Class<?> interfaceType;
             try {
                 interfaceType = Class.forName(metadataReader.getClassMetadata().getClassName());
-                Config<?> config = new Config();
+                Config config = new Config();
 
                 // Select handler according to different protocol
                 String protocol = annotationAttributes.get("protocol").toString();
@@ -49,16 +49,10 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                 String name = annotationAttributes.get("value").toString();
                 config.put(new ConfigEntry("name", name));
 
-                String packageEof = annotationAttributes.get("packageEof").toString();
-                if (!StringUtils.hasLength(packageEof)) {
-                    packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
-                }
+                String packageEof = getPackageEof(annotationAttributes.get("packageEof"), environment);
                 config.put(new ConfigEntry("packageEof", packageEof));
 
-                int packageMaxLength = (int) annotationAttributes.get("packageMaxLength");
-                if (packageMaxLength == 0) {
-                    packageMaxLength = environment.getProperty("jsonrpc.client.package-max-length", Integer.class, RequestUtils.TCP_PACKAG_MAX_LENGHT);
-                }
+                int packageMaxLength = getPackageMaxLength(annotationAttributes.get("packageMaxLength"), environment);
                 config.put(new ConfigEntry("packageMaxLength", packageMaxLength));
 
                 String discoveryDriverName = environment.getProperty("jsonrpc.discovery.driver-name");
@@ -82,13 +76,12 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
                         JsonRpcServiceDiscovery jsonRpcServiceDiscovery = JsonRpcServiceDiscovery.newInstance(discoveryUrl, discoveryDriverName);
                         discovery = jsonRpcServiceDiscovery.getDriver();
                     }
-                    if (discovery != null) {
-                        config.put(new ConfigEntry("discovery", discovery));
-                        jsonRpcClient = getJsonRpcClient(protocol, config);
-                    } else {
+                    if (discovery == null) {
                         log.error("The url of JsonRpcClient is required.");
                         return false;
                     }
+                    config.put(new ConfigEntry("discovery", discovery));
+                    jsonRpcClient = getJsonRpcClient(protocol, config);
                 }
 
                 BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(JsonRpcClientFactoryBean.class);
@@ -110,5 +103,23 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
         } else {
             return new JsonRpcHttpClient(config);
         }
+    }
+
+    private String getPackageEof(Object value, Environment environment) {
+        String packageEof;
+        if (value == null || !StringUtils.hasLength(value.toString())) {
+            packageEof = environment.getProperty("jsonrpc.client.package-eof", RequestUtils.TCP_PACKAGE_EOF);
+        } else {
+            packageEof = value.toString();
+        }
+        return packageEof;
+    }
+
+    private int getPackageMaxLength(Object value, Environment environment) {
+        int packageMaxLength = (int) value;
+        if (packageMaxLength == 0) {
+            packageMaxLength = environment.getProperty("jsonrpc.client.package-max-length", Integer.class, RequestUtils.TCP_PACKAG_MAX_LENGHT);
+        }
+        return packageMaxLength;
     }
 }

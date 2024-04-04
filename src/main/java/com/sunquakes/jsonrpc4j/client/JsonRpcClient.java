@@ -35,5 +35,6 @@ public class JsonRpcClient {
     }
 
     protected void initLoadBalancer() {
+        // Call child class method.
     }
 }
