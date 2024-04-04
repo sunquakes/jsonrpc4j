@@ -97,9 +97,9 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                     }
                 }
             }
-            return null;
+            return "";
         } catch (SocketException e) {
-            return null;
+            return "";
         }
     }
 
