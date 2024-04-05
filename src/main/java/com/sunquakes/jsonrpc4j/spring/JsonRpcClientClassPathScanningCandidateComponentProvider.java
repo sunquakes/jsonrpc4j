@@ -20,8 +20,9 @@ import org.springframework.util.StringUtils;
 import java.util.Map;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 3.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcClientClassPathScanningCandidateComponentProvider extends ClassPathScanningCandidateComponentProvider {

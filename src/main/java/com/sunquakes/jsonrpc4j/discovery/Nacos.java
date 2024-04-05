@@ -25,9 +25,9 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.2.0
- * @since : 2023/1/15 10:34 AM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.2.0
+ * @since 2.2.0
  **/
 @Slf4j
 public class Nacos implements Driver {
@@ -119,7 +119,7 @@ public class Nacos implements Driver {
                 .queryParam(SERVICE_NAME_KEY, serviceName)
                 .queryParam("ip", ip)
                 .queryParam("port", port)
-                .queryParam(EPHEMERAL_KEY, ephemeral) .build();
+                .queryParam(EPHEMERAL_KEY, ephemeral).build();
 
         HttpPut put = new HttpPut(fullUrl.toString());
         try {

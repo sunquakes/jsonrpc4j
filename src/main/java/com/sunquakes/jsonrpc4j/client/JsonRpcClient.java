@@ -6,9 +6,9 @@ import com.sunquakes.jsonrpc4j.discovery.Driver;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.1.0
- * @since : 2022/11/5 10:26 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.1.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcClient {

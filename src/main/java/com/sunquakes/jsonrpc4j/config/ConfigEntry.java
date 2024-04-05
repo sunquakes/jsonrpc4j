@@ -1,9 +1,9 @@
 package com.sunquakes.jsonrpc4j.config;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.1.0
- * @since : 2022/11/6 6:20 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.1.0
+ * @since 1.0.0
  **/
 public class ConfigEntry<T> {
 

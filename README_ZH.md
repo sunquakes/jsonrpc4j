@@ -123,7 +123,7 @@ jsonrpc.client.package-eof=\r\n
 
 ```java
 
-@JsonRpcClient(value = "JsonRpc", protocol = "tcp", url = "localhost:3200")
+@JsonRpcClient(value = "JsonRpc", protocol = JsonRpcProtocol.TCP, url = "localhost:3200")
 public interface IJsonRpcClient {
     int add(int a, int b);
 }
@@ -153,7 +153,7 @@ public class JsonRpcTest {
 
 ```properties
 # 主机名，非必填项，如果用默认主机ip，此项可以不配置
-jsonrpc.discovery.hostname=192.168.39.1 
+jsonrpc.discovery.hostname=192.168.39.1
 # consul地址
 # instanceId: 用来区分不同节点上拥有相同主机名和端口的 
 # check: 开启健康检查，默认关闭
@@ -167,7 +167,7 @@ jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Consul
 
 ```properties
 # 主机名，非必填项，如果用默认主机ip，此项可以不配置
-jsonrpc.discovery.hostname=192.168.39.1 
+jsonrpc.discovery.hostname=192.168.39.1
 # nacos地址
 # 支持 [Open API Guide](https://nacos.io/zh-cn/docs/open-api.html) 注册实例章节的请求参数
 jsonrpc.discovery.url=http://127.0.0.1:8849?namespaceId=XXXXXX&...

@@ -12,9 +12,9 @@ import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.1.0
- * @since : 2022/11/1 8:17 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 3.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcServiceDiscovery {

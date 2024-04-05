@@ -22,9 +22,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 1.0.0
+ * @since 1.0.0
  **/
 @AllArgsConstructor
 public class JsonRpcServerHandler {

@@ -27,14 +27,14 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/6/2 1:19 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 3.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanDefinitionScanner {
 
-    private static final String ANNOTATION_VALUE = "value";
+    private static final String ANNOTATION_VALUE_KEY = "value";
 
     public JsonRpcServiceClassPathBeanDefinitionScanner(BeanDefinitionRegistry registry, Environment environment) {
         super(registry);
@@ -125,10 +125,10 @@ public class JsonRpcServiceClassPathBeanDefinitionScanner extends ClassPathBeanD
                 annotationAttributes = getMetadataReaderFactory().getMetadataReader(t[i])
                         .getAnnotationMetadata()
                         .getAnnotationAttributes("com.sunquakes.jsonrpc4j.JsonRpcService");
-                if (annotationAttributes == null || annotationAttributes.get(ANNOTATION_VALUE) == null || !StringUtils.hasLength(annotationAttributes.get(ANNOTATION_VALUE).toString()) || !checkCandidate(annotationAttributes.get(ANNOTATION_VALUE).toString(), candidate)) {
+                if (annotationAttributes == null || annotationAttributes.get(ANNOTATION_VALUE_KEY) == null || !StringUtils.hasLength(annotationAttributes.get(ANNOTATION_VALUE_KEY).toString()) || !checkCandidate(annotationAttributes.get(ANNOTATION_VALUE_KEY).toString(), candidate)) {
                     continue;
                 }
-                String customBeanName = annotationAttributes.get(ANNOTATION_VALUE).toString();
+                String customBeanName = annotationAttributes.get(ANNOTATION_VALUE_KEY).toString();
 
                 BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, customBeanName);
                 beanDefinitions.add(definitionHolder);

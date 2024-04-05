@@ -18,9 +18,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.1.0
- * @since : 2022/11/1 7:12 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.1.0
+ * @since 2.1.0
  **/
 @Slf4j
 public class Consul implements Driver {

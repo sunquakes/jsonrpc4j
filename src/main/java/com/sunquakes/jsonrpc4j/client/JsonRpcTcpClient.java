@@ -26,14 +26,12 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.0.0
- * @since : 2022/6/28 9:05 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInterface {
-
-    private static int defaultPort = 80;
 
     private JsonRpcTcpClientHandler jsonRpcTcpClientHandler;
 
@@ -64,6 +62,7 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
                     }
                 });
 
+        int defaultPort = 80;
         if (discovery != null) {
             loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {

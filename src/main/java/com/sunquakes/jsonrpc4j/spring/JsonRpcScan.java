@@ -6,9 +6,9 @@ import org.springframework.core.annotation.AliasFor;
 import java.lang.annotation.*;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 1.0.0
+ * @since 1.0.0
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -18,6 +18,7 @@ public @interface JsonRpcScan {
 
     /**
      * Base packages to scan for annotated jsonrpc4j components.
+     *
      * @return base packages
      */
     @AliasFor("basePackages")
@@ -25,6 +26,7 @@ public @interface JsonRpcScan {
 
     /**
      * Base packages to scan for annotated jsonrpc4j components.
+     *
      * @return base packages
      */
     @AliasFor("value")
