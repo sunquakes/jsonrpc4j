@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-http.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcHttpServerTest {
+class JsonRpcHttpServerTest {
 
     @Test
-    public void testHandle() throws IOException {
+    void testHandle() throws IOException {
         JSONObject params = new JSONObject();
         params.put("a", 1);
         params.put("b", 2);
@@ -37,11 +37,11 @@ public class JsonRpcHttpServerTest {
         HttpPost httpPost = new HttpPost("http://localhost:3200");
         httpPost.setEntity(new StringEntity(request.toString(), ContentType.APPLICATION_JSON));
         HttpResponse response = httpClient.execute(httpPost);
-        assertEquals(EntityUtils.toString(response.getEntity()), "{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}");
+        assertEquals("{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}", EntityUtils.toString(response.getEntity()));
     }
 
     @Test
-    public void testMethod() throws IOException {
+    void testMethod() throws IOException {
         JSONObject params = new JSONObject();
         params.put("a", 3);
         params.put("b", 4);
@@ -54,6 +54,6 @@ public class JsonRpcHttpServerTest {
         HttpPost httpPost = new HttpPost("http://localhost:3200");
         httpPost.setEntity(new StringEntity(request.toString(), ContentType.APPLICATION_JSON));
         HttpResponse response = httpClient.execute(httpPost);
-        assertEquals(EntityUtils.toString(response.getEntity()), "{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":7}");
+        assertEquals("{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":7}", EntityUtils.toString(response.getEntity()));
     }
 }

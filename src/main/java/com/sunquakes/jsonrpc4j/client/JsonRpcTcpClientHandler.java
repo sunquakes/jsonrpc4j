@@ -8,7 +8,6 @@ import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
-import com.sunquakes.jsonrpc4j.utils.ResponseUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -19,32 +18,33 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.SynchronousQueue;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.0.0
- * @since : 2022/7/3 2:44 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 @Sharable
 public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap();
+    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap<>();
 
     private TcpClientOption tcpClientOption;
 
     private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
-    private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap();
+    private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap<>();
 
     public JsonRpcTcpClientHandler(TcpClientOption tcpClientOption) {
         this.tcpClientOption = tcpClientOption;
     }
 
     @Synchronized
-    public synchronized SynchronousQueue<Object> send(JSONObject request, Channel channel) {
+    public synchronized Queue<Object> send(JSONObject request, Channel channel) {
         String id = request.getString("id");
         String message = request.toJSONString() + tcpClientOption.getPackageEof();
         ByteBuf byteBuf = channel.alloc().buffer(tcpClientOption.getPackageMaxLength());
@@ -98,7 +98,7 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
                 String body = new String(bytes);
                 ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
                 String id = responseDto.getId();
-                synchronized (id) {
+                synchronized (responseDto) {
                     SynchronousQueue<Object> queue = queueMap.get(id);
                     if (queue != null) {
                         queue.put(body);
@@ -117,8 +117,8 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
-            synchronized (id) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
+            synchronized (errorResponseDto) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
                     queue.put(JSON.toJSONString(errorResponseDto));
@@ -134,8 +134,8 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
         ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
         if (idMap == null) return;
         for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.InternalError.getCode(), ErrorEnum.InternalError.getText(), null));
-            synchronized (id) {
+            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
+            synchronized (errorResponseDto) {
                 SynchronousQueue<Object> queue = queueMap.get(id);
                 if (queue != null) {
                     queue.put(JSON.toJSONString(errorResponseDto));

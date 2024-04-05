@@ -12,9 +12,9 @@ import org.springframework.core.type.AnnotationMetadata;
 import java.util.Map;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 3.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcImportBeanDefinitionRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware {
@@ -29,6 +29,9 @@ public class JsonRpcImportBeanDefinitionRegistrar implements ImportBeanDefinitio
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry beanDefinitionRegistry) {
         Map<String, Object> data = annotationMetadata.getAnnotationAttributes("com.sunquakes.jsonrpc4j.spring.JsonRpcScan");
+        if (data == null) {
+            return;
+        }
         String[] basePackages = (String[]) data.get("basePackages");
 
         ClassPathScanningCandidateComponentProvider classPathScanningCandidateComponentProvider = new JsonRpcClientClassPathScanningCandidateComponentProvider(false, environment, beanDefinitionRegistry);

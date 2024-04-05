@@ -5,9 +5,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelPoolHandler;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.0.0
- * @since : 2022/7/25 6:47 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.0.0
+ * @since 1.0.0
  **/
 public class JsonRpcChannelPoolHandler implements ChannelPoolHandler {
 
@@ -24,6 +24,7 @@ public class JsonRpcChannelPoolHandler implements ChannelPoolHandler {
 
     @Override
     public void channelAcquired(Channel ch) throws Exception {
+        // There is no needs to handle channel acquired event.
     }
 
     @Override

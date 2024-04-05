@@ -17,13 +17,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcServerHandlerTest {
+class JsonRpcServerHandlerTest {
 
     @Autowired
     private ApplicationContext applicationContext;
 
     @Test
-    public void testHandle() {
+    void testHandle() {
         // test ResponseDto
         {
             String json = "{" +
@@ -34,9 +34,9 @@ public class JsonRpcServerHandlerTest {
                     "}";
             com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler.class);
             ResponseDto responseDto = (ResponseDto) jsonRpcServerHandler.handle(json);
-            assertEquals(responseDto.getId(), "1234567890");
-            assertEquals(responseDto.getJsonrpc(), "2.0");
-            assertEquals(responseDto.getResult(), 3);
+            assertEquals("1234567890", responseDto.getId());
+            assertEquals("2.0", responseDto.getJsonrpc());
+            assertEquals(3, responseDto.getResult());
         }
 
         // test NotifyResponseDto
@@ -48,8 +48,8 @@ public class JsonRpcServerHandlerTest {
                     "}";
             JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(JsonRpcServerHandler.class);
             NotifyResponseDto notifyResponseDto = (NotifyResponseDto) jsonRpcServerHandler.handle(json);
-            assertEquals(notifyResponseDto.getJsonrpc(), "2.0");
-            assertEquals(notifyResponseDto.getResult(), 3);
+            assertEquals("2.0", notifyResponseDto.getJsonrpc());
+            assertEquals(3, notifyResponseDto.getResult());
         }
 
         // test RequestDto||NotifyRequestDto Array
@@ -66,7 +66,7 @@ public class JsonRpcServerHandlerTest {
                     "}]";
             com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler jsonRpcServerHandler = applicationContext.getBean(com.sunquakes.jsonrpc4j.server.JsonRpcServerHandler.class);
             Object res = jsonRpcServerHandler.handle(json);
-            assertTrue(res instanceof ArrayList);
+            assertTrue(res instanceof List);
 
             List<Object> list = (List<Object>) res;
             assertTrue(list.get(0) instanceof ResponseDto);

@@ -7,24 +7,25 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 1.0.0
+ * @since 1.0.0
  **/
 @Slf4j
-public class  JsonRpcClientInvocationHandler<T> implements InvocationHandler {
+public class JsonRpcClientInvocationHandler implements InvocationHandler {
 
-    private JsonRpcClientInterface jsonRpcClient;
+    private final JsonRpcClientInterface jsonRpcClient;
 
-    private String service;
+    private final String service;
 
     public JsonRpcClientInvocationHandler(JsonRpcClientInterface jsonRpcClient, String service) {
         this.jsonRpcClient = jsonRpcClient;
         this.service = service;
     }
+
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
         String methodPath = String.format("/%s/%s", service, method.getName());
-        return JSON.toJavaObject(jsonRpcClient.handle(methodPath, args), method.getReturnType());
+        return JSON.to(method.getReturnType(), jsonRpcClient.handle(methodPath, args));
     }
 }

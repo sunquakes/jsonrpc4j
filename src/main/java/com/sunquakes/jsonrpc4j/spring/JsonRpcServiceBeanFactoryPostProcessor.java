@@ -12,9 +12,9 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 3.0.0
+ * @since 1.0.0
  **/
 public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostProcessor, EnvironmentAware {
 
@@ -28,17 +28,15 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         DefaultListableBeanFactory defaultListableBeanFactory = (DefaultListableBeanFactory) beanFactory;
-        if (defaultListableBeanFactory == null) {
-            return;
-        }
         String protocol = environment.getProperty("jsonrpc.server.protocol");
         String port = environment.getProperty("jsonrpc.server.port");
         String serverBeanName = String.format("%s_%s_%s", "JsonRpcServer", protocol, port);
         if (protocol != null && port != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
             BeanDefinitionBuilder serverBuilder;
-            if (protocol.equals(JsonRpcProtocol.tcp.name())) {
+            protocol = protocol.toUpperCase();
+            if (protocol.equals(JsonRpcProtocol.TCP.name())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
-            } else if (protocol.equals(JsonRpcProtocol.http.name()) || protocol.equals(JsonRpcProtocol.https.name())) {
+            } else if (protocol.equals(JsonRpcProtocol.HTTP.name()) || protocol.equals(JsonRpcProtocol.HTTPS.name())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
             } else {
                 throw new IllegalArgumentException("Invalid protocol.");

@@ -7,13 +7,13 @@ import org.springframework.beans.factory.FactoryBean;
 import java.lang.reflect.Proxy;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 1.0.0
+ * @since 1.0.0
  **/
 public class JsonRpcClientFactoryBean<T> implements FactoryBean<T> {
 
-    private Class<T> interfaceType;
+    private final Class<T> interfaceType;
 
     private JsonRpcClientInterface jsonRpcClient;
 

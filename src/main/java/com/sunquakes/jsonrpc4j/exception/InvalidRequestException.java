@@ -2,22 +2,17 @@ package com.sunquakes.jsonrpc4j.exception;
 
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 
-public class InvalidRequestException extends RuntimeException {
+public class InvalidRequestException extends JsonRpcException {
 
-    private int code;
+    private final int code;
 
     public InvalidRequestException() {
-        this(ErrorEnum.InvalidRequest.getText());
+        this(ErrorEnum.INVALID_REQUEST.getText());
     }
 
     public InvalidRequestException(String message) {
         super(message);
-        this.code = ErrorEnum.InvalidRequest.getCode();
-    }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
+        this.code = ErrorEnum.INVALID_REQUEST.getCode();
     }
 
     public int getCode() {

@@ -1,6 +1,6 @@
 package com.sunquakes.jsonrpc4j.server;
 
-import com.sunquakes.jsonrpc4j.utils.RequestUtils;
+import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -31,9 +31,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.0.0
- * @since : 2022/7/2 12:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean {
@@ -64,7 +64,8 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
 
     public void start() throws InterruptedException, NoSuchAlgorithmException, KeyStoreException, IOException, UnrecoverableKeyException, CertificateException {
         SslContext sslContext = null;
-        if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+        protocol = protocol.toUpperCase();
+        if (protocol.equals(JsonRpcProtocol.HTTPS.name())) {
             InputStream sslInputStream = getClass().getClassLoader().getResourceAsStream(sslKeyStore);
             KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             KeyStore keyStore = KeyStore.getInstance(sslKeyStoreType);
@@ -90,8 +91,9 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
                         .childOption(ChannelOption.SO_KEEPALIVE, true)
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
-                            protected void initChannel(SocketChannel sh) throws Exception {
-                                if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+                            protected void initChannel(SocketChannel sh) {
+                                protocol = protocol.toUpperCase();
+                                if (protocol.equals(JsonRpcProtocol.HTTPS.name())) {
                                     sh.pipeline().addFirst(new OptionalSslHandler(finalSslContext));
                                 }
                                 sh.pipeline()
@@ -108,14 +110,14 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
                     log.info("JsonRpc http server startup successfully.");
                 } else {
                     log.info("JsonRpc http server startup failed.");
-                    future.cause().printStackTrace();
                     bossGroup.shutdownGracefully();
                     workerGroup.shutdownGracefully();
                 }
 
                 future.channel().closeFuture().sync();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                log.error(e.getMessage(), e);
+                Thread.currentThread().interrupt();
             }
         });
         countDownLatch.await();

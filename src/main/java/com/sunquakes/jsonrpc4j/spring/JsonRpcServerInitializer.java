@@ -5,9 +5,9 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.Environment;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/6/1 1:04 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 1.0.0
+ * @since 1.0.0
  **/
 public class JsonRpcServerInitializer implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 

@@ -8,6 +8,7 @@ import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
+import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -24,23 +25,25 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.net.ssl.SSLException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.0.0
- * @since : 2022/7/8 12:39 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInterface {
 
-    private static int DEFAULT_HTTP_PORT = 80;
+    private static final int DEFAULT_HTTP_PORT = 80;
 
-    private static int DEFAULT_HTTPS_PORT = 443;
+    private static final int DEFAULT_HTTPS_PORT = 443;
 
-    private JsonRpcHttpClientHandler jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler();
+    private final JsonRpcHttpClientHandler jsonRpcHttpClientHandler = new JsonRpcHttpClientHandler();
 
-    public JsonRpcHttpClient(Config config) {
+    public JsonRpcHttpClient(Config<Object> config) {
         super(config);
     }
 
@@ -52,7 +55,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true);
-        int defaultPort = protocol.equals(JsonRpcProtocol.https) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
+        int defaultPort = protocol.equals(JsonRpcProtocol.HTTPS.name()) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
         if (discovery != null) {
             loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {
@@ -61,7 +64,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
     }
 
     @Override
-    public Object handle(String method, Object[] args) throws Exception {
+    public Object handle(String method, Object[] args) throws JsonRpcException {
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
@@ -72,12 +75,15 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            SynchronousQueue<Object> queue = jsonRpcHttpClientHandler.send(request, channel);
+            SynchronousQueue<Object> queue = (SynchronousQueue<Object>) jsonRpcHttpClientHandler.send(request, channel);
             body = (String) queue.take();
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             loadBalancer.removePool(pool);
+            Thread.currentThread().interrupt();
+            throw new JsonRpcClientException(e.getMessage());
+        } catch (ExecutionException e) {
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {
@@ -92,12 +98,13 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
 
     class Handler implements JsonRpcChannelHandler {
         @Override
-        public void channelUpdated(Channel ch) throws Exception {
+        public void channelUpdated(Channel ch) throws SSLException {
             ch.pipeline()
                     .addLast("codec", new HttpClientCodec())
                     .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
                     .addLast(jsonRpcHttpClientHandler);
-            if (protocol.equals(RequestUtils.PROTOCOL_HTTPS)) {
+            protocol = protocol.toUpperCase();
+            if (protocol.equals(JsonRpcProtocol.HTTPS.name())) {
                 SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
                 ch.pipeline().addLast(new OptionalSslHandler(sslContext));
             }

@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-http.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcServiceTest {
+class JsonRpcServiceTest {
 
     @Value("${jsonrpc.server.protocol}")
     private final String protocol = null;
@@ -29,12 +29,12 @@ public class JsonRpcServiceTest {
     private ApplicationContext applicationContext;
 
     @Test
-    public void testContext() {
+    void testContext() {
         assertNotNull(applicationContext);
     }
 
     @Test
-    public void testGetBean() throws IOException {
+    void testGetBean() throws IOException {
         {
             Object bean = applicationContext.getBean("JsonRpc");
             assertSame(JsonRpcServiceImpl.class, bean.getClass());
@@ -51,7 +51,7 @@ public class JsonRpcServiceTest {
     }
 
     @Test
-    public void testGetConfiguration() {
-        assertEquals(protocol, "http");
+    void testGetConfiguration() {
+        assertEquals("http", protocol);
     }
 }

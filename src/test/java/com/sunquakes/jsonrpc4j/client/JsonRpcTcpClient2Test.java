@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @TestPropertySource("classpath:application-tcp2.properties")
 @ContextConfiguration("classpath:applicationContext.xml")
-public class JsonRpcTcpClient2Test {
+class JsonRpcTcpClient2Test {
 
     @Resource
     private IJsonRpcTcpClient2 jsonRpcTcpClient2;
@@ -39,20 +39,20 @@ public class JsonRpcTcpClient2Test {
     }
 
     @Test
-    public void testHandler() {
+    void testHandler() {
         // test tcp handler
-        assertEquals(jsonRpcTcpClient2.add(1, 2), 3);
-        assertEquals(jsonRpcTcpClient2.add(3, 4), 7);
-        assertEquals(jsonRpcTcpClient2.add(5, 6), 11);
+        assertEquals(3, jsonRpcTcpClient2.add(1, 2));
+        assertEquals(7, jsonRpcTcpClient2.add(3, 4));
+        assertEquals(11, jsonRpcTcpClient2.add(5, 6));
     }
 
     @Test
-    public void testLongParams() {
+    void testLongParams() {
         assertEquals(text1 + text2, jsonRpcTcpClient2.splice(text1, text2));
     }
 
     @Test
-    public void testMultithreading() throws InterruptedException {
+    void testMultithreading() throws InterruptedException {
         int co = 10;
         int total = 100;
         CountDownLatch countDownLatch = new CountDownLatch(total);

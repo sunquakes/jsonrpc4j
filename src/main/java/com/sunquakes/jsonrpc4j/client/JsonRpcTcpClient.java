@@ -7,6 +7,7 @@ import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
+import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -21,17 +22,16 @@ import io.netty.handler.codec.bytes.ByteArrayDecoder;
 import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.0.0
- * @since : 2022/6/28 9:05 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.0.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInterface {
-
-    private static int DEFAULT_PORT = 80;
 
     private JsonRpcTcpClientHandler jsonRpcTcpClientHandler;
 
@@ -62,15 +62,16 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
                     }
                 });
 
+        int defaultPort = 80;
         if (discovery != null) {
-            loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), DEFAULT_PORT, bootstrap, poolHandler);
+            loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {
-            loadBalancer = new JsonRpcLoadBalancer(() -> url.value(), DEFAULT_PORT, bootstrap, poolHandler);
+            loadBalancer = new JsonRpcLoadBalancer(() -> url.value(), defaultPort, bootstrap, poolHandler);
         }
     }
 
     @Override
-    public Object handle(String method, Object[] args) throws Exception {
+    public Object handle(String method, Object[] args) throws JsonRpcException {
         JSONObject request = new JSONObject();
         request.put("id", RequestUtils.getId());
         request.put("jsonrpc", RequestUtils.JSONRPC);
@@ -81,12 +82,15 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            SynchronousQueue<Object> queue = jsonRpcTcpClientHandler.send(request, channel);
+            SynchronousQueue<Object> queue = (SynchronousQueue<Object>) jsonRpcTcpClientHandler.send(request, channel);
             body = (String) queue.take();
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             loadBalancer.removePool(pool);
+            Thread.currentThread().interrupt();
+            throw new JsonRpcClientException(e.getMessage());
+        } catch (ExecutionException e) {
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {

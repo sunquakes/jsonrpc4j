@@ -21,22 +21,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-public class JsonRpcLoadBalancerTest {
+class JsonRpcLoadBalancerTest {
 
     private AutoCloseable closeable;
 
     @BeforeEach
-    public void openMocks() {
+    void openMocks() {
         closeable = MockitoAnnotations.openMocks(this);
     }
 
     @AfterEach
-    public void releaseMocks() throws Exception {
+    void releaseMocks() throws Exception {
         closeable.close();
     }
 
     @Test
-    public void testGetPool() throws ExecutionException, InterruptedException {
+    void testGetPool() throws ExecutionException, InterruptedException {
         Bootstrap bootstrap = mock(Bootstrap.class);
         JsonRpcChannelPoolHandler handler = mock(JsonRpcChannelPoolHandler.class);
         String url = "localhost";
@@ -56,7 +56,7 @@ public class JsonRpcLoadBalancerTest {
     }
 
     @Test
-    public void testRetry() {
+    void testRetry() {
         Bootstrap bootstrap = mock(Bootstrap.class);
         JsonRpcChannelPoolHandler handler = mock(JsonRpcChannelPoolHandler.class);
         String url = "";

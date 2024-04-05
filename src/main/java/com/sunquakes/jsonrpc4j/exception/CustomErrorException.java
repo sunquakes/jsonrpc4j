@@ -2,22 +2,17 @@ package com.sunquakes.jsonrpc4j.exception;
 
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 
-public class CustomErrorException extends RuntimeException {
+public class CustomErrorException extends JsonRpcException {
 
-    private int code;
+    private final int code;
 
     public CustomErrorException() {
-        this(ErrorEnum.CustomError.getText());
+        this(ErrorEnum.CUSTOM_ERROR.getText());
     }
 
     public CustomErrorException(String message) {
         super(message);
-        this.code = ErrorEnum.CustomError.getCode();
-    }
-
-    @Override
-    public String getMessage() {
-        return super.getMessage();
+        this.code = ErrorEnum.CUSTOM_ERROR.getCode();
     }
 
     public int getCode() {

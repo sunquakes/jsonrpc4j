@@ -3,38 +3,37 @@ package com.sunquakes.jsonrpc4j.config;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.1.0
- * @since : 2022/11/6 6:20 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.1.0
+ * @since 1.0.0
  **/
 @Slf4j
-public class Config {
-    private final Collection<ConfigEntry> entries;
+public class Config<T> {
+    private final Collection<ConfigEntry<T>> entries;
 
     public Config() {
         entries = new HashSet<>();
     }
 
-    public ConfigEntry get(String name) {
-        Iterator iterator = entries.iterator();
+    public ConfigEntry<T> get(String name) {
+        Iterator<ConfigEntry<T>> iterator = entries.iterator();
 
-        ConfigEntry entry;
+        ConfigEntry<T> entry;
         do {
             if (!iterator.hasNext()) {
                 return null;
             }
-            entry = (ConfigEntry) iterator.next();
+            entry = iterator.next();
         } while (!entry.name().equals(name));
 
         return entry;
     }
 
-    public void put(ConfigEntry entry) {
+    public void put(ConfigEntry<T> entry) {
         entries.add(entry);
     }
 }

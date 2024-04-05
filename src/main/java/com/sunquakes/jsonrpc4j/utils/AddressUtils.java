@@ -3,7 +3,7 @@ package com.sunquakes.jsonrpc4j.utils;
 import lombok.experimental.UtilityClass;
 
 /**
- * @author : Shing, sunquakes@outlook.com
+ * @author : Shing Rui <sunquakes@outlook.com>
  * @version : 2.1.1
  * @since : 2023/11/8 8:10 PM
  */

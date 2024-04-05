@@ -3,23 +3,17 @@ package com.sunquakes.jsonrpc4j.client;
 import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.config.ConfigEntry;
 import com.sunquakes.jsonrpc4j.discovery.Driver;
-import io.netty.channel.pool.FixedChannelPool;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.1.0
- * @since : 2022/11/5 10:26 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.1.0
+ * @since 1.0.0
  **/
 @Slf4j
 public class JsonRpcClient {
 
-    private ConcurrentHashMap<InetSocketAddress, FixedChannelPool> poolMap = new ConcurrentHashMap();
-
-    protected Config config;
+    protected Config<Object> config;
 
     protected String protocol;
 
@@ -29,17 +23,24 @@ public class JsonRpcClient {
 
     protected ConfigEntry<Driver> discovery;
 
+    private static final String DISCOVERY_KEY = "discovery";
+
     JsonRpcLoadBalancer loadBalancer;
 
-    JsonRpcClient(Config config) {
+    JsonRpcClient(Config<Object> config) {
         this.config = config;
-        url = config.get("url");
-        discovery = config.get("discovery");
+        if (config.get("url") != null) {
+            url = new ConfigEntry<>("url", (String) config.get("url").value());
+        }
+        if (config.get(DISCOVERY_KEY) != null) {
+            discovery = new ConfigEntry<>(DISCOVERY_KEY, (Driver) config.get(DISCOVERY_KEY).value());
+        }
         protocol = (String) config.get("protocol").value();
         name = (String) config.get("name").value();
         initLoadBalancer();
     }
 
     protected void initLoadBalancer() {
+        // Call child class method.
     }
 }

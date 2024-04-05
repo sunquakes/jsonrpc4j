@@ -20,19 +20,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 1.0.0
- * @since : 2022/5/21 1:32 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 1.0.0
+ * @since 1.0.0
  **/
 @AllArgsConstructor
 public class JsonRpcServerHandler {
 
     private ApplicationContext applicationContext;
 
-    private final static Map<String, Optional<Method>> METHOD_MAP = new ConcurrentHashMap<>();
+    private static final Map<String, Optional<Method>> METHOD_MAP = new ConcurrentHashMap<>();
 
     public Object handle(String json) {
         try {
@@ -50,10 +49,10 @@ public class JsonRpcServerHandler {
     }
 
     public Object handleObject(Object request) {
-        String method, id = null;
+        String method = null;
+        String id = null;
         Object params;
-        if (request instanceof NotifyRequestDto) {
-            NotifyRequestDto notifyRequestDto = (NotifyRequestDto) request;
+        if (request instanceof NotifyRequestDto notifyRequestDto) {
             method = notifyRequestDto.getMethod();
             params = notifyRequestDto.getParams();
         } else {
@@ -88,16 +87,16 @@ public class JsonRpcServerHandler {
             Object result = m.invoke(clazz, paramArr);
             return ResponseUtils.success(id, result);
         } catch (InvocationTargetException | IllegalAccessException | BeansException e) {
-            return ResponseUtils.error(id, ErrorEnum.MethodNotFound.getCode());
+            return ResponseUtils.error(id, ErrorEnum.METHOD_NOT_FOUND.getCode());
         } catch (InvalidParamsException e) {
-            return ResponseUtils.error(id, e.getCode(), e.getMessage());
+            return ResponseUtils.error(id, ErrorEnum.INTERNAL_ERROR.getCode(), e.getMessage());
         } catch (MethodNotFoundException e) {
-            return ResponseUtils.error(id, e.getCode(), e.getMessage());
+            return ResponseUtils.error(id, ErrorEnum.METHOD_NOT_FOUND.getCode(), e.getMessage());
         }
     }
 
     public List<Object> handleArray(Object request) {
         List<Object> requestList = (List<Object>) request;
-        return requestList.stream().map(item -> handleObject(item)).collect(Collectors.toList());
+        return requestList.stream().map(this::handleObject).toList();
     }
 }

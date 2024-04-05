@@ -5,14 +5,14 @@ import com.sunquakes.jsonrpc4j.dto.*;
 import lombok.experimental.UtilityClass;
 
 /**
- * @author : Shing, sunquakes@outlook.com
+ * @author : Shing Rui <sunquakes@outlook.com>
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM
  **/
 @UtilityClass
 public class ResponseUtils {
 
-    private String JSONRPC = RequestUtils.JSONRPC;
+    private final String JSONRPC = RequestUtils.JSONRPC;
 
     public Object error(String id, int code) {
         return error(id, code, null);

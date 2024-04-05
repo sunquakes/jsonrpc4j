@@ -122,7 +122,7 @@ jsonrpc.client.package-eof=\r\n
 
 ```java
 
-@JsonRpcClient(value = "JsonRpc", protocol = "tcp", url = "localhost:3200")
+@JsonRpcClient(value = "JsonRpc", protocol = JsonRpcProtocol.TCP, url = "localhost:3200")
 public interface IJsonRpcClient {
     int add(int a, int b);
 }
@@ -152,7 +152,7 @@ public class JsonRpcTest {
 
 ```properties
 # The service hostname, not required, if the default node ip is used, it can be ignored.
-jsonrpc.discovery.hostname=192.168.39.1 
+jsonrpc.discovery.hostname=192.168.39.1
 # The consul address
 # instanceId: If there are the same service has same service name and port in difference nodes, the parameter is required. 
 # check: true is enable health check. The default value is false
@@ -166,7 +166,7 @@ jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Consul
 
 ```properties
 # The service hostname, not required, if the default node ip is used, it can be ignored.
-jsonrpc.discovery.hostname=192.168.39.1 
+jsonrpc.discovery.hostname=192.168.39.1
 # The nacos address
 # Support [Open API Guide](https://nacos.io/en-us/docs/open-api.html) Register instance chapter Request Parameters.
 jsonrpc.discovery.url=http://127.0.0.1:8849?namespaceId=XXXXXX&...

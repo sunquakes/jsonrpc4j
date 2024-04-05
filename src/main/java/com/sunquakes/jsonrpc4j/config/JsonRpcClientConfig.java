@@ -5,9 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author : Shing, sunquakes@outlook.com
- * @version : 2.0.2
- * @since : 2022/8/21 4:12 PM
+ * @author Shing Rui <sunquakes@outlook.com>
+ * @version 2.0.2
+ * @since 1.0.0
  **/
 @Data
 @Configuration
