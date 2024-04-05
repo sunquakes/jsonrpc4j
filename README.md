@@ -177,5 +177,5 @@ jsonrpc.discovery.driver-name=com.sunquakes.jsonrpc4j.discovery.Nacos
 ## Test
 
 ```shell
-gradle test -Dfile.encoding=UTF-8
+mvn test
 ```
