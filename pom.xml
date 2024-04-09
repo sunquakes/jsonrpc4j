@@ -12,6 +12,7 @@
     <url>https://www.moonquakes.io/guide/java.html</url>
 
     <properties>
+        <argLine>-Dfile.encoding=UTF-8</argLine>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
