@@ -10,8 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 class RequestUtilsTest {
 
@@ -28,8 +27,8 @@ class RequestUtilsTest {
         // test RequestDto||NotifyRequestDto
         {
             String json = "{" +
-                    "\"id\":\"1234567890\"" +
-                    "\"jsonrpc\":2.0" +
+                    "\"id\":\"1234567890\"," +
+                    "\"jsonrpc\":2.0," +
                     "\"params\":{\"a\":1,\"b\":2}" +
                     "}";
             Object request = RequestUtils.parseRequestBody(json);
@@ -47,15 +46,16 @@ class RequestUtilsTest {
         // test RequestDto||NotifyRequestDto Array
         {
             String json = "[{" +
-                    "\"id\":\"1234567890\"" +
-                    "\"jsonrpc\":2.0" +
-                    "\"params\":{\"a\":1,\"b\":2}" +
+                    "\"id\":\"1234567890\"," +
+                    "\"jsonrpc\":2.0," +
+                    "\"params\":{\"a\":1,\"b\":2}," +
                     "},{" +
-                    "\"jsonrpc\":2.0" +
+                    "\"jsonrpc\":2.0," +
                     "\"params\":[1, 2]" +
                     "}]";
             Object request = RequestUtils.parseRequestBody(json);
             assertSame(ArrayList.class, request.getClass());
+            assertInstanceOf(List.class, request);
             List<Object> requestDtoList = (List<Object>) request;
             RequestDto requestDto = (RequestDto) requestDtoList.get(0);
             assertEquals("1234567890", requestDto.getId());
