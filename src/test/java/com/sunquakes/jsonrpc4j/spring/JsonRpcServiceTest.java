@@ -34,7 +34,7 @@ class JsonRpcServiceTest {
     }
 
     @Test
-    void testGetBean() throws IOException {
+    void testGetBean() {
         {
             Object bean = applicationContext.getBean("JsonRpc");
             assertSame(JsonRpcServiceImpl.class, bean.getClass());

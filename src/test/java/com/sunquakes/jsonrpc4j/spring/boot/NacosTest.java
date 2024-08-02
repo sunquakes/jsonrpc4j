@@ -14,7 +14,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,7 +42,7 @@ class NacosTest {
     }
 
     @AfterEach
-    public void releaseMocks() throws Exception {
+    public void releaseMocks() {
         mockStatic.close();
     }
 
@@ -57,7 +56,7 @@ class NacosTest {
     }
 
     @Test
-    void testRequest() throws IOException, InterruptedException {
+    void testRequest() {
         // test request
         {
             assertEquals(3, jsonRpcClient.add(1, 2));
