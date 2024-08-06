@@ -6,7 +6,7 @@ import com.sunquakes.jsonrpc4j.discovery.Driver;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @author Shing Rui <sunquakes@outlook.com>
+ * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
  * @version 2.1.0
  * @since 1.0.0
  **/

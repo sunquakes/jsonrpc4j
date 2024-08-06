@@ -6,7 +6,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import java.util.function.Supplier;
 
 /**
- * @author Shing Rui <sunquakes@outlook.com>
+ * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
  * @version 2.1.0
  * @since 1.0.0
  **/

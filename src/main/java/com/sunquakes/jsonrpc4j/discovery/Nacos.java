@@ -25,7 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 /**
- * @author Shing Rui <sunquakes@outlook.com>
+ * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
  * @version 2.2.0
  * @since 2.2.0
  **/

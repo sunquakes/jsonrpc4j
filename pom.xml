@@ -35,6 +35,7 @@
         <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
         <spring-test.version>6.1.11</spring-test.version>
         <spring-boot-test.version>3.3.2</spring-boot-test.version>
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -217,6 +218,20 @@
                         <configuration>
                             <doclint>none</doclint>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

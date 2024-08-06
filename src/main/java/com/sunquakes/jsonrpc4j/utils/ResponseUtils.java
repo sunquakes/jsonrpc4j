@@ -5,7 +5,7 @@ import com.sunquakes.jsonrpc4j.dto.*;
 import lombok.experimental.UtilityClass;
 
 /**
- * @author : Shing Rui <sunquakes@outlook.com>
+ * @author : Shing Rui {@link "mailto:sunquakes@outlook.com"}
  * @version : 1.0.0
  * @since : 2022/5/21 1:32 PM
  **/
