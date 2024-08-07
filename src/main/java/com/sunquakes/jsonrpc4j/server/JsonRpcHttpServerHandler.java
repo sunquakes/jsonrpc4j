@@ -10,7 +10,7 @@ import io.netty.util.CharsetUtil;
 import org.springframework.context.ApplicationContext;
 
 /**
- * @author Shing Rui <sunquakes@outlook.com>
+ * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
  * @version 2.0.0
  * @since 1.0.0
  **/

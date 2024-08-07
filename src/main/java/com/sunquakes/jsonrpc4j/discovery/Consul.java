@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author Shing Rui <sunquakes@outlook.com>
+ * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
  * @version 2.1.0
  * @since 2.1.0
  **/

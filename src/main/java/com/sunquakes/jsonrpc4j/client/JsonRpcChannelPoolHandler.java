@@ -5,7 +5,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.pool.ChannelPoolHandler;
 
 /**
- * @author Shing Rui <sunquakes@outlook.com>
+ * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
  * @version 2.0.0
  * @since 1.0.0
  **/

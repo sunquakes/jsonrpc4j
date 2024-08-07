@@ -6,16 +6,12 @@ import com.sunquakes.jsonrpc4j.spring.boot.dto.ArgsDto;
 import com.sunquakes.jsonrpc4j.spring.boot.dto.ResultDto;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -49,7 +45,7 @@ class JsonRpcService2Test {
     }
 
     @AfterEach
-    public void releaseMocks() throws Exception {
+    public void releaseMocks() {
         mockStatic.close();
     }
 
@@ -63,7 +59,7 @@ class JsonRpcService2Test {
     }
 
     @Test
-    void testRequest() throws IOException, InterruptedException {
+    void testRequest() {
         // test request
         {
             // When running the test case, if the client and the server are in the same app, sleep time should be greater than the health interval.

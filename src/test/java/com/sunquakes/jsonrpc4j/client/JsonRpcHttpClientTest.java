@@ -56,7 +56,7 @@ class JsonRpcHttpClientTest {
     }
 
     @Test
-    void testLongParams() throws UnsupportedEncodingException {
+    void testLongParams() {
         assertEquals(text1 + text2, jsonRpcHttpClient.splice(text1, text2));
     }
 }
