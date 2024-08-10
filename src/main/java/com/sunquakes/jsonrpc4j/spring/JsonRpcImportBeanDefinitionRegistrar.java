@@ -12,7 +12,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import java.util.Map;
 
 /**
- * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
+ * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
  * @version 3.0.0
  * @since 1.0.0
  **/

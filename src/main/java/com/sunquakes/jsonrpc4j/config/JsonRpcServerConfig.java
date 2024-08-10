@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
+ * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
  * @version 2.0.2
  * @since 1.0.0
  **/

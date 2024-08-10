@@ -14,7 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 /**
- * @author Shing Rui {@link "mailto:sunquakes@outlook.com"}
+ * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
  * @version 2.1.0
  * @since 1.0.0
  **/
