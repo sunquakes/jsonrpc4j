@@ -20,7 +20,7 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - name: Run the Maven verify phase
-      run: mvn verify -f pom.xml
+      run: mvn sonar:sonar -Pcoverage
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:
