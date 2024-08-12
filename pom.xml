@@ -36,6 +36,8 @@
         <spring-test.version>6.1.11</spring-test.version>
         <spring-boot-test.version>3.3.2</spring-boot-test.version>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
+        <sonar.organization>sunquakes</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
