@@ -5,7 +5,6 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
-import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -30,18 +29,12 @@ import java.util.concurrent.SynchronousQueue;
 @Sharable
 public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
 
-    private ConcurrentHashMap<String, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
-
-    private ConcurrentHashMap<Channel, ConcurrentHashMap<String, Integer>> channelQueueMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Channel, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
     @Synchronized
     public synchronized Queue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
-        String id = data.getString("id");
         SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
-        queueMap.put(id, synchronousQueue);
-        ConcurrentHashMap<String, Integer> idMap = channelQueueMap.getOrDefault(channel, new ConcurrentHashMap<>());
-        idMap.put(id, 0);
-        channelQueueMap.putIfAbsent(channel, idMap);
+        queueMap.put(channel, synchronousQueue);
 
         String message = data.toJSONString();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
@@ -60,50 +53,31 @@ public class JsonRpcHttpClientHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        Channel channel = ctx.channel();
         FullHttpResponse httpResponse = (FullHttpResponse) msg;
         ByteBuf buf = httpResponse.content();
         String body = buf.toString(CharsetUtil.UTF_8);
-        ResponseDto responseDto = JSONObject.parseObject(body, ResponseDto.class);
-        String id = responseDto.getId();
-        SynchronousQueue<Object> queue = queueMap.get(id);
+        SynchronousQueue<Object> queue = queueMap.get(channel);
         queue.put(body);
-        queueMap.remove(id);
-        ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
-        idMap.remove(id, 0);
+        queueMap.remove(channel);
         httpResponse.release();
     }
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
-        if (idMap == null) return;
-        for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-            synchronized (idMap) {
-                SynchronousQueue<Object> queue = queueMap.get(id);
-                if (queue != null) {
-                    queue.put(JSON.toJSONString(errorResponseDto));
-                    idMap.remove(id);
-                    queueMap.remove(id);
-                }
-            }
-        }
+        handleInternalError(ctx);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        ConcurrentHashMap<String, Integer> idMap = channelQueueMap.get(ctx.channel());
-        if (idMap == null) return;
-        for (String id : idMap.keySet()) {
-            ErrorResponseDto errorResponseDto = new ErrorResponseDto(id, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-            synchronized (idMap) {
-                SynchronousQueue<Object> queue = queueMap.get(id);
-                if (queue != null) {
-                    queue.put(JSON.toJSONString(errorResponseDto));
-                    idMap.remove(id);
-                    queueMap.remove(id);
-                }
-            }
-        }
+        handleInternalError(ctx);
+    }
+
+    private void handleInternalError(ChannelHandlerContext ctx) throws InterruptedException {
+        Channel channel = ctx.channel();
+        ErrorResponseDto errorResponseDto = new ErrorResponseDto(null, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
+        SynchronousQueue<Object> queue = queueMap.get(channel);
+        queue.put(JSON.toJSONString(errorResponseDto));
+        queueMap.remove(channel);
     }
 }
