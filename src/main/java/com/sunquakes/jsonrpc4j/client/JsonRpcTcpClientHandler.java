@@ -1,17 +1,11 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
-import com.sunquakes.jsonrpc4j.ErrorEnum;
-import com.sunquakes.jsonrpc4j.dto.ErrorDto;
-import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
-import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,13 +22,11 @@ import java.util.concurrent.SynchronousQueue;
  **/
 @Slf4j
 @Sharable
-public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
+public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
 
     private final ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap<>();
 
     private final TcpClientOption tcpClientOption;
-
-    private final ConcurrentHashMap<Channel, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
 
     public JsonRpcTcpClientHandler(TcpClientOption tcpClientOption) {
         this.tcpClientOption = tcpClientOption;
@@ -98,23 +90,5 @@ public class JsonRpcTcpClientHandler extends ChannelInboundHandlerAdapter {
                 bytes = initBytes;
             }
         }
-    }
-
-    @Override
-    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        handleInternalError(ctx);
-    }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        handleInternalError(ctx);
-    }
-
-    private void handleInternalError(ChannelHandlerContext ctx) throws InterruptedException {
-        Channel channel = ctx.channel();
-        ErrorResponseDto errorResponseDto = new ErrorResponseDto(null, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-        SynchronousQueue<Object> queue = queueMap.get(channel);
-        queue.put(JSON.toJSONString(errorResponseDto));
-        queueMap.remove(channel);
     }
 }
