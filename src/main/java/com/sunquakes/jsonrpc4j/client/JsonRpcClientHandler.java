@@ -9,10 +9,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.util.concurrent.Promise;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
@@ -23,7 +24,7 @@ import java.util.concurrent.SynchronousQueue;
 @Sharable
 public abstract class JsonRpcClientHandler extends ChannelInboundHandlerAdapter {
 
-    protected final ConcurrentHashMap<Channel, SynchronousQueue<Object>> queueMap = new ConcurrentHashMap<>();
+    protected Map<Channel, Promise> promiseMap = new ConcurrentHashMap<>();
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
@@ -35,11 +36,13 @@ public abstract class JsonRpcClientHandler extends ChannelInboundHandlerAdapter 
         handleInternalError(ctx);
     }
 
-    protected void handleInternalError(ChannelHandlerContext ctx) throws InterruptedException {
+    protected void handleInternalError(ChannelHandlerContext ctx) {
         Channel channel = ctx.channel();
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(null, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-        SynchronousQueue<Object> queue = queueMap.get(channel);
-        queue.put(JSON.toJSONString(errorResponseDto));
-        queueMap.remove(channel);
+        Promise promise = promiseMap.get(channel);
+        if (promise != null) {
+            promise.setSuccess(JSON.toJSONString(errorResponseDto));
+            promiseMap.remove(channel);
+        }
     }
 }

@@ -6,14 +6,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Promise;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
@@ -33,18 +34,19 @@ public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
     }
 
     @Synchronized
-    public synchronized Queue<Object> send(JSONObject request, Channel channel) {
+    public synchronized String send(JSONObject request, Channel channel) throws InterruptedException, ExecutionException {
         String message = request.toJSONString() + tcpClientOption.getPackageEof();
         ByteBuf byteBuf = channel.alloc().buffer(tcpClientOption.getPackageMaxLength());
         byteBuf.writeBytes(message.getBytes());
-        SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
-        queueMap.put(channel, synchronousQueue);
-        channel.writeAndFlush(byteBuf);
-        return synchronousQueue;
+
+        Promise<String> promise = new DefaultPromise<>(channel.eventLoop());
+        promiseMap.put(channel, promise);
+
+        channel.writeAndFlush(byteBuf).sync();
+        return promise.sync().get();
     }
 
     @Override
-    @Synchronized
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         Channel channel = ctx.channel();
         byte[] initBytes = bufferMap.getOrDefault(channel, new byte[0]);
@@ -82,9 +84,9 @@ public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
             if (bytes.length > 0) {
                 String body = new String(bytes);
                 synchronized (channel) {
-                    SynchronousQueue<Object> queue = queueMap.get(channel);
-                    if (queue != null) {
-                        queue.put(body);
+                    Promise promise = promiseMap.get(channel);
+                    if (promise != null) {
+                        promise.setSuccess(body);
                     }
                 }
                 bytes = initBytes;

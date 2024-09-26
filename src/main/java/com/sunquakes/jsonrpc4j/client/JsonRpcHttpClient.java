@@ -27,7 +27,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
@@ -75,8 +74,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            SynchronousQueue<Object> queue = (SynchronousQueue<Object>) jsonRpcHttpClientHandler.send(request, channel);
-            body = (String) queue.take();
+            body = jsonRpcHttpClientHandler.send(request, channel);
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
         } catch (InterruptedException e) {

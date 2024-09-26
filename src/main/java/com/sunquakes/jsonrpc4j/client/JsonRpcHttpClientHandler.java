@@ -8,11 +8,12 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Promise;
 import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Queue;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
@@ -24,9 +25,9 @@ import java.util.concurrent.SynchronousQueue;
 public class JsonRpcHttpClientHandler extends JsonRpcClientHandler {
 
     @Synchronized
-    public synchronized Queue<Object> send(JSONObject data, Channel channel) throws InterruptedException {
-        SynchronousQueue<Object> synchronousQueue = new SynchronousQueue<>();
-        queueMap.put(channel, synchronousQueue);
+    public synchronized String send(JSONObject data, Channel channel) throws InterruptedException, ExecutionException {
+        Promise<String> promise = new DefaultPromise<>(channel.eventLoop());
+        promiseMap.put(channel, promise);
 
         String message = data.toJSONString();
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
@@ -40,7 +41,7 @@ public class JsonRpcHttpClientHandler extends JsonRpcClientHandler {
         request.headers().add(HttpHeaderNames.HOST, RequestUtils.getLocalIp());
 
         channel.writeAndFlush(request).sync();
-        return synchronousQueue;
+        return promise.sync().get();
     }
 
     @Override
@@ -49,9 +50,9 @@ public class JsonRpcHttpClientHandler extends JsonRpcClientHandler {
         FullHttpResponse httpResponse = (FullHttpResponse) msg;
         ByteBuf buf = httpResponse.content();
         String body = buf.toString(CharsetUtil.UTF_8);
-        SynchronousQueue<Object> queue = queueMap.get(channel);
-        queue.put(body);
-        queueMap.remove(channel);
+        Promise<String> promise = promiseMap.get(channel);
+        promise.setSuccess(body);
+        promiseMap.remove(channel);
         httpResponse.release();
     }
 }
