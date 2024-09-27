@@ -23,7 +23,6 @@ import io.netty.handler.codec.bytes.ByteArrayEncoder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.SynchronousQueue;
 
 /**
  * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
@@ -82,8 +81,7 @@ public class JsonRpcTcpClient extends JsonRpcClient implements JsonRpcClientInte
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            SynchronousQueue<Object> queue = (SynchronousQueue<Object>) jsonRpcTcpClientHandler.send(request, channel);
-            body = (String) queue.take();
+            body = jsonRpcTcpClientHandler.send(request, channel);
             pool.release(channel);
             responseDto = JSONObject.parseObject(body, ResponseDto.class);
         } catch (InterruptedException e) {
