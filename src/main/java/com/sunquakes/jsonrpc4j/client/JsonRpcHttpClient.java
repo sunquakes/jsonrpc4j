@@ -16,10 +16,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.FixedChannelPool;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.ssl.OptionalSslHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
@@ -54,7 +54,7 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         bootstrap.group(eventLoopGroup)
                 .channel(NioSocketChannel.class)
                 .option(ChannelOption.SO_KEEPALIVE, true);
-        int defaultPort = protocol.equals(JsonRpcProtocol.HTTPS.name()) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
+        int defaultPort = isHttps(protocol) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
         if (discovery != null) {
             loadBalancer = new JsonRpcLoadBalancer(() -> discovery.value().get(name), defaultPort, bootstrap, poolHandler);
         } else {
@@ -97,15 +97,19 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
     class Handler implements JsonRpcChannelHandler {
         @Override
         public void channelUpdated(Channel ch) throws SSLException {
-            ch.pipeline()
-                    .addLast("codec", new HttpClientCodec())
-                    .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024))
-                    .addLast(jsonRpcHttpClientHandler);
-            protocol = protocol.toUpperCase();
-            if (protocol.equals(JsonRpcProtocol.HTTPS.name())) {
+            SocketChannel sc = (SocketChannel) ch;
+            if (isHttps(protocol)) {
                 SslContext sslContext = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-                ch.pipeline().addLast(new OptionalSslHandler(sslContext));
+                ch.pipeline().addLast(sslContext.newHandler(ch.alloc()));
             }
+            sc.pipeline()
+                    .addLast("codec", new HttpClientCodec())
+                    .addLast("http-aggregator", new HttpObjectAggregator(1024 * 1024));
+            sc.pipeline().addLast(jsonRpcHttpClientHandler);
         }
+    }
+
+    private boolean isHttps(String scheme) {
+        return scheme.toUpperCase().equals(JsonRpcProtocol.HTTPS.name());
     }
 }

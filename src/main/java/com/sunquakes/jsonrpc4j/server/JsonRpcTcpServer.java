@@ -86,14 +86,12 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
                     log.info("JsonRpc tcp server startup successfully.");
                 } else {
                     log.info("JsonRpc tcp server startup failed.");
-                    future.cause().printStackTrace();
                     bossGroup.shutdownGracefully();
                     workerGroup.shutdownGracefully();
                 }
 
                 future.channel().closeFuture().sync();
             } catch (InterruptedException e) {
-                e.printStackTrace();
                 Thread.currentThread().interrupt();
             }
         });

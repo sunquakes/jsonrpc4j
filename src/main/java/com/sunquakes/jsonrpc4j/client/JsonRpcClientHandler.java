@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Sharable
 public abstract class JsonRpcClientHandler extends ChannelInboundHandlerAdapter {
 
-    protected Map<Channel, Promise> promiseMap = new ConcurrentHashMap<>();
+    protected Map<Channel, Promise<String>> promiseMap = new ConcurrentHashMap<>();
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
@@ -39,7 +39,7 @@ public abstract class JsonRpcClientHandler extends ChannelInboundHandlerAdapter 
     protected void handleInternalError(ChannelHandlerContext ctx) {
         Channel channel = ctx.channel();
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(null, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
-        Promise promise = promiseMap.get(channel);
+        Promise<String> promise = promiseMap.get(channel);
         if (promise != null) {
             promise.setSuccess(JSON.toJSONString(errorResponseDto));
             promiseMap.remove(channel);

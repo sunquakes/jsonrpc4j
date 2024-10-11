@@ -1,9 +1,7 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
-import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -13,7 +11,6 @@ import io.netty.handler.codec.http.*;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
 
@@ -26,7 +23,7 @@ import java.util.concurrent.ExecutionException;
  * @version 3.0.0
  * @since 3.0.0
  **/
-public class HttpClient {
+public class NettyHttpClient {
 
     private static final int DEFAULT_HTTP_PORT = 80;
 
@@ -34,36 +31,41 @@ public class HttpClient {
 
     private URI uri;
 
-    HttpClient(String host) {
+    NettyHttpClient(String host) {
         uri = URI.create(host);
     }
 
-    public Object get(String path) {
+    public FullHttpResponse get(String path) throws ExecutionException, InterruptedException {
+        return request(path, HttpMethod.GET);
+    }
+
+    public FullHttpResponse post(String path) throws ExecutionException, InterruptedException {
+        return request(path, HttpMethod.POST);
+    }
+
+    public FullHttpResponse put(String path) throws ExecutionException, InterruptedException {
+        return request(path, HttpMethod.PUT);
+    }
+
+    private FullHttpResponse request(String path, HttpMethod method) throws InterruptedException, ExecutionException {
         EventLoopGroup group = new NioEventLoopGroup();
-        Promise<String> promise = new DefaultPromise<>(group.next());
+        Promise<FullHttpResponse> promise = new DefaultPromise<>(group.next());
         Bootstrap bootstrap = new Bootstrap();
         bootstrap.group(group)
                 .channel(NioSocketChannel.class)
                 .handler(new HttpClientInitializer(promise));
-        try {
-            int port = uri.getPort();
-            int defaultPort = isHttps(uri.getScheme()) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
-            if (port == -1) {
-                port = defaultPort;
-            }
-
-            Channel channel = bootstrap.connect(new InetSocketAddress(uri.getHost(), port)).sync().channel();
-
-            FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, path, Unpooled.EMPTY_BUFFER);
-
-            channel.writeAndFlush(request).sync();
-            return promise.sync().get();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new JsonRpcException(e.getMessage());
-        } catch (ExecutionException e) {
-            throw new JsonRpcException(e.getMessage());
+        int port = uri.getPort();
+        int defaultPort = isHttps(uri.getScheme()) ? DEFAULT_HTTPS_PORT : DEFAULT_HTTP_PORT;
+        if (port == -1) {
+            port = defaultPort;
         }
+
+        Channel channel = bootstrap.connect(new InetSocketAddress(uri.getHost(), port)).sync().channel();
+
+        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, path, Unpooled.EMPTY_BUFFER);
+
+        channel.writeAndFlush(request).sync();
+        return promise.sync().get();
     }
 
     private boolean isHttps(String scheme) {
@@ -72,9 +74,9 @@ public class HttpClient {
 
     class HttpClientInitializer extends ChannelInitializer<Channel> {
 
-        Promise<String> promise;
+        Promise<FullHttpResponse> promise;
 
-        HttpClientInitializer(Promise<String> promise) {
+        HttpClientInitializer(Promise<FullHttpResponse> promise) {
             this.promise = promise;
         }
 
@@ -96,22 +98,21 @@ public class HttpClient {
 
     class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-        Promise<String> promise;
+        Promise<FullHttpResponse> promise;
 
-        HttpResponseHandler(Promise<String> promise) {
+        HttpResponseHandler(Promise<FullHttpResponse> promise) {
             this.promise = promise;
         }
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) {
             FullHttpResponse httpResponse = msg;
-            ByteBuf buf = httpResponse.content();
-            String body = buf.toString(CharsetUtil.UTF_8);
-            promise.setSuccess(body);
+            promise.setSuccess(httpResponse);
         }
 
         @Override
         public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+            promise.setFailure(cause);
             ctx.close();
         }
     }

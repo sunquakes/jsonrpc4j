@@ -84,7 +84,7 @@ public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
             if (bytes.length > 0) {
                 String body = new String(bytes);
                 synchronized (channel) {
-                    Promise promise = promiseMap.get(channel);
+                    Promise<String> promise = promiseMap.get(channel);
                     if (promise != null) {
                         promise.setSuccess(body);
                     }
