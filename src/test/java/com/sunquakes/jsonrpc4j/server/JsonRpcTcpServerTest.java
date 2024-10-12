@@ -2,6 +2,7 @@ package com.sunquakes.jsonrpc4j.server;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
+import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,76 +48,29 @@ class JsonRpcTcpServerTest {
             bw = new BufferedWriter(new OutputStreamWriter(os));
             bw.write((request + packageEof));
             bw.flush();
-            StringBuffer sb = new StringBuffer();
             byte[] buffer = new byte[packageMaxLength];
-            int bufferLength = buffer.length;
             int len;
             InputStream is = s.getInputStream();
 
-            String init = "";
-            int packageEofLength = packageEof.length();
+            byte[] packageEofBytes = packageEof.getBytes();
+            byte[] bytes = new byte[0];
 
-            int i = sb.indexOf(packageEof);
-            if (i != -1) {
-                sb.substring(0, i);
-                if (i + packageEofLength < sb.length()) {
-                    init = sb.substring(i + packageEofLength);
-                } else {
-                    init = "";
-                }
-            } else {
-                while ((len = is.read(buffer)) != -1) {
-                    if (bufferLength == len) {
-                        sb.append(new String(buffer));
-                    } else {
-                        byte[] end = Arrays.copyOfRange(buffer, 0, len);
-                        sb.append(new String(end));
-                    }
-                    i = sb.indexOf(packageEof);
-                    if (i != -1) {
-                        sb.substring(0, i);
-                        if (i + packageEofLength < sb.length()) {
-                            init = sb.substring(i + packageEofLength);
-                        } else {
-                            init = "";
-                        }
-                        break;
-                    }
+            while ((len = is.read(buffer)) != -1) {
+                int mergeLength = bytes.length + len;
+                byte[] mergedArray = new byte[mergeLength];
+                System.arraycopy(bytes, 0, mergedArray, 0, bytes.length);
+                System.arraycopy(buffer, 0, mergedArray, bytes.length, mergeLength);
+                bytes = mergedArray;
+
+                int i = ByteArrayUtils.strstr(bytes, packageEofBytes, 0);
+                if (i != -1) {
+                    bytes = Arrays.copyOfRange(bytes, 0, i);
+                    break;
                 }
             }
-            ResponseDto responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
+            String sb = new String(bytes);
+            ResponseDto responseDto = JSONObject.parseObject(sb, ResponseDto.class);
             assertEquals(3, responseDto.getResult());
-
-            sb = new StringBuffer(init);
-
-            i = sb.indexOf(packageEof);
-            if (i != -1) {
-                sb.substring(0, i);
-                if (i + packageEofLength < sb.length()) {
-                    init = sb.substring(i + packageEofLength);
-                } else {
-                    init = "";
-                }
-            } else {
-                while ((len = is.read(buffer)) != -1) {
-                    if (bufferLength == len) {
-                        sb.append(new String(buffer));
-                    } else {
-                        byte[] end = Arrays.copyOfRange(buffer, 0, len);
-                        sb.append(new String(end));
-                    }
-                    i = sb.indexOf(packageEof);
-                    if (i != -1) {
-                        sb.substring(0, i);
-                        if (i + packageEofLength < sb.length()) {
-                            init = sb.substring(i + packageEofLength);
-                        } else {
-                            init = "";
-                        }
-                        break;
-                    }
-                }
-            }
 
             responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
             assertEquals(3, responseDto.getResult());
