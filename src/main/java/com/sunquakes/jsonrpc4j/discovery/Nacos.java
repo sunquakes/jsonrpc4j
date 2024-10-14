@@ -68,7 +68,7 @@ public class Nacos implements Driver {
                 .build();
 
         try {
-            FullHttpResponse res = client.post(fullUrl.toString());
+            FullHttpResponse res = client.post(fullUrl.toString(), null);
             if (res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to register to nacos.");
             }
@@ -117,7 +117,7 @@ public class Nacos implements Driver {
                 .queryParam("port", port)
                 .queryParam(EPHEMERAL_KEY, ephemeral).build();
         try {
-            FullHttpResponse res = client.put(fullUrl.toString());
+            FullHttpResponse res = client.put(fullUrl.toString(), null);
             if (res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to send heartbeat to nacos.");
             }

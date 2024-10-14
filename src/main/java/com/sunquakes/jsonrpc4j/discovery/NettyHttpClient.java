@@ -2,6 +2,7 @@ package com.sunquakes.jsonrpc4j.discovery;
 
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -36,18 +37,18 @@ public class NettyHttpClient {
     }
 
     public FullHttpResponse get(String path) throws ExecutionException, InterruptedException {
-        return request(path, HttpMethod.GET);
+        return request(path, HttpMethod.GET, null);
     }
 
-    public FullHttpResponse post(String path) throws ExecutionException, InterruptedException {
-        return request(path, HttpMethod.POST);
+    public FullHttpResponse post(String path, String body) throws ExecutionException, InterruptedException {
+        return request(path, HttpMethod.POST, body);
     }
 
-    public FullHttpResponse put(String path) throws ExecutionException, InterruptedException {
-        return request(path, HttpMethod.PUT);
+    public FullHttpResponse put(String path, String body) throws ExecutionException, InterruptedException {
+        return request(path, HttpMethod.PUT, body);
     }
 
-    private FullHttpResponse request(String path, HttpMethod method) throws InterruptedException, ExecutionException {
+    private FullHttpResponse request(String path, HttpMethod method, String body) throws InterruptedException, ExecutionException {
         EventLoopGroup group = new NioEventLoopGroup();
         Promise<FullHttpResponse> promise = new DefaultPromise<>(group.next());
         Bootstrap bootstrap = new Bootstrap();
@@ -63,6 +64,13 @@ public class NettyHttpClient {
         Channel channel = bootstrap.connect(new InetSocketAddress(uri.getHost(), port)).sync().channel();
 
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, path, Unpooled.EMPTY_BUFFER);
+        if (body != null) {
+            ByteBuf buffer = request.content().clear();
+            buffer.writerIndex();
+            buffer.writeBytes(body.getBytes());
+            buffer.writerIndex();
+            buffer.readableBytes();
+        }
 
         channel.writeAndFlush(request).sync();
         return promise.sync().get();
