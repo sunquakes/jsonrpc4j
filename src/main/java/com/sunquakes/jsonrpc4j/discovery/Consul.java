@@ -1,9 +1,11 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.utils.AddressUtils;
+import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.util.CharsetUtil;
@@ -16,7 +18,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -120,8 +121,9 @@ public class Consul implements Driver {
             if (!res.status().equals(HttpResponseStatus.OK)) {
                 return "";
             }
-            String body = res.content().toString(CharsetUtil.UTF_8);
-            List<HealthService> healthyServices = JSONObject.parseObject(body, ArrayList.class);
+            ByteBuf content = res.content();
+            String body = content.toString(CharsetUtil.UTF_8);
+            List<HealthService> healthyServices = JSONArray.parseArray(body, HealthService.class);
             return healthyServices.stream().map(item -> AddressUtils.getUrl(item.getService().getAddress(), item.getService().getPort())).collect(Collectors.joining(","));
         } catch (Exception e) {
             Thread.currentThread().interrupt();

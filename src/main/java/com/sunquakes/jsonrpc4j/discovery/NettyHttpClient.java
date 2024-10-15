@@ -1,9 +1,9 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
+import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -63,14 +63,17 @@ public class NettyHttpClient {
 
         Channel channel = bootstrap.connect(new InetSocketAddress(uri.getHost(), port)).sync().channel();
 
-        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, path, Unpooled.EMPTY_BUFFER);
+        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, path);
+        request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8");
         if (body != null) {
             ByteBuf buffer = request.content().clear();
             buffer.writerIndex();
             buffer.writeBytes(body.getBytes());
             buffer.writerIndex();
             buffer.readableBytes();
+            request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
         }
+        request.headers().add(HttpHeaderNames.HOST, RequestUtils.getLocalIp());
 
         channel.writeAndFlush(request).sync();
         return promise.sync().get();
@@ -114,8 +117,9 @@ public class NettyHttpClient {
 
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) {
-            FullHttpResponse httpResponse = msg;
-            promise.setSuccess(httpResponse);
+            ByteBuf buf = msg.content();
+            FullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(msg.status().code()), buf.copy());
+            promise.setSuccess(res);
         }
 
         @Override
