@@ -68,8 +68,8 @@ public class Nacos implements Driver {
                 .build();
 
         try {
-            FullHttpResponse res = client.post(fullUrl.toString(), null);
-            if (res.status().equals(HttpResponseStatus.OK)) {
+            FullHttpResponse res = client.post(fullUrl.getPath() + "?" + fullUrl.getQuery(), null);
+            if (!res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to register to nacos.");
             }
             if (IS_EPHEMERAL.equals(ephemeral)) {
@@ -92,8 +92,8 @@ public class Nacos implements Driver {
                 .queryParam(SERVICE_NAME_KEY, name)
                 .build();
         try {
-            FullHttpResponse res = client.get(fullUrl.toString());
-            if (res.status().equals(HttpResponseStatus.OK)) {
+            FullHttpResponse res = client.get(fullUrl.getPath() + "?" + fullUrl.getQuery());
+            if (!res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to get the service list from nacos.");
             }
             ByteBuf buf = res.content();
@@ -117,8 +117,8 @@ public class Nacos implements Driver {
                 .queryParam("port", port)
                 .queryParam(EPHEMERAL_KEY, ephemeral).build();
         try {
-            FullHttpResponse res = client.put(fullUrl.toString(), null);
-            if (res.status().equals(HttpResponseStatus.OK)) {
+            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), null);
+            if (!res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to send heartbeat to nacos.");
             }
             ByteBuf buf = res.content();

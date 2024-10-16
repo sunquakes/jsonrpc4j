@@ -61,7 +61,7 @@ public class Consul implements Driver {
             id = AddressUtils.getUrl(name, port);
         }
         if (check) {
-            checkRegister(protocol, hostname, port);
+            checkRegister(protocol, hostname, port, name);
         }
 
         RegisterService service = new RegisterService(id, name, port, hostname);
@@ -70,7 +70,7 @@ public class Consul implements Driver {
                 .path("/v1/agent/service/register")
                 .build();
         try {
-            FullHttpResponse res = client.put(fullUrl.toUriString(), JSONObject.toJSONString(service));
+            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), JSONObject.toJSONString(service));
             if (!res.status().equals(HttpResponseStatus.OK)) {
                 return false;
             }
@@ -82,9 +82,10 @@ public class Consul implements Driver {
         return true;
     }
 
-    private void checkRegister(String protocol, String hostname, int port) {
+    private void checkRegister(String protocol, String hostname, int port, String name) {
         protocol = protocol.toUpperCase();
         Check serviceCheck = new Check();
+        serviceCheck.setName(name);
         if (protocol.equals(JsonRpcProtocol.TCP.name())) {
             serviceCheck.setTcp(AddressUtils.getUrl(hostname, port));
         } else {
@@ -100,7 +101,7 @@ public class Consul implements Driver {
                 .path("/v1/agent/check/register")
                 .build();
         try {
-            FullHttpResponse res = client.put(fullUrl.toUriString(), JSONObject.toJSONString(serviceCheck));
+            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), JSONObject.toJSONString(serviceCheck));
             if (!res.status().equals(HttpResponseStatus.OK)) {
                 log.error("Health check register failed.");
             }
@@ -117,7 +118,7 @@ public class Consul implements Driver {
                 .path("/v1/agent/health/service/name/" + name)
                 .build();
         try {
-            FullHttpResponse res = client.get(fullUrl.toUriString());
+            FullHttpResponse res = client.get(fullUrl.getPath() + "?" + fullUrl.getQuery());
             if (!res.status().equals(HttpResponseStatus.OK)) {
                 return "";
             }
