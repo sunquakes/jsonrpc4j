@@ -2,17 +2,14 @@ package com.sunquakes.jsonrpc4j.discovery;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.CharsetUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -32,8 +29,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class Nacos implements Driver {
 
-    private static final int STATUS_CODE_SUCCESS = 200;
-
     private static final int HEARTBEAT_INTERVAL = 5000;
 
     private static final String EPHEMERAL_KEY = "ephemeral";
@@ -44,7 +39,7 @@ public class Nacos implements Driver {
 
     private UriComponents url;
 
-    private CloseableHttpClient client = HttpClients.createDefault();
+    private NettyHttpClient client;
 
     private String ephemeral = "true";
 
@@ -52,6 +47,7 @@ public class Nacos implements Driver {
 
     @Override
     public Nacos newClient(String url) {
+        client = new NettyHttpClient(url);
         this.url = UriComponentsBuilder.fromUriString(url).build();
         if (this.url.getQueryParams().containsKey(EPHEMERAL_KEY)) {
             ephemeral = this.url.getQueryParams().getFirst(EPHEMERAL_KEY);
@@ -71,16 +67,16 @@ public class Nacos implements Driver {
                 .queryParam(EPHEMERAL_KEY, ephemeral)
                 .build();
 
-        HttpPost post = new HttpPost(fullUrl.toString());
         try {
-            HttpResponse res = client.execute(post);
-            if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
+            FullHttpResponse res = client.post(fullUrl.getPath() + "?" + fullUrl.getQuery(), null);
+            if (!res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to register to nacos.");
             }
             if (IS_EPHEMERAL.equals(ephemeral)) {
                 registerHeartbeat(name, hostname, port);
             }
         } catch (Exception e) {
+            Thread.currentThread().interrupt();
             log.error(e.getMessage(), e);
             return false;
         }
@@ -95,17 +91,17 @@ public class Nacos implements Driver {
                 .path("/nacos/v1/ns/instance/list")
                 .queryParam(SERVICE_NAME_KEY, name)
                 .build();
-
-        HttpGet get = new HttpGet(fullUrl.toString());
         try {
-            HttpResponse res = client.execute(get);
-            if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
+            FullHttpResponse res = client.get(fullUrl.getPath() + "?" + fullUrl.getQuery());
+            if (!res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to get the service list from nacos.");
             }
-            String json = EntityUtils.toString(res.getEntity());
+            ByteBuf buf = res.content();
+            String json = buf.toString(CharsetUtil.UTF_8);
             GetResp resp = JSONObject.parseObject(json, GetResp.class);
             return resp.getHosts().stream().filter(item -> item.healthy).map(item -> String.format("%s:%d", item.getIp(), item.getPort())).collect(Collectors.joining(","));
         } catch (Exception e) {
+            Thread.currentThread().interrupt();
             log.error(e.getMessage(), e);
         }
         return name;
@@ -120,15 +116,15 @@ public class Nacos implements Driver {
                 .queryParam("ip", ip)
                 .queryParam("port", port)
                 .queryParam(EPHEMERAL_KEY, ephemeral).build();
-
-        HttpPut put = new HttpPut(fullUrl.toString());
         try {
-            HttpResponse res = client.execute(put);
-            if (res.getStatusLine().getStatusCode() != STATUS_CODE_SUCCESS) {
+            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), null);
+            if (!res.status().equals(HttpResponseStatus.OK)) {
                 throw new JsonRpcException("Failed to send heartbeat to nacos.");
             }
-            return EntityUtils.toString(res.getEntity());
+            ByteBuf buf = res.content();
+            return buf.toString(CharsetUtil.UTF_8);
         } catch (Exception e) {
+            Thread.currentThread().interrupt();
             log.error(e.getMessage(), e);
             return null;
         }

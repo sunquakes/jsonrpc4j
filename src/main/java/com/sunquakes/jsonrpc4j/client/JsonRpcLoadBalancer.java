@@ -7,10 +7,10 @@ import lombok.Synchronized;
 import org.springframework.util.StringUtils;
 
 import java.net.InetSocketAddress;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 /**
@@ -33,6 +33,8 @@ public class JsonRpcLoadBalancer {
     private int times = 0;
 
     private static final int MAX_RETRY_TIMES = 3;
+
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     public JsonRpcLoadBalancer(Supplier<String> url, int defaultPort, Bootstrap bootstrap, JsonRpcChannelPoolHandler poolHandler) {
         this.bootstrap = bootstrap;
@@ -68,7 +70,8 @@ public class JsonRpcLoadBalancer {
             initPools();
             return getPool();
         } else {
-            int index = ThreadLocalRandom.current().nextInt(pools.size());
+            secureRandom.nextBytes(new byte[8]);
+            int index = secureRandom.nextInt(pools.size());
             pool = pools.get(index);
         }
         return pool;
