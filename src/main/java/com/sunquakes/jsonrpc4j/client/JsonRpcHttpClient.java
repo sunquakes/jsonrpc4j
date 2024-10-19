@@ -1,14 +1,14 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
+import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcClientException;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -64,19 +64,15 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
 
     @Override
     public Object handle(String method, Object[] args) throws JsonRpcException {
-        JSONObject request = new JSONObject();
-        request.put("id", RequestUtils.getId());
-        request.put("jsonrpc", RequestUtils.JSONRPC);
-        request.put("method", method);
-        request.put("params", args);
+        RequestDto requestDto = new RequestDto(RequestUtils.getId(), RequestUtils.JSONRPC, method, args);
         ResponseDto responseDto;
         String body;
         FixedChannelPool pool = loadBalancer.getPool();
         try {
             Channel channel = pool.acquire().get();
-            body = jsonRpcHttpClientHandler.send(request, channel);
+            body = jsonRpcHttpClientHandler.send(requestDto, channel);
             pool.release(channel);
-            responseDto = JSONObject.parseObject(body, ResponseDto.class);
+            responseDto = JSONUtils.parseJavaObject(body, ResponseDto.class);
         } catch (InterruptedException e) {
             loadBalancer.removePool(pool);
             Thread.currentThread().interrupt();
@@ -85,9 +81,9 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
             throw new JsonRpcClientException(e.getMessage());
         }
         if (responseDto.getResult() == null) {
-            JSONObject bodyJSON = JSON.parseObject(body);
-            if (bodyJSON.containsKey("error")) {
-                ErrorDto errorDto = JSONObject.parseObject(bodyJSON.getString("error"), ErrorDto.class);
+            Object error = JSONUtils.get(JSONUtils.parseJSONObject(body), "error");
+            if (error != null) {
+                ErrorDto errorDto = JSONUtils.parseJavaObject(JSONUtils.toString(error), ErrorDto.class);
                 throw ErrorEnum.getException(errorDto.getCode(), errorDto.getMessage());
             }
         }

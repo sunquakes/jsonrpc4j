@@ -1,8 +1,11 @@
 package com.sunquakes.jsonrpc4j.server;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.dto.ResponseDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,14 +32,16 @@ class JsonRpcTcpServerTest {
 
     @Test
     void testHandle() throws IOException {
-        JSONObject params = new JSONObject();
-        params.put("a", 1);
-        params.put("b", 2);
-        JSONObject request = new JSONObject();
-        request.put("id", "1234567890");
-        request.put("jsonrpc", "2.0");
-        request.put("method", "JsonRpc/add");
-        request.put("params", params);
+
+        @Data
+        @AllArgsConstructor
+        class Params {
+            int a;
+            int b;
+        }
+        Params params = new Params(1, 2);
+        RequestDto requestDto = new RequestDto("1234567890", "2.0", "JsonRpc/add", params);
+        String request = JSONUtils.toString(requestDto);
 
         Socket s = new Socket("localhost", 3201);
         try {
@@ -69,10 +74,10 @@ class JsonRpcTcpServerTest {
                 }
             }
             String sb = new String(bytes);
-            ResponseDto responseDto = JSONObject.parseObject(sb, ResponseDto.class);
+            ResponseDto responseDto = JSONUtils.parseJavaObject(sb, ResponseDto.class);
             assertEquals(3, responseDto.getResult());
 
-            responseDto = JSONObject.parseObject(sb.toString(), ResponseDto.class);
+            responseDto = JSONUtils.toJavaObject(ResponseDto.class, sb.toString());
             assertEquals(3, responseDto.getResult());
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,6 +1,6 @@
 package com.sunquakes.jsonrpc4j.server;
 
-import com.alibaba.fastjson2.JSON;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
@@ -43,7 +43,7 @@ public class JsonRpcHttpServerHandler extends ChannelInboundHandlerAdapter {
 
         JsonRpcServerHandler jsonRpcServerHandler = new JsonRpcServerHandler(applicationContext);
         Object res = jsonRpcServerHandler.handle(body);
-        String output = JSON.toJSONString(res);
+        String output = JSONUtils.toString(res);
 
         send(ctx, output, HttpResponseStatus.OK, httpVersion);
         httpRequest.release();

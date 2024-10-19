@@ -1,12 +1,10 @@
 package com.sunquakes.jsonrpc4j.utils;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.dto.NotifyRequestDto;
 import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.exception.InvalidParamsException;
 import com.sunquakes.jsonrpc4j.exception.InvalidRequestException;
+import com.sunquakes.jsonrpc4j.exception.JSONException;
 import com.sunquakes.jsonrpc4j.exception.MethodNotFoundException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +14,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -36,26 +32,21 @@ public class RequestUtils {
     public static final String JSONRPC = "2.0";
 
     public Object parseRequestBody(String json) throws InvalidRequestException {
-        Object typeObject = JSON.parse(json);
-        if (typeObject instanceof JSONArray jsonArray) {
-            List<Object> list = new ArrayList<>();
-            for (int i = 0; i < jsonArray.size(); i++) {
-                JSONObject jsonObject = jsonArray.getJSONObject(i);
-                list.add(parseSingleRequestBody(jsonObject));
-            }
-            return list;
-        } else if (typeObject instanceof JSONObject jsonObject) {
-            return parseSingleRequestBody(jsonObject);
+        Object typeObject = JSONUtils.parse(json);
+        if (JSONUtils.isArray(typeObject)) {
+            return JSONUtils.toList(typeObject, (int index, Object item) -> parseSingleRequestBody(item));
+        } else if (JSONUtils.isObject(typeObject)) {
+            return parseSingleRequestBody(typeObject);
         } else {
             throw new InvalidRequestException();
         }
     }
 
-    public Object parseSingleRequestBody(JSONObject jsonObject) {
-        if (jsonObject.containsKey("id")) {
-            return jsonObject.toJavaObject(RequestDto.class);
+    public Object parseSingleRequestBody(Object jsonObject) {
+        if (JSONUtils.containsKey(jsonObject, "id")) {
+            return JSONUtils.toJavaObject(RequestDto.class, jsonObject);
         } else {
-            return jsonObject.toJavaObject(NotifyRequestDto.class);
+            return JSONUtils.toJavaObject(NotifyRequestDto.class, jsonObject);
         }
     }
 
@@ -79,13 +70,13 @@ public class RequestUtils {
     }
 
     public Object[] parseParams(Object params, String[] names) throws InvalidParamsException {
-        if (params instanceof JSONArray jsonArray) {
-            return jsonArray.toArray();
-        } else if (params instanceof JSONObject jsonObject) {
+        if (JSONUtils.isArray(params)) {
+            return JSONUtils.toArray(params);
+        } else if (JSONUtils.isObject(params)) {
             int l = names.length;
             Object[] res = new Object[l];
             for (int i = 0; i < l; i++) {
-                res[i] = jsonObject.get(names[i]);
+                res[i] = JSONUtils.get(params, names[i]);
             }
             return res;
         } else {
@@ -95,23 +86,22 @@ public class RequestUtils {
 
     public Object[] parseParams(Object params, Parameter[] paramsReflect) throws InvalidParamsException {
         int l = paramsReflect.length;
-        if (params instanceof JSONArray jsonArray) {
-            Object[] res = new Object[l];
-            for (int i = 0; i < l; i++) {
-                Object item = jsonArray.get(i);
-                res[i] = JSON.to(paramsReflect[i].getType(), item);
-            }
-            return res;
-        } else if (params instanceof JSONObject jsonObject) {
-            Object[] res = new Object[l];
-            for (int i = 0; i < l; i++) {
-                String key = paramsReflect[i].getName();
-                if (!jsonObject.containsKey(key)) {
-                    throw new InvalidParamsException();
+        if (JSONUtils.isArray(params)) {
+            return JSONUtils.toArray(params, l, (int index, Object item) -> JSONUtils.toJavaObject(paramsReflect[index].getType(), item));
+        } else if (JSONUtils.isObject(params)) {
+            try {
+                Object[] res = new Object[l];
+                for (int i = 0; i < l; i++) {
+                    String key = paramsReflect[i].getName();
+                    if (!JSONUtils.containsKey(params, key)) {
+                        throw new InvalidParamsException();
+                    }
+                    res[i] = JSONUtils.toJavaObject(paramsReflect[i].getType(), JSONUtils.get(params, key));
                 }
-                res[i] = JSON.to(paramsReflect[i].getType(), jsonObject.get(key));
+                return res;
+            } catch (JSONException e) {
+                throw new InvalidParamsException();
             }
-            return res;
         } else {
             throw new InvalidParamsException();
         }

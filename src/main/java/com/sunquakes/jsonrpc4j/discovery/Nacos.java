@@ -1,7 +1,7 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
-import com.alibaba.fastjson2.JSONObject;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -98,7 +98,7 @@ public class Nacos implements Driver {
             }
             ByteBuf buf = res.content();
             String json = buf.toString(CharsetUtil.UTF_8);
-            GetResp resp = JSONObject.parseObject(json, GetResp.class);
+            GetResp resp = JSONUtils.parseJavaObject(json, GetResp.class);
             return resp.getHosts().stream().filter(item -> item.healthy).map(item -> String.format("%s:%d", item.getIp(), item.getPort())).collect(Collectors.joining(","));
         } catch (Exception e) {
             Thread.currentThread().interrupt();

@@ -1,10 +1,9 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
-import com.alibaba.fastjson2.JSONArray;
-import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.annotation.JSONField;
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.utils.AddressUtils;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -70,7 +69,7 @@ public class Consul implements Driver {
                 .path("/v1/agent/service/register")
                 .build();
         try {
-            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), JSONObject.toJSONString(service));
+            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), JSONUtils.toString(service));
             if (!res.status().equals(HttpResponseStatus.OK)) {
                 return false;
             }
@@ -101,7 +100,7 @@ public class Consul implements Driver {
                 .path("/v1/agent/check/register")
                 .build();
         try {
-            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), JSONObject.toJSONString(serviceCheck));
+            FullHttpResponse res = client.put(fullUrl.getPath() + "?" + fullUrl.getQuery(), JSONUtils.toString(serviceCheck));
             if (!res.status().equals(HttpResponseStatus.OK)) {
                 log.error("Health check register failed.");
             }
@@ -124,7 +123,7 @@ public class Consul implements Driver {
             }
             ByteBuf content = res.content();
             String body = content.toString(CharsetUtil.UTF_8);
-            List<HealthService> healthyServices = JSONArray.parseArray(body, HealthService.class);
+            List<HealthService> healthyServices = JSONUtils.parseList(body, HealthService.class);
             return healthyServices.stream().map(item -> AddressUtils.getUrl(item.getService().getAddress(), item.getService().getPort())).collect(Collectors.joining(","));
         } catch (Exception e) {
             Thread.currentThread().interrupt();

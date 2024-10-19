@@ -1,6 +1,7 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.sunquakes.jsonrpc4j.dto.RequestDto;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -25,11 +26,11 @@ import java.util.concurrent.ExecutionException;
 public class JsonRpcHttpClientHandler extends JsonRpcClientHandler {
 
     @Synchronized
-    public synchronized String send(JSONObject data, Channel channel) throws InterruptedException, ExecutionException {
+    public synchronized String send(RequestDto data, Channel channel) throws InterruptedException, ExecutionException {
         Promise<String> promise = new DefaultPromise<>(channel.eventLoop());
         promiseMap.put(channel, promise);
 
-        String message = data.toJSONString();
+        String message = JSONUtils.toString(data);
         FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, "");
         request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8");
         ByteBuf buffer = request.content().clear();
