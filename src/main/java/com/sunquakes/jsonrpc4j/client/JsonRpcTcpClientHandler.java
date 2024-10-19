@@ -1,7 +1,8 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSONObject;
+import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.utils.ByteArrayUtils;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -34,8 +35,8 @@ public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
     }
 
     @Synchronized
-    public synchronized String send(JSONObject request, Channel channel) throws InterruptedException, ExecutionException {
-        String message = request.toJSONString() + tcpClientOption.getPackageEof();
+    public synchronized String send(RequestDto request, Channel channel) throws InterruptedException, ExecutionException {
+        String message = JSONUtils.toString(request) + tcpClientOption.getPackageEof();
         ByteBuf byteBuf = channel.alloc().buffer(tcpClientOption.getPackageMaxLength());
         byteBuf.writeBytes(message.getBytes());
 

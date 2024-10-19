@@ -1,9 +1,9 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSON;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -41,7 +41,7 @@ public abstract class JsonRpcClientHandler extends ChannelInboundHandlerAdapter 
         ErrorResponseDto errorResponseDto = new ErrorResponseDto(null, RequestUtils.JSONRPC, new ErrorDto(ErrorEnum.INTERNAL_ERROR.getCode(), ErrorEnum.INTERNAL_ERROR.getText(), null));
         Promise<String> promise = promiseMap.get(channel);
         if (promise != null) {
-            promise.setSuccess(JSON.toJSONString(errorResponseDto));
+            promise.setSuccess(JSONUtils.toString(errorResponseDto));
             promiseMap.remove(channel);
         }
     }

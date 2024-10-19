@@ -1,6 +1,6 @@
 package com.sunquakes.jsonrpc4j.client;
 
-import com.alibaba.fastjson2.JSON;
+import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
@@ -26,6 +26,6 @@ public class JsonRpcClientInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
         String methodPath = String.format("/%s/%s", service, method.getName());
-        return JSON.to(method.getReturnType(), jsonRpcClient.handle(methodPath, args));
+        return JSONUtils.toJavaObject(method.getReturnType(), jsonRpcClient.handle(methodPath, args));
     }
 }
