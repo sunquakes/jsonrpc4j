@@ -1,6 +1,5 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
-import com.alibaba.fastjson2.annotation.JSONField;
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.utils.AddressUtils;
 import com.sunquakes.jsonrpc4j.utils.JSONUtils;
@@ -86,9 +85,9 @@ public class Consul implements Driver {
         Check serviceCheck = new Check();
         serviceCheck.setName(name);
         if (protocol.equals(JsonRpcProtocol.TCP.name())) {
-            serviceCheck.setTcp(AddressUtils.getUrl(hostname, port));
+            serviceCheck.setTCP(AddressUtils.getUrl(hostname, port));
         } else {
-            serviceCheck.setHttp(String.format("%s://%s:%d", protocol, hostname, port));
+            serviceCheck.setHTTP(String.format("%s://%s:%d", protocol, hostname, port));
         }
         serviceCheck.setInterval(checkInterval);
         // Set the init status passing
@@ -156,81 +155,66 @@ public class Consul implements Driver {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class HealthService {
+    @SuppressWarnings({"java:S116"})
+    static public class HealthService {
 
-        @JSONField(name = "AggregatedStatus")
-        private String aggregatedStatus;
+        private String AggregatedStatus;
 
-        @JSONField(name = "Service")
-        private NewService service;
+        private NewService Service;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class NewService {
+    @SuppressWarnings({"java:S116"})
+    static public class NewService {
 
-        @JSONField(name = "ID")
-        private String id;
+        private String ID;
 
-        @JSONField(name = "Service")
-        private String service;
+        private String Service;
 
-        @JSONField(name = "Port")
-        private Integer port;
+        private Integer Port;
 
-        @JSONField(name = "Address")
-        private String address;
+        private String Address;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class RegisterService {
+    @SuppressWarnings({"java:S116"})
+    static public class RegisterService {
 
-        @JSONField(name = "ID")
-        private String id;
+        private String ID;
 
-        @JSONField(name = "Name")
-        private String name;
+        private String Name;
 
-        @JSONField(name = "Port")
-        private Integer port;
+        private Integer Port;
 
-        @JSONField(name = "Address")
-        private String address;
+        private String Address;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class Check {
+    @SuppressWarnings({"java:S116"})
+    static public class Check {
 
-        @JSONField(name = "ID")
-        private String id;
+        private String ID;
 
-        @JSONField(name = "Name")
-        private String name;
+        private String Name;
 
-        @JSONField(name = "Status")
-        private String status;
+        private String Status;
 
-        @JSONField(name = "ServiceID")
-        private String serviceID;
+        private String ServiceID;
 
-        @JSONField(name = "HTTP")
-        private String http;
+        private String HTTP;
 
-        @JSONField(name = "Method")
-        private String method;
+        private String Method;
 
-        @JSONField(name = "TCP")
-        private String tcp;
+        private String TCP;
 
-        @JSONField(name = "Interval")
-        private String interval;
+        private String Interval;
 
-        @JSONField(name = "Timeout")
-        private String timeout;
+        private String Timeout;
     }
 }
