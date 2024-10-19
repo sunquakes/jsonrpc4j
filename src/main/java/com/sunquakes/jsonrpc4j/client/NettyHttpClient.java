@@ -1,4 +1,4 @@
-package com.sunquakes.jsonrpc4j.discovery;
+package com.sunquakes.jsonrpc4j.client;
 
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
@@ -30,9 +30,9 @@ public class NettyHttpClient {
 
     private static final int DEFAULT_HTTPS_PORT = 443;
 
-    private URI uri;
+    private final URI uri;
 
-    NettyHttpClient(String host) {
+    public NettyHttpClient(String host) {
         uri = URI.create(host);
     }
 
@@ -107,7 +107,7 @@ public class NettyHttpClient {
         }
     }
 
-    class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
+    static class HttpResponseHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
         Promise<FullHttpResponse> promise;
 

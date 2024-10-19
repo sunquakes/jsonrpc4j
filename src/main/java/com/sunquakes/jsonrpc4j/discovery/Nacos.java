@@ -1,5 +1,6 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
+import com.sunquakes.jsonrpc4j.client.NettyHttpClient;
 import com.sunquakes.jsonrpc4j.exception.JsonRpcException;
 import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import io.netty.buffer.ByteBuf;
@@ -43,7 +44,7 @@ public class Nacos implements Driver {
 
     private String ephemeral = "true";
 
-    private List<Map.Entry<String, Service>> heartbeatList = new ArrayList<>();
+    private final List<Map.Entry<String, Service>> heartbeatList = new ArrayList<>();
 
     @Override
     public Nacos newClient(String url) {
@@ -163,7 +164,7 @@ public class Nacos implements Driver {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class Service {
+    public static class Service {
         private String ip;
         private Integer port;
         private String instanceId;

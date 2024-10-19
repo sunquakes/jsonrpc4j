@@ -1,5 +1,6 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
+import com.sunquakes.jsonrpc4j.client.NettyHttpClient;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;

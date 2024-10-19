@@ -2,18 +2,11 @@ package com.sunquakes.jsonrpc4j.client;
 
 import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.utils.JSONUtils;
+import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.util.CharsetUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustStrategy;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.util.EntityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +15,14 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.annotation.Resource;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,7 +47,7 @@ class JsonRpcHttpsClientTest {
     }
 
     @Test
-    void testRequest() throws IOException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
+    void testRequest() throws NoSuchAlgorithmException, KeyStoreException, KeyManagementException, ExecutionException, InterruptedException {
         @Data
         @AllArgsConstructor
         class Params {
@@ -63,19 +58,11 @@ class JsonRpcHttpsClientTest {
         RequestDto requestDto = new RequestDto("1234567890", "2.0", "JsonRpc/add", params);
         String request = JSONUtils.toString(requestDto);
 
-        SSLContextBuilder builder = new SSLContextBuilder();
-        builder.loadTrustMaterial(null, new TrustStrategy() {
-            @Override
-            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
-                return true;
-            }
-        });
-        SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
-        CloseableHttpClient httpClient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-        HttpPost httpPost = new HttpPost("https://localhost:3205");
-        httpPost.setEntity(new StringEntity(request, ContentType.APPLICATION_JSON));
-        HttpResponse response = httpClient.execute(httpPost);
-        assertEquals("{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}", EntityUtils.toString(response.getEntity()));
+        NettyHttpClient httpClient = new NettyHttpClient("https://localhost:3205");
+        FullHttpResponse res = httpClient.post("", request);
+        ByteBuf buf = res.content();
+        String body = buf.toString(CharsetUtil.UTF_8);
+        assertEquals("{\"id\":\"1234567890\",\"jsonrpc\":\"2.0\",\"result\":3}", body);
     }
 
     @Test

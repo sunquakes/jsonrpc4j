@@ -1,6 +1,7 @@
 package com.sunquakes.jsonrpc4j.discovery;
 
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
+import com.sunquakes.jsonrpc4j.client.NettyHttpClient;
 import com.sunquakes.jsonrpc4j.utils.AddressUtils;
 import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import io.netty.buffer.ByteBuf;
