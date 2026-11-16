@@ -7,7 +7,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.springframework.context.ApplicationContext;
 
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,14 +37,9 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
         Channel channel = ctx.channel();
         byte[] initBytes = bufferMap.getOrDefault(channel, new byte[0]);
 
-        byte[] msgBytes = (byte[]) msg;
+        byte[] bytes = ByteArrayUtils.merge(initBytes, (byte[]) msg);
 
         int index = initBytes.length;
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.write(initBytes);
-        byteArrayOutputStream.write(msgBytes);
-        byte[] bytes = byteArrayOutputStream.toByteArray();
 
         if (index < packageEofBytesLength) {
             index = packageEofBytesLength;
