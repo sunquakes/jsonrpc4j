@@ -106,6 +106,6 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
     }
 
     private boolean isHttps(String scheme) {
-        return scheme.toUpperCase().equals(JsonRpcProtocol.HTTPS.name());
+        return JsonRpcProtocol.HTTPS.name().equalsIgnoreCase(scheme);
     }
 }

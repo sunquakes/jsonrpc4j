@@ -4,6 +4,7 @@ import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -13,10 +14,12 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.concurrent.Promise;
 
 import java.net.InetSocketAddress;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -29,6 +32,9 @@ public class NettyHttpClient {
     private static final int DEFAULT_HTTP_PORT = 80;
 
     private static final int DEFAULT_HTTPS_PORT = 443;
+
+    private static final EventLoopGroup EVENT_LOOP_GROUP =
+            new NioEventLoopGroup(1, new DefaultThreadFactory("jsonrpc4j-http-client", true));
 
     private final URI uri;
 
@@ -49,10 +55,9 @@ public class NettyHttpClient {
     }
 
     private FullHttpResponse request(String path, HttpMethod method, String body) throws InterruptedException, ExecutionException {
-        EventLoopGroup group = new NioEventLoopGroup();
-        Promise<FullHttpResponse> promise = new DefaultPromise<>(group.next());
+        Promise<FullHttpResponse> promise = new DefaultPromise<>(EVENT_LOOP_GROUP.next());
         Bootstrap bootstrap = new Bootstrap();
-        bootstrap.group(group)
+        bootstrap.group(EVENT_LOOP_GROUP)
                 .channel(NioSocketChannel.class)
                 .handler(new HttpClientInitializer(promise));
         int port = uri.getPort();
@@ -61,26 +66,30 @@ public class NettyHttpClient {
             port = defaultPort;
         }
 
-        Channel channel = bootstrap.connect(new InetSocketAddress(uri.getHost(), port)).sync().channel();
+        Channel channel = null;
+        try {
+            channel = bootstrap.connect(new InetSocketAddress(uri.getHost(), port)).sync().channel();
 
-        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, path);
-        request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8");
-        if (body != null) {
-            ByteBuf buffer = request.content().clear();
-            buffer.writerIndex();
-            buffer.writeBytes(body.getBytes());
-            buffer.writerIndex();
-            buffer.readableBytes();
-            request.headers().add(HttpHeaderNames.CONTENT_LENGTH, buffer.readableBytes());
+            byte[] bodyBytes = body == null ? null : body.getBytes(StandardCharsets.UTF_8);
+            ByteBuf content = bodyBytes == null ? Unpooled.EMPTY_BUFFER : Unpooled.wrappedBuffer(bodyBytes);
+            FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, path, content);
+            request.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json; charset=utf-8");
+            if (bodyBytes != null) {
+                request.headers().set(HttpHeaderNames.CONTENT_LENGTH, bodyBytes.length);
+            }
+            request.headers().set(HttpHeaderNames.HOST, RequestUtils.getLocalIp());
+
+            channel.writeAndFlush(request).sync();
+            return promise.sync().get();
+        } finally {
+            if (channel != null) {
+                channel.close();
+            }
         }
-        request.headers().add(HttpHeaderNames.HOST, RequestUtils.getLocalIp());
-
-        channel.writeAndFlush(request).sync();
-        return promise.sync().get();
     }
 
     private boolean isHttps(String scheme) {
-        return scheme.toUpperCase().equals(JsonRpcProtocol.HTTPS.name());
+        return JsonRpcProtocol.HTTPS.name().equalsIgnoreCase(scheme);
     }
 
     class HttpClientInitializer extends ChannelInitializer<Channel> {
@@ -118,7 +127,7 @@ public class NettyHttpClient {
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, FullHttpResponse msg) {
             ByteBuf buf = msg.content();
-            FullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(msg.status().code()), buf.copy());
+            FullHttpResponse res = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, msg.status(), Unpooled.copiedBuffer(buf));
             promise.setSuccess(res);
         }
 

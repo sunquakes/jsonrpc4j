@@ -49,12 +49,13 @@ public class JsonRpcServerHandler {
     }
 
     public Object handleObject(Object request) {
-        String method = null;
-        String id = null;
+        String method;
+        String id;
         Object params;
         if (request instanceof NotifyRequestDto notifyRequestDto) {
             method = notifyRequestDto.getMethod();
             params = notifyRequestDto.getParams();
+            id = null;
         } else {
             RequestDto requestDto = (RequestDto) request;
             method = requestDto.getMethod();
@@ -66,14 +67,15 @@ public class JsonRpcServerHandler {
             String className = methodArr[0];
             String methodName = methodArr[1];
             Object clazz = applicationContext.getBean(className);
-            Method[] methods = clazz.getClass().getMethods();
-            Method m = null;
-            if (METHOD_MAP.containsKey(method)) {
-                m = METHOD_MAP.get(method).orElse(null);
+            Method m;
+            Optional<Method> cachedMethod = METHOD_MAP.get(method);
+            if (cachedMethod != null) {
+                m = cachedMethod.orElse(null);
             } else {
-                for (Method m2 : methods) {
-                    if (m2.getName().equals(methodName)) {
-                        m = m2;
+                m = null;
+                for (Method candidate : clazz.getClass().getMethods()) {
+                    if (candidate.getName().equals(methodName)) {
+                        m = candidate;
                         break;
                     }
                 }

@@ -31,6 +31,8 @@ public class RequestUtils {
 
     public static final String JSONRPC = "2.0";
 
+    private volatile String localIp;
+
     public Object parseRequestBody(String json) throws InvalidRequestException {
         Object typeObject = JSONUtils.parse(json);
         if (JSONUtils.isArray(typeObject)) {
@@ -112,6 +114,15 @@ public class RequestUtils {
     }
 
     public String getLocalIp() {
+        String ip = localIp;
+        if (ip == null) {
+            ip = resolveLocalIp();
+            localIp = ip;
+        }
+        return ip;
+    }
+
+    private String resolveLocalIp() {
         Enumeration<NetworkInterface> netInterfaces;
         try {
             netInterfaces = NetworkInterface.getNetworkInterfaces();

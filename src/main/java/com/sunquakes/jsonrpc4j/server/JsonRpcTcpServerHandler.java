@@ -8,6 +8,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.springframework.context.ApplicationContext;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -18,15 +19,18 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
 
-    private ApplicationContext applicationContext;
+    private final JsonRpcServerHandler jsonRpcServerHandler;
 
-    private TcpServerOption tcpServerOption;
+    private final byte[] packageEofBytes;
 
-    private ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap<>();
+    private final int packageEofBytesLength;
+
+    private final ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap<>();
 
     public JsonRpcTcpServerHandler(ApplicationContext applicationContext, TcpServerOption tcpServerOption) {
-        this.applicationContext = applicationContext;
-        this.tcpServerOption = tcpServerOption;
+        this.jsonRpcServerHandler = new JsonRpcServerHandler(applicationContext);
+        this.packageEofBytes = tcpServerOption.getPackageEof().getBytes(StandardCharsets.UTF_8);
+        this.packageEofBytesLength = packageEofBytes.length;
     }
 
     @Override
@@ -35,10 +39,6 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
         byte[] initBytes = bufferMap.getOrDefault(channel, new byte[0]);
 
         byte[] msgBytes = (byte[]) msg;
-
-        String packageEof = tcpServerOption.getPackageEof();
-        int packageEofBytesLength = packageEof.length();
-        byte[] packageEofBytes = packageEof.getBytes();
 
         int index = initBytes.length;
 
@@ -65,9 +65,8 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
                 break;
             }
             if (bytes.length > 0) {
-                JsonRpcServerHandler jsonRpcServerHandler = new JsonRpcServerHandler(applicationContext);
-                Object res = jsonRpcServerHandler.handle(new String(bytes));
-                byte[] output = ByteArrayUtils.merge(JSONUtils.toBytes(res), packageEof.getBytes());
+                Object res = jsonRpcServerHandler.handle(new String(bytes, StandardCharsets.UTF_8));
+                byte[] output = ByteArrayUtils.merge(JSONUtils.toBytes(res), packageEofBytes);
                 ctx.writeAndFlush(output);
                 bytes = initBytes;
             }
@@ -76,6 +75,7 @@ public class JsonRpcTcpServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        bufferMap.remove(ctx.channel());
         ctx.channel().close();
     }
 
