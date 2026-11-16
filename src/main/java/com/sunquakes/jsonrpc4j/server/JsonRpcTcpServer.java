@@ -62,6 +62,7 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
             try {
                 EventLoopGroup bossGroup = new NioEventLoopGroup(bossGroupThreadNum);
                 EventLoopGroup workerGroup = new NioEventLoopGroup(workerGroupThreadNum);
+                TcpServerOption tcpServerOption = new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive));
 
                 ServerBootstrap sb = new ServerBootstrap();
                 sb.group(bossGroup, workerGroup)
@@ -75,7 +76,7 @@ public class JsonRpcTcpServer extends JsonRpcServer implements InitializingBean 
                                 sh.pipeline()
                                         .addLast(new ByteArrayDecoder())
                                         .addLast(new ByteArrayEncoder())
-                                        .addLast(new JsonRpcTcpServerHandler(applicationContext, new TcpServerOption(packageEof, packageMaxLength, new TcpServerPoolOption(poolMaxActive))));
+                                        .addLast(new JsonRpcTcpServerHandler(applicationContext, tcpServerOption));
                             }
                         });
                 ChannelFuture future;

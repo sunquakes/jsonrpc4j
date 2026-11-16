@@ -9,10 +9,9 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Promise;
-import lombok.Synchronized;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -28,17 +27,19 @@ public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
 
     private final ConcurrentHashMap<Channel, byte[]> bufferMap = new ConcurrentHashMap<>();
 
-    private final TcpClientOption tcpClientOption;
+    private final byte[] packageEofBytes;
+
+    private final int packageEofBytesLength;
 
     public JsonRpcTcpClientHandler(TcpClientOption tcpClientOption) {
-        this.tcpClientOption = tcpClientOption;
+        this.packageEofBytes = tcpClientOption.getPackageEof().getBytes(StandardCharsets.UTF_8);
+        this.packageEofBytesLength = packageEofBytes.length;
     }
 
-    @Synchronized
-    public synchronized String send(RequestDto request, Channel channel) throws InterruptedException, ExecutionException {
-        String message = JSONUtils.toString(request) + tcpClientOption.getPackageEof();
-        ByteBuf byteBuf = channel.alloc().buffer(tcpClientOption.getPackageMaxLength());
-        byteBuf.writeBytes(message.getBytes());
+    public String send(RequestDto request, Channel channel) throws InterruptedException, ExecutionException {
+        byte[] body = JSONUtils.toBytes(request);
+        ByteBuf byteBuf = channel.alloc().buffer(body.length + packageEofBytesLength);
+        byteBuf.writeBytes(body).writeBytes(packageEofBytes);
 
         Promise<String> promise = new DefaultPromise<>(channel.eventLoop());
         promiseMap.put(channel, promise);
@@ -52,18 +53,9 @@ public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
         Channel channel = ctx.channel();
         byte[] initBytes = bufferMap.getOrDefault(channel, new byte[0]);
 
-        byte[] msgBytes = (byte[]) msg;
-
-        String packageEof = tcpClientOption.getPackageEof();
-        int packageEofBytesLength = packageEof.length();
-        byte[] packageEofBytes = packageEof.getBytes();
+        byte[] bytes = ByteArrayUtils.merge(initBytes, (byte[]) msg);
 
         int index = initBytes.length;
-
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.write(initBytes);
-        byteArrayOutputStream.write(msgBytes);
-        byte[] bytes = byteArrayOutputStream.toByteArray();
 
         if (index < packageEofBytesLength) {
             index = packageEofBytesLength;
@@ -83,15 +75,19 @@ public class JsonRpcTcpClientHandler extends JsonRpcClientHandler {
                 break;
             }
             if (bytes.length > 0) {
-                String body = new String(bytes);
-                synchronized (channel) {
-                    Promise<String> promise = promiseMap.get(channel);
-                    if (promise != null) {
-                        promise.setSuccess(body);
-                    }
+                String body = new String(bytes, StandardCharsets.UTF_8);
+                Promise<String> promise = promiseMap.remove(channel);
+                if (promise != null) {
+                    promise.setSuccess(body);
                 }
                 bytes = initBytes;
             }
         }
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        bufferMap.remove(ctx.channel());
+        super.channelUnregistered(ctx);
     }
 }
