@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.client;
 import com.sunquakes.jsonrpc4j.ErrorEnum;
 import com.sunquakes.jsonrpc4j.dto.ErrorDto;
 import com.sunquakes.jsonrpc4j.dto.ErrorResponseDto;
+import com.sunquakes.jsonrpc4j.dto.RequestDto;
 import com.sunquakes.jsonrpc4j.utils.JSONUtils;
 import com.sunquakes.jsonrpc4j.utils.RequestUtils;
 import io.netty.channel.Channel;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author Shing Rui <a href="mailto:sunquakes@outlook.com">sunquakes@outlook.com</a>
@@ -25,6 +27,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public abstract class JsonRpcClientHandler extends ChannelInboundHandlerAdapter {
 
     protected Map<Channel, Promise<String>> promiseMap = new ConcurrentHashMap<>();
+
+    public abstract String send(RequestDto requestDto, Channel channel) throws InterruptedException, ExecutionException;
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
