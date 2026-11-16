@@ -68,10 +68,12 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
         ResponseDto responseDto;
         String body;
         FixedChannelPool pool = loadBalancer.getPool();
+        Channel channel = null;
         try {
-            Channel channel = pool.acquire().get();
+            channel = pool.acquire().get();
             body = jsonRpcHttpClientHandler.send(requestDto, channel);
             pool.release(channel);
+            channel = null;
             responseDto = JSONUtils.parseJavaObject(body, ResponseDto.class);
         } catch (InterruptedException e) {
             loadBalancer.removePool(pool);
@@ -79,6 +81,10 @@ public class JsonRpcHttpClient extends JsonRpcClient implements JsonRpcClientInt
             throw new JsonRpcClientException(e.getMessage());
         } catch (ExecutionException e) {
             throw new JsonRpcClientException(e.getMessage());
+        } finally {
+            if (channel != null) {
+                pool.release(channel);
+            }
         }
         if (responseDto.getResult() == null) {
             Object error = JSONUtils.get(JSONUtils.parseJSONObject(body), "error");
