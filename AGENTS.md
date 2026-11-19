@@ -10,6 +10,13 @@ Maven project version and changelog headings use `x.y.z` without the `v` prefix.
 The tag must match the `v[0-9]+.[0-9]+.[0-9]+` trigger of
 `.github/workflows/publish-release.yml`.
 
+Publishing behavior is selected by the tag, but the published artifact version
+always comes from the top-level project version in the tagged commit's `pom.xml`.
+A `vx.y.z-alpha` tag triggers `.github/workflows/publish-snapshot.yml`; if the
+POM version is `x.y.z-SNAPSHOT`, it publishes that snapshot to the snapshot
+repository, not the final `x.y.z` release. Never use an alpha tag to publish a
+final release.
+
 1. **Inspect the remote versions.** Run `git fetch --tags origin` and then
    `git ls-remote --tags --sort=-v:refname origin`. To list only final versions,
    run:
