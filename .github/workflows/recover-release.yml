@@ -73,7 +73,7 @@ jobs:
             echo 'The configured key has no secret component. Export it with gpg --armor --export-secret-keys.'
             exit 1
           fi
-          printf 'signing check' | gpg --batch --pinentry-mode loopback --passphrase "$MAVEN_GPG_PASSPHRASE" --local-key "$GPG_KEYNAME" --detach-sign > /dev/null
+          printf 'signing check' | gpg --batch --pinentry-mode loopback --passphrase "$MAVEN_GPG_PASSPHRASE" --local-user "$GPG_KEYNAME" --detach-sign > /dev/null
 
       - name: Verify Central authentication
         env:
