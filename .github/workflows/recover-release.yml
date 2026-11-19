@@ -66,6 +66,8 @@ jobs:
             echo 'The configured key has no secret component. Export it with gpg --armor --export-secret-keys.'
             exit 1
           fi
+          key_fingerprint="$(gpg --with-colons --list-secret-keys | python3 -c 'import sys; lines=iter(sys.stdin); print(next(fields[9] for line in lines if (fields := line.split(":"))[0] == "fpr"))')"
+          echo "GPG_KEYNAME=$key_fingerprint" >> "$GITHUB_ENV"
 
       - name: Verify Central authentication
         env:
@@ -88,6 +90,7 @@ jobs:
           mvn --batch-mode package \
             org.apache.maven.plugins:maven-gpg-plugin:3.2.7:sign \
             org.apache.maven.plugins:maven-deploy-plugin:3.1.2:deploy \
+            "-Dgpg.keyname=$GPG_KEYNAME" \
             '-DaltDeploymentRepository=sonatype-release::default::https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/'
           sonatype_token="$(printf '%s:%s' "$MAVEN_USERNAME" "$MAVEN_PASSWORD" | base64 -w0)"
           curl --fail-with-body --silent --show-error \
