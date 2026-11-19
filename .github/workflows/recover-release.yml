@@ -41,9 +41,14 @@ jobs:
       - name: Verify GPG signing configuration
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY || secrets.MAVEN_GPG_PRIVATE_KEY }}
+          GPG_KEYNAME: ${{ secrets.SIGNING_KEY_ID }}
         run: |
           if [[ -z "$GPG_PRIVATE_KEY" ]]; then
             echo 'Set GPG_PRIVATE_KEY or MAVEN_GPG_PRIVATE_KEY before recovering a release.'
+            exit 1
+          fi
+          if [[ -z "$GPG_KEYNAME" ]]; then
+            echo 'Set SIGNING_KEY_ID to the fingerprint of the signing key.'
             exit 1
           fi
 
@@ -60,14 +65,15 @@ jobs:
       - name: Import and verify GPG secret key
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY || secrets.MAVEN_GPG_PRIVATE_KEY }}
+          GPG_KEYNAME: ${{ secrets.SIGNING_KEY_ID }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           printf '%s' "$GPG_PRIVATE_KEY" | gpg --batch --import
           if ! gpg --with-colons --list-secret-keys | python3 -c 'import sys; raise SystemExit(0 if any(line.startswith("sec:") for line in sys.stdin) else 1)'; then
             echo 'The configured key has no secret component. Export it with gpg --armor --export-secret-keys.'
             exit 1
           fi
-          key_fingerprint="$(gpg --with-colons --list-secret-keys | python3 -c 'import sys; lines=iter(sys.stdin); print(next(fields[9] for line in lines if (fields := line.split(":"))[0] == "fpr"))')"
-          echo "GPG_KEYNAME=$key_fingerprint" >> "$GITHUB_ENV"
+          printf 'signing check' | gpg --batch --pinentry-mode loopback --passphrase "$MAVEN_GPG_PASSPHRASE" --local-key "$GPG_KEYNAME" --detach-sign > /dev/null
 
       - name: Verify Central authentication
         env:
@@ -85,7 +91,8 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE || secrets.MAVEN_GPG_PASSPHRASE }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.SIGNING_PASSWORD }}
+          GPG_KEYNAME: ${{ secrets.SIGNING_KEY_ID }}
         run: |
           mvn --batch-mode package \
             org.apache.maven.plugins:maven-gpg-plugin:3.2.7:sign \
