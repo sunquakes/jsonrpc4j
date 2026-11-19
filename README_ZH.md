@@ -11,20 +11,15 @@
 
 ## 安装
 
-- pom.xml文件中添加snapshots源
+- 使用快照版本时，在pom.xml文件中添加Sonatype Central快照仓库。正式版可直接从Maven Central获取，无需额外配置仓库。
 
 ```xml
 
 <repositories>
     <repository>
-        <id>releases</id>
-        <name>Releases</name>
-        <url>https://oss.sonatype.org/content/repositories/releases/</url>
-    </repository>
-    <repository>
-        <id>snapshots</id>
-        <name>Snapshots</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        <id>sonatype-snapshots</id>
+        <name>Sonatype Central Snapshots</name>
+        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
     </repository>
 </repositories>
 ```
