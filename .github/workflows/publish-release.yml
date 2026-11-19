@@ -57,6 +57,13 @@ jobs:
       - name: Publish package
         run: |
           mvn --batch-mode deploy
+          sonatype_token="$(printf '%s:%s' "$MAVEN_USERNAME" "$MAVEN_PASSWORD" | base64 -w0)"
+          curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${sonatype_token}" \
+            --header 'Accept: application/json' \
+            --data '' \
+            'https://ossrh-staging-api.central.sonatype.com/manual/upload/defaultRepository/com.sunquakes?publishing_type=automatic'
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
