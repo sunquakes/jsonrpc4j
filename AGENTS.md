@@ -74,6 +74,17 @@ them:
    publish to Maven Central. The tag without its `v` prefix must exactly equal
    the POM project version. Never re-tag an already published version.
 
+## Documentation
+
+- In the `README.md` and `README_ZH.md` installation sections, document release
+  usage without a `<repositories>` block; release artifacts resolve from Maven
+  Central by default.
+- Show the Sonatype Central snapshot repository
+  (`https://central.sonatype.com/repository/maven-snapshots/`) only in the
+  snapshot installation instructions.
+- Keep the documented dependency version equal to the released POM version and
+  link that version on Maven Central.
+
 ## Do not
 
 - Do not bump the POM version or edit `CHANGELOG.md` unless a release was
