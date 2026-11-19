@@ -1,6 +1,9 @@
 name: Recover Maven Central Release
 
 on:
+  push:
+    branches:
+      - 'recovery/v3.0.0'
   workflow_dispatch:
     inputs:
       tag:
@@ -18,12 +21,12 @@ jobs:
       - name: Checkout release tag
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.tag }}
+          ref: ${{ inputs.tag || 'v3.0.0' }}
           fetch-depth: 0
 
       - name: Verify release tag and POM version
         env:
-          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ inputs.tag || 'v3.0.0' }}
         run: |
           if [[ ! "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo 'Only an existing final vx.y.z tag can be recovered.'
