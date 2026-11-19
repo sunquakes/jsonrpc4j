@@ -31,9 +31,11 @@ English | [🇨🇳中文](README_ZH.md)
 <dependency>
     <groupId>com.sunquakes</groupId>
     <artifactId>jsonrpc4j</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0</version>
 </dependency>
 ```
+
+- Latest release: [3.0.0 on Maven Central](https://central.sonatype.com/artifact/com.sunquakes/jsonrpc4j/3.0.0)
 
 ## Getting started
 
