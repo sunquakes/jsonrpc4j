@@ -17,12 +17,14 @@ POM version is `x.y.z-SNAPSHOT`, it publishes that snapshot to the snapshot
 repository, not the final `x.y.z` release. Never use an alpha tag to publish a
 final release.
 
-For a final release, use the release POM configuration: set the top-level
-project version to `x.y.z` without `-SNAPSHOT` and deploy through
-`<distributionManagement><repository>` with the `sonatype-release` ID. Maven
-selects this release repository automatically for a non-snapshot version. The
-`<snapshotRepository>` with the `sonatype-snapshots` ID is only for snapshots.
-The workflow `server-id` must match the selected POM repository ID.
+For a final release, keep the existing `<distributionManagement>` configuration,
+including both `<repository>` with the `sonatype-release` ID and
+`<snapshotRepository>` with the `sonatype-snapshots` ID. Do not delete either
+repository configuration: the same POM supports both final releases and alpha
+snapshot publishing. Only remove `-SNAPSHOT` from the top-level project version.
+Maven automatically selects `sonatype-release` for `x.y.z` and
+`sonatype-snapshots` for `x.y.z-SNAPSHOT`. The workflow `server-id` must match
+the selected POM repository ID.
 
 1. **Inspect the remote versions.** Run `git fetch --tags origin` and then
    `git ls-remote --tags --sort=-v:refname origin`. To list only final versions,
