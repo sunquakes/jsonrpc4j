@@ -75,6 +75,14 @@ jobs:
           fi
           printf 'signing check' | gpg --batch --pinentry-mode loopback --passphrase "$MAVEN_GPG_PASSPHRASE" --local-user "$GPG_KEYNAME" --detach-sign > /dev/null
 
+      - name: Verify signing public key availability
+        env:
+          GPG_KEYNAME: ${{ secrets.SIGNING_KEY_ID }}
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --output /dev/null \
+            "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x${GPG_KEYNAME}"
+
       - name: Verify Central authentication
         env:
           MAVEN_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
