@@ -11,20 +11,15 @@ English | [🇨🇳中文](README_ZH.md)
 
 ## Installing
 
-- Add maven source to the pom.xml
+- To use a snapshot version, add the Sonatype Central snapshot repository to the pom.xml. Release versions are available from Maven Central without additional repository configuration.
 
 ```xml
 
 <repositories>
     <repository>
-        <id>releases</id>
-        <name>Releases</name>
-        <url>https://oss.sonatype.org/content/repositories/releases/</url>
-    </repository>
-    <repository>
-        <id>snapshots</id>
-        <name>Snapshots</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        <id>sonatype-snapshots</id>
+        <name>Sonatype Central Snapshots</name>
+        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
     </repository>
 </repositories>
 ```
