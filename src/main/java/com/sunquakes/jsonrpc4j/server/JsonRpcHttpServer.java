@@ -92,8 +92,7 @@ public class JsonRpcHttpServer extends JsonRpcServer implements InitializingBean
                         .childHandler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             protected void initChannel(SocketChannel sh) {
-                                protocol = protocol.toUpperCase();
-                                if (protocol.equals(JsonRpcProtocol.HTTPS.name())) {
+                                if (finalSslContext != null) {
                                     sh.pipeline().addFirst(new OptionalSslHandler(finalSslContext));
                                 }
                                 sh.pipeline()

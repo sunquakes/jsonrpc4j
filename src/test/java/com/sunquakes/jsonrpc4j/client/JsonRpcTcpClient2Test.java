@@ -12,10 +12,13 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.CountDownLatch;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -52,23 +55,17 @@ class JsonRpcTcpClient2Test {
     }
 
     @Test
-    void testMultithreading() throws InterruptedException {
-        int co = 10;
-        int total = 100;
-        CountDownLatch countDownLatch = new CountDownLatch(total);
-        ExecutorService pool = Executors.newFixedThreadPool(co);
-        for (int i = 0; i < total; i++) {
-            pool.submit(() -> {
-                try {
-                    assertEquals(3, jsonRpcTcpClient2.add(1, 2));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    countDownLatch.countDown();
-                }
-            });
+    void testMultithreading() throws Exception {
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        try {
+            List<Future<Integer>> results = IntStream.range(0, 100)
+                    .mapToObj(i -> pool.submit(() -> jsonRpcTcpClient2.add(1, 2)))
+                    .toList();
+            for (Future<Integer> result : results) {
+                assertEquals(3, result.get(10, TimeUnit.SECONDS));
+            }
+        } finally {
+            pool.shutdownNow();
         }
-        countDownLatch.await();
-        pool.shutdown();
     }
 }

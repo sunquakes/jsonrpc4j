@@ -7,7 +7,7 @@
     <groupId>com.sunquakes</groupId>
     <artifactId>jsonrpc4j</artifactId>
     <name>${project.artifactId}</name>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.0</version>
     <description>Package java-jsonrpc provides a client and server implementation of JSON-RPC 2.0🚀</description>
     <url>https://www.moonquakes.io/guide/java.html</url>
 
