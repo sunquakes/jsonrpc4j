@@ -24,21 +24,6 @@
 
 - 最新正式版：[Maven Central 上的 3.0.0](https://central.sonatype.com/artifact/com.sunquakes/jsonrpc4j/3.0.0)
 
-正式版直接从Maven Central获取，无需配置仓库。
-
-- 使用快照版本时，在pom.xml文件中添加Sonatype Central快照仓库
-
-```xml
-
-<repositories>
-    <repository>
-        <id>sonatype-snapshots</id>
-        <name>Sonatype Central Snapshots</name>
-        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-    </repository>
-</repositories>
-```
-
 ## 开始使用
 
 ### 步骤1. 用@JsonRpcScan注解配置basePackages，扫描Service和Client

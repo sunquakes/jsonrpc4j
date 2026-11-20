@@ -24,21 +24,6 @@ English | [🇨🇳中文](README_ZH.md)
 
 - Latest release: [3.0.0 on Maven Central](https://central.sonatype.com/artifact/com.sunquakes/jsonrpc4j/3.0.0)
 
-Release versions resolve from Maven Central directly, so no repository configuration is required.
-
-- To use a snapshot version, add the Sonatype Central snapshot repository to the pom.xml
-
-```xml
-
-<repositories>
-    <repository>
-        <id>sonatype-snapshots</id>
-        <name>Sonatype Central Snapshots</name>
-        <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-    </repository>
-</repositories>
-```
-
 ## Getting started
 
 ### step1. Configuring base packages with @JsonRpcScan to scan service and client class

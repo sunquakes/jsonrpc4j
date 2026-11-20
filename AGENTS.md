@@ -76,14 +76,16 @@ them:
 
 ## Documentation
 
-- In the `README.md` and `README_ZH.md` installation sections, document release
-  usage without a `<repositories>` block; release artifacts resolve from Maven
-  Central by default.
-- Show the Sonatype Central snapshot repository
-  (`https://central.sonatype.com/repository/maven-snapshots/`) only in the
-  snapshot installation instructions.
-- Keep the documented dependency version equal to the released POM version and
-  link that version on Maven Central.
+- Keep `README.md` and `README_ZH.md` focused on user-facing installation and
+  usage instructions. Keep maintainer-only release rules in this file.
+- When preparing a final release, set the documented dependency version to
+  `x.y.z`, link that version on Maven Central, and remove the `<repositories>`
+  block and snapshot instructions. Release artifacts resolve from Maven Central
+  by default.
+- When preparing a snapshot release, set the documented dependency version to
+  `x.y.z-SNAPSHOT` and add the Sonatype Central snapshot repository
+  (`https://central.sonatype.com/repository/maven-snapshots/`) to the
+  installation instructions.
 
 ## Do not
 
