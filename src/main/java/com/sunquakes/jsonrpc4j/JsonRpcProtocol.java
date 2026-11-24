@@ -3,5 +3,6 @@ package com.sunquakes.jsonrpc4j;
 public enum JsonRpcProtocol {
     TCP,
     HTTP,
-    HTTPS
+    HTTPS,
+    STREAMABLE_HTTP
 }

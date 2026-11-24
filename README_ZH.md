@@ -71,7 +71,7 @@ public class JsonRpcApplication {
 - 添加服务端配置项到application.properties文件中
 
 ```properties
-# 配置服务端采用的协议，可以配置tcp或http。
+# 配置服务端采用的协议，可以配置tcp、http、https或streamable-http。
 jsonrpc.server.protocol=tcp
 # 配置服务端监听的端口。
 jsonrpc.server.port=3200
@@ -118,7 +118,7 @@ jsonrpc.client.package-eof=\r\n
 
 -
 
-创建一个名为IJsonRpcClient的接口文件，添加注解@JsonRpcClient，其中配置的value值为请求的服务名（与步骤3的value值对应），protocol值可以是tcp/http/https（与步骤2中配置的jsonrpc.server.protocol值对应）。
+创建一个名为IJsonRpcClient的接口文件，添加注解@JsonRpcClient，其中配置的value值为请求的服务名（与步骤3的value值对应），protocol值可以是tcp/http/https/streamable-http（与步骤2中配置的jsonrpc.server.protocol值对应）。
 
 ```java
 
@@ -145,6 +145,42 @@ public class JsonRpcTest {
 ```
 
 ## 更多特性
+
+### Streamable HTTP（兼容 MCP）
+
+配置 `jsonrpc.server.protocol=streamable-http` 后，所有 `@JsonRpcService` 都会发布到单个 `/mcp` 端点，实现 MCP
+Streamable HTTP 传输协议。
+
+```properties
+jsonrpc.server.protocol=streamable-http
+jsonrpc.server.port=3200
+```
+
+- `POST /mcp` 在单个结果时返回 `application/json`；当服务方法返回数组、`Iterable`、`Iterator` 或 `Stream` 时返回
+  `text/event-stream`，逐个元素推送 JSON-RPC 响应。
+- 通过 `Mcp-Session-Id` 维护会话，通过 `Mcp-Protocol-Version` 协商协议版本；`GET /mcp` 打开 SSE 通道，支持
+  `Last-Event-ID` 重放与 keepalive 注释。
+- 通知请求返回 `202 Accepted`，`DELETE /mcp` 关闭会话并返回 `204 No Content`。
+- `Origin` 与 `Host` 不一致的请求返回 `403 Forbidden`。
+- 注册的服务会自动发布为名为 `Service_method` 的 MCP 工具，并根据 Java 参数名反射生成输入 schema，MCP agent 可调用
+  `initialize`、`ping`、`tools/list` 和 `tools/call`。传入 `_meta.progressToken` 时，流式工具结果会转换为
+  `notifications/progress` 事件。旧有的 `Service/method` 分发在同一端点继续可用。
+
+```java
+Config<Object> config = new Config<>();
+config.put(new ConfigEntry<>("protocol", "streamable-http"));
+config.put(new ConfigEntry<>("name", "JsonRpc"));
+config.put(new ConfigEntry<>("url", "localhost:3200"));
+JsonRpcStreamableHttpClient client = new JsonRpcStreamableHttpClient(config);
+Object sum = client.call("add", 1, 2); // 一元结果，兼容 JSON 与 SSE
+try (Stream<Object> values = client.stream("numbers", 3)) {
+    values.forEach(System.out::println); // 每个 SSE 事件一个值
+}
+client.close(); // 关闭会话
+```
+
+也可以通过接口声明：
+`@JsonRpcClient(value = "JsonRpc", protocol = JsonRpcProtocol.STREAMABLE_HTTP, url = "localhost:3200")`。
 
 ### 服务发现
 
