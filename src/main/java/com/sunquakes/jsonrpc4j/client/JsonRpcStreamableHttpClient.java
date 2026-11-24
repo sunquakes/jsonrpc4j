@@ -93,18 +93,21 @@ public class JsonRpcStreamableHttpClient extends JsonRpcClient implements JsonRp
 
     @Override
     public void close() {
-        String sessionId = this.sessionId;
-        if (sessionId == null) {
+        String currentSessionId = this.sessionId;
+        if (currentSessionId == null) {
             return;
         }
         this.sessionId = null;
         try {
             HttpRequest request = HttpRequest.newBuilder(URI.create(endpoint()))
                     .method("DELETE", HttpRequest.BodyPublishers.noBody())
-                    .header(SESSION_HEADER, sessionId)
+                    .header(SESSION_HEADER, currentSessionId)
                     .build();
             httpClient.send(request, HttpResponse.BodyHandlers.discarding());
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.debug("Failed to terminate the streamable http session.", e);
+        } catch (IOException | RuntimeException e) {
             log.debug("Failed to terminate the streamable http session.", e);
         }
     }

@@ -103,7 +103,9 @@ public class McpHandler {
 
     private JSONObject initialize(Object params) {
         String requested = JSONUtils.isObject(params) ? stringValue(JSONUtils.get(params, "protocolVersion")) : null;
-        String protocolVersion = PROTOCOL_VERSIONS.contains(requested) ? requested : DEFAULT_PROTOCOL_VERSION;
+        String protocolVersion = requested != null && PROTOCOL_VERSIONS.contains(requested)
+                ? requested
+                : DEFAULT_PROTOCOL_VERSION;
         JSONObject result = new JSONObject();
         result.put("protocolVersion", protocolVersion);
         JSONObject capabilities = new JSONObject();

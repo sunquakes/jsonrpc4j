@@ -40,6 +40,9 @@ public class StreamableUtils {
 
                 @Override
                 public Object next() {
+                    if (!hasNext()) {
+                        throw new java.util.NoSuchElementException();
+                    }
                     return Array.get(value, index++);
                 }
             };

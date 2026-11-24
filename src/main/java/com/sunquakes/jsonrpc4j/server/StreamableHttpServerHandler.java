@@ -250,7 +250,7 @@ public class StreamableHttpServerHandler extends ChannelInboundHandlerAdapter {
         List<BufferedEvent> replay = new ArrayList<>();
         String lastEventId = request.headers().get(LAST_EVENT_ID_HEADER);
         if (lastEventId != null && !lastEventId.isEmpty()) {
-            synchronized (session) {
+            synchronized (session.lock) {
                 boolean found = false;
                 for (BufferedEvent event : session.events) {
                     if (found) {
@@ -338,7 +338,7 @@ public class StreamableHttpServerHandler extends ChannelInboundHandlerAdapter {
         String eventId = UUID.randomUUID().toString();
         String frame = "id: " + eventId + "\nevent: message\ndata: " + message + "\n\n";
         if (session != null) {
-            synchronized (session) {
+            synchronized (session.lock) {
                 session.events.addLast(new BufferedEvent(eventId, frame));
                 while (session.events.size() > EVENT_BUFFER_LIMIT) {
                     session.events.removeFirst();
@@ -421,7 +421,7 @@ public class StreamableHttpServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void scheduleKeepAlive(Session session, Channel channel) {
-        synchronized (session) {
+        synchronized (session.lock) {
             if (session.keepAlive != null) {
                 return;
             }
@@ -437,7 +437,7 @@ public class StreamableHttpServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void cancelKeepAlive(Session session) {
-        synchronized (session) {
+        synchronized (session.lock) {
             if (session.keepAlive != null) {
                 session.keepAlive.cancel(false);
                 session.keepAlive = null;
@@ -489,6 +489,8 @@ public class StreamableHttpServerHandler extends ChannelInboundHandlerAdapter {
     }
 
     private static class Session {
+
+        private final Object lock = new Object();
 
         private final Deque<BufferedEvent> events = new ArrayDeque<>();
 
