@@ -3,6 +3,7 @@ package com.sunquakes.jsonrpc4j.spring;
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.client.JsonRpcClientInterface;
 import com.sunquakes.jsonrpc4j.client.JsonRpcHttpClient;
+import com.sunquakes.jsonrpc4j.client.JsonRpcStreamableHttpClient;
 import com.sunquakes.jsonrpc4j.client.JsonRpcTcpClient;
 import com.sunquakes.jsonrpc4j.config.Config;
 import com.sunquakes.jsonrpc4j.config.ConfigEntry;
@@ -98,9 +99,11 @@ public class JsonRpcClientClassPathScanningCandidateComponentProvider extends Cl
     }
 
     private JsonRpcClientInterface getJsonRpcClient(String protocol, Config<Object> config) throws IllegalArgumentException {
-        protocol = protocol.toUpperCase();
+        protocol = protocol.toUpperCase().replace('-', '_');
         if (protocol.equals(JsonRpcProtocol.TCP.name())) {
             return new JsonRpcTcpClient(config);
+        } else if (protocol.equals(JsonRpcProtocol.STREAMABLE_HTTP.name())) {
+            return new JsonRpcStreamableHttpClient(config);
         } else {
             return new JsonRpcHttpClient(config);
         }

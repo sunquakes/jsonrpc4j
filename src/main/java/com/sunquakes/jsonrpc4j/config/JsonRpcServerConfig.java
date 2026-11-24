@@ -17,7 +17,8 @@ public class JsonRpcServerConfig {
     public enum Protocol {
         HTTP,
         HTTPS,
-        TCP;
+        TCP,
+        STREAMABLE_HTTP;
     }
 
     private String name;

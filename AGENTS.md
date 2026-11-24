@@ -76,6 +76,9 @@ them:
 
 ## Documentation
 
+- When adding or modifying a user-facing feature or API, update `README.md` and
+  `README_ZH.md` in the same change so the documented usage matches the
+  implementation.
 - In the `README.md` and `README_ZH.md` installation sections, document release
   usage without a `<repositories>` block; release artifacts resolve from Maven
   Central by default.

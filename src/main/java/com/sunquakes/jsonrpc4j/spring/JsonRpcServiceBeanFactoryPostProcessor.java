@@ -2,6 +2,7 @@ package com.sunquakes.jsonrpc4j.spring;
 
 import com.sunquakes.jsonrpc4j.JsonRpcProtocol;
 import com.sunquakes.jsonrpc4j.server.JsonRpcHttpServer;
+import com.sunquakes.jsonrpc4j.server.JsonRpcStreamableHttpServer;
 import com.sunquakes.jsonrpc4j.server.JsonRpcTcpServer;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -33,11 +34,13 @@ public class JsonRpcServiceBeanFactoryPostProcessor implements BeanFactoryPostPr
         String serverBeanName = String.format("%s_%s_%s", "JsonRpcServer", protocol, port);
         if (protocol != null && port != null && !defaultListableBeanFactory.containsBeanDefinition(serverBeanName)) {
             BeanDefinitionBuilder serverBuilder;
-            protocol = protocol.toUpperCase();
+            protocol = protocol.toUpperCase().replace('-', '_');
             if (protocol.equals(JsonRpcProtocol.TCP.name())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcTcpServer.class);
             } else if (protocol.equals(JsonRpcProtocol.HTTP.name()) || protocol.equals(JsonRpcProtocol.HTTPS.name())) {
                 serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcHttpServer.class);
+            } else if (protocol.equals(JsonRpcProtocol.STREAMABLE_HTTP.name())) {
+                serverBuilder = BeanDefinitionBuilder.rootBeanDefinition(JsonRpcStreamableHttpServer.class);
             } else {
                 throw new IllegalArgumentException("Invalid protocol.");
             }

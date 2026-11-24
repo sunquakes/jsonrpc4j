@@ -62,26 +62,7 @@ public class JsonRpcServerHandler {
             id = requestDto.getId();
         }
         try {
-            String[] methodArr = RequestUtils.parseMethod(method);
-            String className = methodArr[0];
-            String methodName = methodArr[1];
-            Object clazz = applicationContext.getBean(className);
-            Method m = METHOD_MAP.get(method);
-            if (m == null) {
-                for (Method candidate : clazz.getClass().getMethods()) {
-                    if (candidate.getName().equals(methodName)) {
-                        m = candidate;
-                        METHOD_MAP.put(method, m);
-                        break;
-                    }
-                }
-            }
-            if (m == null) {
-                throw new MethodNotFoundException();
-            }
-            Parameter[] paramsReflect = m.getParameters();
-            Object[] paramArr = RequestUtils.parseParams(params, paramsReflect);
-            Object result = m.invoke(clazz, paramArr);
+            Object result = invoke(method, params);
             return ResponseUtils.success(id, result);
         } catch (InvocationTargetException | IllegalAccessException | BeansException e) {
             return ResponseUtils.error(id, ErrorEnum.METHOD_NOT_FOUND.getCode());
@@ -95,5 +76,28 @@ public class JsonRpcServerHandler {
     public List<Object> handleArray(Object request) {
         List<Object> requestList = (List<Object>) request;
         return requestList.stream().map(this::handleObject).toList();
+    }
+
+    public Object invoke(String method, Object params) throws InvocationTargetException, IllegalAccessException {
+        String[] methodArr = RequestUtils.parseMethod(method);
+        String className = methodArr[0];
+        String methodName = methodArr[1];
+        Object clazz = applicationContext.getBean(className);
+        Method m = METHOD_MAP.get(method);
+        if (m == null) {
+            for (Method candidate : clazz.getClass().getMethods()) {
+                if (candidate.getName().equals(methodName)) {
+                    m = candidate;
+                    METHOD_MAP.put(method, m);
+                    break;
+                }
+            }
+        }
+        if (m == null) {
+            throw new MethodNotFoundException();
+        }
+        Parameter[] paramsReflect = m.getParameters();
+        Object[] paramArr = RequestUtils.parseParams(params, paramsReflect);
+        return m.invoke(clazz, paramArr);
     }
 }

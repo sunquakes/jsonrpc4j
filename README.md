@@ -71,7 +71,7 @@ public class JsonRpcApplication {
 - Add configuration items to application.properties
 
 ```properties
-# The protocol of the server, Value can be tcp or http.
+# The protocol of the server, Value can be tcp, http, https or streamable-http.
 jsonrpc.server.protocol=tcp
 # The port of the server listening.
 jsonrpc.server.port=3200
@@ -116,8 +116,8 @@ jsonrpc.client.package-eof=\r\n
 
 ### step5. Create client interface
 
-- Create a new interface file named IJsonRpcClient with @JsonRpcClient, protocol can be tcp or http or https and should
-  be same as item(jsonrpc.server.protocol) of step2, value must be same as the value of step3.
+- Create a new interface file named IJsonRpcClient with @JsonRpcClient, protocol can be tcp, http, https or
+  streamable-http and should be same as item(jsonrpc.server.protocol) of step2, value must be same as the value of step3.
 
 ```java
 
@@ -144,6 +144,43 @@ public class JsonRpcTest {
 ```
 
 ## More Feature
+
+### Streamable HTTP (MCP compatible)
+
+Set `jsonrpc.server.protocol=streamable-http` to expose every `@JsonRpcService` on a single `/mcp` endpoint that
+implements the MCP Streamable HTTP transport.
+
+```properties
+jsonrpc.server.protocol=streamable-http
+jsonrpc.server.port=3200
+```
+
+- `POST /mcp` answers with `application/json` for a single result and with `text/event-stream` when the service method
+  returns an array, `Iterable`, `Iterator` or `Stream`, pushing one JSON-RPC response per element.
+- Sessions are tracked with `Mcp-Session-Id`, versions are negotiated with `Mcp-Protocol-Version`, and `GET /mcp` opens
+  an SSE channel that supports `Last-Event-ID` replay and keepalive comments.
+- Notifications are acknowledged with `202 Accepted`, while `DELETE /mcp` closes the session with `204 No Content`.
+- Requests whose `Origin` does not match the `Host` header are rejected with `403 Forbidden`.
+- Registered services are published as MCP tools named `Service_method` with an input schema reflected from the Java
+  parameter names, so MCP agents can call `initialize`, `ping`, `tools/list` and `tools/call`. Supplying
+  `_meta.progressToken` turns streamed tool results into `notifications/progress` events. The legacy `Service/method`
+  dispatch keeps working on the same endpoint.
+
+```java
+Config<Object> config = new Config<>();
+config.put(new ConfigEntry<>("protocol", "streamable-http"));
+config.put(new ConfigEntry<>("name", "JsonRpc"));
+config.put(new ConfigEntry<>("url", "localhost:3200"));
+JsonRpcStreamableHttpClient client = new JsonRpcStreamableHttpClient(config);
+Object sum = client.call("add", 1, 2); // unary result, accepts JSON or SSE
+try (Stream<Object> values = client.stream("numbers", 3)) {
+    values.forEach(System.out::println); // one value per SSE event
+}
+client.close(); // terminates the session
+```
+
+You can also declare an interface with
+`@JsonRpcClient(value = "JsonRpc", protocol = JsonRpcProtocol.STREAMABLE_HTTP, url = "localhost:3200")`.
 
 ### Service Discovery
 
