@@ -49,13 +49,13 @@ them:
    do not change dependency versions. Run the full test suite with JDK 17 before
    committing.
 
-2. **Commit and push to `development`.** Commit both release files as
-   `chore: release version x.y.z` and push with `git push origin development`.
+2. **Commit and push to `develop`.** Commit both release files as
+   `chore: release version x.y.z` and push with `git push origin develop`.
 
 3. **Create and merge the pull request to `main`.** Create the PR with:
 
    ```bash
-   gh pr create --base main --head development --title "chore: release version x.y.z" --body "..."
+   gh pr create --base main --head develop --title "chore: release version x.y.z" --body "..."
    ```
 
    Wait for the required checks and SonarCloud Quality Gate to pass before
@@ -80,6 +80,6 @@ them:
   explicitly requested.
 - Do not include `-SNAPSHOT` in a release tag or deploy a snapshot as a final
   release.
-- Do not tag the `development` branch tip instead of the merged `main` commit.
+- Do not tag the `develop` branch tip instead of the merged `main` commit.
 - Do not run a local `mvn deploy` for the release; publishing belongs to the tag
   workflow.
