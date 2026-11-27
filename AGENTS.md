@@ -74,6 +74,15 @@ them:
    publish to Maven Central. The tag without its `v` prefix must exactly equal
    the POM project version. Never re-tag an already published version.
 
+## Pull requests
+
+- Do the work on a short-lived topic branch and merge it into `main` through a
+  pull request.
+- Delete the topic branch as part of the merge, both locally and on the remote.
+  Prefer `gh pr merge <number> --merge --delete-branch`, or run
+  `git push origin --delete <branch>` and `git branch -d <branch>` afterwards.
+- Never leave a topic branch whose pull request is already merged on the remote.
+
 ## Documentation
 
 - When adding or modifying a user-facing feature or API, update `README.md` and
